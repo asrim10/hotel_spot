@@ -1,12 +1,10 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { RegisterData, registerSchema } from "../schema";
-import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 
@@ -20,7 +18,6 @@ export default function RegisterForm() {
     resolver: zodResolver(registerSchema),
     mode: "onSubmit",
   });
-
   const [pending, setTransition] = useTransition();
 
   const submit = async (values: RegisterData) => {
@@ -28,7 +25,6 @@ export default function RegisterForm() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       router.push("/login");
     });
-    // GO TO LOGIN PAGE
     console.log("register", values);
   };
 
@@ -58,6 +54,23 @@ export default function RegisterForm() {
       </div>
 
       <form onSubmit={handleSubmit(submit)} className="space-y-4">
+        <div className="space-y-1">
+          <label className="text-sm font-medium" htmlFor="name">
+            Name
+          </label>
+          <input
+            id="name"
+            type="text"
+            autoComplete="name"
+            className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
+            {...register("name")}
+            placeholder="Enter your full name"
+          />
+          {errors.name?.message && (
+            <p className="text-xs text-red-600">{errors.name.message}</p>
+          )}
+        </div>
+
         <div className="space-y-1">
           <label className="text-sm font-medium" htmlFor="email">
             Email
@@ -113,10 +126,10 @@ export default function RegisterForm() {
 
         <button
           type="submit"
-          disabled={isSubmitting || pending}
+          disabled={isSubmitting}
           className="h-10 w-full rounded-md bg-black text-white text-sm font-semibold hover:opacity-95 disabled:opacity-60"
         >
-          {isSubmitting || pending ? "Creating account..." : "Register"}
+          {isSubmitting ? "Creating account..." : "Sign Up"}
         </button>
 
         <div className="flex items-center gap-4 mt-4">
