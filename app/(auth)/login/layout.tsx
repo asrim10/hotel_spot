@@ -8,7 +8,7 @@ export default function LoginLayout({
   return (
     <section
       className="min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('/images/hotel.jpg')" }}
+      style={{ backgroundImage: "url('/images/hotel4.webp')" }}
     >
       <div className="min-h-screen w-full bg-black/30 dark:bg-black/40">
         <div className="max-w-7xl mx-auto px-4 py-12">
