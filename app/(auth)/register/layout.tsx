@@ -19,7 +19,7 @@ export default function RegisterLayout({
                   Because Stays Should Feel Like Destinations
                 </h3>
                 <p className="mt-3 text-sm text-gray-200">
-                  Find a perfect stay for you much awaited vacation!
+                  Find a perfect stay for your much awaited vacation!
                 </p>
                 <div className="mt-6 flex gap-3">
                   <div className="h-2 w-16 rounded-full bg-white/80" />

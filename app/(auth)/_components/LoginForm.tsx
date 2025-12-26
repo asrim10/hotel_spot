@@ -115,13 +115,6 @@ export default function LoginForm() {
             <FaApple /> Continue with Apple
           </button>
         </div>
-
-        <p className="text-center text-sm text-gray-600 mt-3">
-          Don't have an account?{" "}
-          <Link href="/register" className="text-black font-medium">
-            Register
-          </Link>
-        </p>
       </form>
     </div>
   );

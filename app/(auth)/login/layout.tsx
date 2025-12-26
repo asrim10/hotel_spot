@@ -16,10 +16,10 @@ export default function LoginLayout({
             <div className="hidden md:block">
               <div className="max-w-sm rounded-xl bg-black/40 backdrop-blur p-6 text-white shadow-lg">
                 <h3 className="text-xl font-semibold">
-                  Because Stays Should Feel Like Destinations
+                  ﬁ Because Stays Should Feel Like Destinations
                 </h3>
                 <p className="mt-3 text-sm text-gray-200">
-                  Find a perfect stay for you much awaited vacation!
+                  Find a perfect stay for your much awaited vacation!
                 </p>
                 <div className="mt-6 flex gap-3">
                   <div className="h-2 w-16 rounded-full bg-white/80" />
