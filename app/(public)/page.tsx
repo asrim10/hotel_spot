@@ -2,7 +2,7 @@ export default function Home() {
   return (
     <main
       className="min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('/images/hotel.jpg')" }}
+      style={{ backgroundImage: "url('/images/hotel1.jpg')" }}
     >
       <div className="min-h-screen w-full bg-black/30">
         <div className="max-w-7xl mx-auto px-4 py-36 text-center text-white">
