@@ -16,7 +16,7 @@ export default function LoginLayout({
             <div className="hidden md:block">
               <div className="max-w-sm rounded-xl bg-black/40 backdrop-blur p-6 text-white shadow-lg">
                 <h3 className="text-xl font-semibold">
-                  ﬁ Because Stays Should Feel Like Destinations
+                  Because Stays Should Feel Like Destinations
                 </h3>
                 <p className="mt-3 text-sm text-gray-200">
                   Find a perfect stay for your much awaited vacation!
