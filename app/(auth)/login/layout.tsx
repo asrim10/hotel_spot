@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function RegisterLayout({
+export default function LoginLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -33,9 +33,12 @@ export default function RegisterLayout({
               <div className="w-full max-w-md rounded-2xl bg-white/60 dark:bg-black/40 backdrop-blur p-8 shadow-md">
                 {children}
                 <div className="mt-6 text-center text-sm text-gray-700">
-                  <span>Already have an account? </span>
-                  <Link href="/login" className="font-semibold text-blue-600">
-                    Login
+                  <span>Don't have an account? </span>
+                  <Link
+                    href="/register"
+                    className="font-semibold text-blue-600"
+                  >
+                    Register
                   </Link>
                 </div>
               </div>

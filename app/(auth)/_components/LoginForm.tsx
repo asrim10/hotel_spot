@@ -51,8 +51,7 @@ export default function LoginForm() {
           </svg>
           Hotelspot
         </div>
-        <h1 className="text-3xl font-serif mt-4">Welcome back to Hotel_Spot</h1>
-        <p className="text-sm text-gray-700 mt-2">Sign in to your account</p>
+        <h2 className="text-3xl font-serif mt-4">Sign in to your account</h2>
       </div>
 
       <form onSubmit={handleSubmit(submit)} className="space-y-4">
