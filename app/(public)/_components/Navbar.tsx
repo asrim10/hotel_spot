@@ -18,7 +18,7 @@ export default function Navbar() {
           <div className="flex-1 flex items-center justify-end gap-4">
             <Link
               href="/login"
-              className="text-white border border-white/30 px-4 py-2 rounded-md transition-colors duration-200 hover:bg-white/10 hover:text-white/100"
+              className="text-white border border-white/30 px-4 py-2 rounded-md transition-colors duration-200  hover:bg-white hover:text-black"
             >
               Sign in / Sign up
             </Link>
@@ -27,29 +27,21 @@ export default function Navbar() {
 
         <nav className="mt-4">
           <ul className="flex flex-wrap justify-center gap-8 text-white text-sm">
-            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white/10 hover:text-white/100 cursor-pointer">
+            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white hover:text-black cursor-pointer">
               Hotels &amp; Resorts
             </li>
-            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white/10 hover:text-white/100 cursor-pointer">
+            <li className="px-2 py-1 rounded-md transition-colors duration-200  hover:bg-white hover:text-black cursor-pointer">
               Offers
             </li>
-            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white/10 hover:text-white/100 cursor-pointer">
+            <li className="px-2 py-1 rounded-md transition-colors duration-200  hover:bg-white hover:text-black cursor-pointer">
               Experiences
             </li>
-            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white/10 hover:text-white/100 cursor-pointer">
-              Meetings &amp; Celebrations
-            </li>
-            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white/10 hover:text-white/100 cursor-pointer">
+
+            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white hover:text-black cursor-pointer">
               About us
             </li>
-            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white/10 hover:text-white/100 cursor-pointer">
-              ALL Accor Loyalty
-            </li>
-            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white/10 hover:text-white/100 cursor-pointer">
-              Magazine
-            </li>
-            <li className="px-2 py-1 rounded-md transition-colors duration-200 hover:bg-white/10 hover:text-white/100 cursor-pointer">
-              Sofitel Boutique
+            <li className="px-2 py-1 rounded-md transition-colors duration-200  hover:bg-white hover:text-black cursor-pointer">
+              Hotelspot
             </li>
           </ul>
         </nav>
