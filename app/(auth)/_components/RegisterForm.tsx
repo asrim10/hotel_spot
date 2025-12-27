@@ -64,7 +64,7 @@ export default function RegisterForm() {
             autoComplete="name"
             className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
             {...register("name")}
-            placeholder="Enter your full name"
+            placeholder="Enter full name"
           />
           {errors.name?.message && (
             <p className="text-xs text-red-600">{errors.name.message}</p>
@@ -81,7 +81,7 @@ export default function RegisterForm() {
             autoComplete="email"
             className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
             {...register("email")}
-            placeholder="Enter your email id here"
+            placeholder="Enter your email"
           />
           {errors.email?.message && (
             <p className="text-xs text-red-600">{errors.email.message}</p>
@@ -98,7 +98,7 @@ export default function RegisterForm() {
             autoComplete="new-password"
             className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
             {...register("password")}
-            placeholder="Enter new password here"
+            placeholder="Enter new password"
           />
           {errors.password?.message && (
             <p className="text-xs text-red-600">{errors.password.message}</p>
@@ -115,7 +115,7 @@ export default function RegisterForm() {
             autoComplete="new-password"
             className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
             {...register("confirmPassword")}
-            placeholder="Enter the same password again"
+            placeholder="Enter same password "
           />
           {errors.confirmPassword?.message && (
             <p className="text-xs text-red-600">

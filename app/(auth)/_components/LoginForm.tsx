@@ -93,7 +93,7 @@ export default function LoginForm() {
           disabled={isSubmitting || pending}
           className="h-10 w-full rounded-md bg-black text-white text-sm font-semibold hover:opacity-95 disabled:opacity-60"
         >
-          {isSubmitting || pending ? "Signing in..." : "Sign in"}
+          {isSubmitting || pending ? "Signing in..." : "Login"}
         </button>
 
         <div className="flex items-center gap-4 mt-4">

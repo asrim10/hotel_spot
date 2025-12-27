@@ -20,7 +20,7 @@ export default function Navbar() {
               href="/login"
               className="text-white border border-white/30 px-4 py-2 rounded-md transition-colors duration-200  hover:bg-white hover:text-black"
             >
-              Sign in / Sign up
+              Login
             </Link>
           </div>
         </div>
