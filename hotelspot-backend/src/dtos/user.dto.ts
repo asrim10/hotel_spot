@@ -14,10 +14,10 @@ export const CreateUserDTO = UserSchema.pick({
     path: ["confirmPassword"],
   });
 
-export type CreateUserDTOType = z.infer<typeof CreateUserDTO>;
+export type CreateUserDTO = z.infer<typeof CreateUserDTO>;
 
 export const LoginUserDTO = z.object({
   email: z.email(),
   password: z.string().min(6),
 });
-export type LoginUserDTOType = z.infer<typeof LoginUserDTO>;
+export type LoginUserDTO = z.infer<typeof LoginUserDTO>;
