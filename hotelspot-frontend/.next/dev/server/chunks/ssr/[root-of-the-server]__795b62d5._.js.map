@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///Users/asrimsuwal/Documents/Developer/WebAPI/hotel_spot/hotelspot-frontend/app/%28public%29/page.tsx"],"sourcesContent":["export default function Home() {\n  return (\n    <main\n      className=\"min-h-screen bg-cover bg-center\"\n      style={{ backgroundImage: \"url('/images/hotel1.jpg')\" }}\n    >\n      <div className=\"min-h-screen w-full bg-black/30\">\n        <div className=\"max-w-7xl mx-auto px-4 py-36 text-center text-white\">\n          <h1 className=\"text-4xl font-bold\">Welcome to Hotelspot</h1>\n          <p className=\"mt-4 text-lg\">\n            Find a perfect stay for your next vacation\n          </p>\n        </div>\n      </div>\n    </main>\n  );\n}\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QACC,WAAU;QACV,OAAO;YAAE,iBAAiB;QAA4B;kBAEtD,cAAA,8OAAC;YAAI,WAAU;sBACb,cAAA,8OAAC;gBAAI,WAAU;;kCACb,8OAAC;wBAAG,WAAU;kCAAqB;;;;;;kCACnC,8OAAC;wBAAE,WAAU;kCAAe;;;;;;;;;;;;;;;;;;;;;;AAOtC"}}]
+}
