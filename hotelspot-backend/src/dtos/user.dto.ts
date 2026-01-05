@@ -21,3 +21,18 @@ export const LoginUserDTO = z.object({
   password: z.string().min(6),
 });
 export type LoginUserDTO = z.infer<typeof LoginUserDTO>;
+
+export const UpdateUserDTO = UserSchema.pick({
+  username: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+}).partial();
+
+export type UpdateUserDTO = z.infer<typeof UpdateUserDTO>;
+
+export const DeleteUserDTO = z.object({
+  id: z.string().uuid(),
+});
+
+export type DeleteUserDTO = z.infer<typeof DeleteUserDTO>;
