@@ -5,6 +5,7 @@ import { connectDatabase } from "./database/mongodb";
 import { PORT } from "./config";
 
 import authRoutes from "./routes/auth.routes";
+import adminRoutes from "./routes/admin/user.route";
 dotenv.config();
 
 console.log(process.env.PORT);
@@ -13,6 +14,7 @@ const app: Application = express();
 app.use(bodyParser.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin/users", adminRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
