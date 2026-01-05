@@ -1,21 +1,19 @@
 import { HttpError } from "../errors/http-error";
 import { UserRepository } from "../repositories/user.repositories";
 import bcryptjs from "bcryptjs";
-let userRepositoory = new UserRepository();
+let userRepository = new UserRepository();
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
-import { CreateUserDTO, LoginUserDTO } from "../dtos/user.dto";
+import { CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
 
 export class UserService {
   async createUser(data: CreateUserDTO) {
     //business logic before creating user
-    const emailCheck = await userRepositoory.getUserByEmail(data.email);
+    const emailCheck = await userRepository.getUserByEmail(data.email);
     if (emailCheck) {
       throw new HttpError(403, "Email already in use");
     }
-    const usernameCheck = await userRepositoory.getUserByUsername(
-      data.username
-    );
+    const usernameCheck = await userRepository.getUserByUsername(data.username);
     if (usernameCheck) {
       throw new HttpError(403, "Username already in use");
     }
@@ -24,11 +22,11 @@ export class UserService {
     data.password = hashedPassword;
 
     //create user
-    const newUser = await userRepositoory.createUser(data);
+    const newUser = await userRepository.createUser(data);
     return newUser;
   }
   async loginUser(data: LoginUserDTO) {
-    const user = await userRepositoory.getUserByEmail(data.email);
+    const user = await userRepository.getUserByEmail(data.email);
     if (!user) {
       throw new HttpError(404, "User not found");
     }
@@ -48,5 +46,42 @@ export class UserService {
     };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" }); // 30days
     return { token, user };
+  }
+
+  async updateUser(userId: string, data: UpdateUserDTO) {
+    const existingUser = await userRepository.getUserByID(userId);
+    if (!existingUser) {
+      throw new HttpError(404, "User not found");
+    }
+
+    if (data.email && data.email !== existingUser.email) {
+      const emailExists = await userRepository.getUserByEmail(data.email);
+      if (emailExists) {
+        throw new HttpError(403, "Email already in use");
+      }
+    }
+
+    if (data.username && data.username !== existingUser.username) {
+      const usernameExists = await userRepository.getUserByUsername(
+        data.username
+      );
+      if (usernameExists) {
+        throw new HttpError(403, "Username already in use");
+      }
+    }
+  }
+
+  async deleteUser(userId: string) {
+    const existingUser = await userRepository.getUserByID(userId);
+    if (!existingUser) {
+      throw new HttpError(404, "User not found");
+    }
+
+    const deleted = await userRepository.deleteUserById(userId);
+    if (!deleted) {
+      throw new HttpError(500, "Failed to delete user");
+    }
+
+    return { message: "User deleted successfully" };
   }
 }
