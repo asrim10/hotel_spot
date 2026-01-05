@@ -5,7 +5,7 @@ import { connectDatabase } from "./database/mongodb";
 import { PORT } from "./config";
 
 import authRoutes from "./routes/auth.routes";
-import adminRoutes from "./routes/admin/user.route";
+import adminRoutes from "./routes/admin/user.routes";
 dotenv.config();
 
 console.log(process.env.PORT);
