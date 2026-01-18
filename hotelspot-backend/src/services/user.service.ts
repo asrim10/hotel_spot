@@ -40,8 +40,7 @@ export class UserService {
       email: user.email,
       username: user.email,
       password: user.password,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      fullName: user.fullName,
       role: user.role,
     };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" }); // 30days
