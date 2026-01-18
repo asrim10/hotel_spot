@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import { connectDatabase } from "./database/mongodb";
 import { PORT } from "./config";
+import cors from "cors";
 
 import authRoutes from "./routes/auth.routes";
 import adminRoutes from "./routes/admin/user.routes";
@@ -11,6 +12,18 @@ dotenv.config();
 console.log(process.env.PORT);
 
 const app: Application = express();
+
+const corsOptions = {
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3003",
+    "http://localhost:3005",
+  ],
+  optionsSuccessStatus: 200,
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
 app.use(bodyParser.json());
 
 app.use("/api/auth", authRoutes);
