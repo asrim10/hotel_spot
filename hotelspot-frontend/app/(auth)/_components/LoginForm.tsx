@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginData, loginSchema } from "../schema";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
@@ -11,6 +11,7 @@ import { handleLogin } from "@/lib/actions/auth-action";
 
 export default function LoginForm() {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -23,13 +24,14 @@ export default function LoginForm() {
   const [pending, startTransition] = useTransition();
 
   const submit = async (values: LoginData) => {
+    setError(null);
     startTransition(async () => {
       const response = await handleLogin(values);
       if (response.success) {
         console.log("Logged in successfully");
         router.push("/dashboard");
       } else {
-        console.log("Login failed");
+        setError(response.message || "Login failed");
       }
     });
     console.log("login", values);
@@ -60,6 +62,11 @@ export default function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit(submit)} className="space-y-4">
+        {error && (
+          <div className="p-3 rounded-md bg-red-50 border border-red-200">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
         <div className="space-y-1">
           <label className="text-sm font-medium" htmlFor="email">
             Email

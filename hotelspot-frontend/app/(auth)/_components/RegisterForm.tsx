@@ -69,6 +69,11 @@ export default function RegisterForm() {
       </div>
 
       <form onSubmit={handleSubmit(submit)} className="space-y-4">
+        {error && (
+          <div className="p-3 rounded-md bg-red-50 border border-red-200">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
         <div className="space-y-1">
           <label className="text-sm font-medium" htmlFor="username">
             Username
