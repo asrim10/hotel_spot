@@ -4,9 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegisterData, registerSchema } from "../schema";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { startTransition, useTransition } from "react";
+import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
+import { handleRegister } from "@/lib/actions/auth-action";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -19,11 +21,24 @@ export default function RegisterForm() {
     mode: "onSubmit",
   });
   const [pending, setTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   const submit = async (values: RegisterData) => {
+    setError(null);
     setTransition(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push("/login");
+      try {
+        const response = await handleRegister(values);
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+        if (response.success) {
+          router.push("/login");
+        } else {
+          setError("Registration failed");
+        }
+      } catch (err: Error | any) {
+        setError(err.message || "Registration failed");
+      }
     });
     console.log("register", values);
   };
@@ -55,6 +70,23 @@ export default function RegisterForm() {
 
       <form onSubmit={handleSubmit(submit)} className="space-y-4">
         <div className="space-y-1">
+          <label className="text-sm font-medium" htmlFor="username">
+            Username
+          </label>
+          <input
+            id="username"
+            type="text"
+            autoComplete="username"
+            className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
+            {...register("username")}
+            placeholder="Enter username"
+          />
+          {errors.username?.message && (
+            <p className="text-xs text-red-600">{errors.username.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-1">
           <label className="text-sm font-medium" htmlFor="name">
             Name
           </label>
@@ -63,11 +95,11 @@ export default function RegisterForm() {
             type="text"
             autoComplete="name"
             className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
-            {...register("name")}
+            {...register("fullName")}
             placeholder="Enter full name"
           />
-          {errors.name?.message && (
-            <p className="text-xs text-red-600">{errors.name.message}</p>
+          {errors.fullName?.message && (
+            <p className="text-xs text-red-600">{errors.fullName.message}</p>
           )}
         </div>
 

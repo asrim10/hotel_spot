@@ -7,6 +7,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
+import { handleLogin } from "@/lib/actions/auth-action";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -23,8 +24,13 @@ export default function LoginForm() {
 
   const submit = async (values: LoginData) => {
     startTransition(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      router.push("/dashboard");
+      const response = await handleLogin(values);
+      if (response.success) {
+        console.log("Logged in successfully");
+        router.push("/dashboard");
+      } else {
+        console.log("Login failed");
+      }
     });
     console.log("login", values);
   };
