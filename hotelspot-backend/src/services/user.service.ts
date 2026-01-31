@@ -62,7 +62,7 @@ export class UserService {
 
     if (data.username && data.username !== existingUser.username) {
       const usernameExists = await userRepository.getUserByUsername(
-        data.username
+        data.username,
       );
       if (usernameExists) {
         throw new HttpError(403, "Username already in use");
