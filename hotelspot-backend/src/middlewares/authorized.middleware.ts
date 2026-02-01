@@ -1,9 +1,9 @@
-import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "../errors/http-error";
 import { JWT_SECRET } from "../config";
-import { UserRepository } from "../repositories/user.repositories";
+import jwt from "jsonwebtoken";
 import { IUser } from "../models/user.model";
+import { UserRepository } from "../repositories/user.repositories";
+import { HttpError } from "../errors/http-error";
 
 declare global {
   namespace Express {
@@ -11,54 +11,51 @@ declare global {
       user?: Record<string, any> | IUser;
     }
   }
-}
-
-const userRepository = new UserRepository();
+} // adding tag (user) to request, can use req.user
+let userRepository = new UserRepository();
 export const authorizedMiddleware = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer "))
-      throw new HttpError(401, "Unauthrized Token Malformed");
-    const token = authHeader.split(" ")[1]; // "Bearer <token>" [1] -> token
-    if (!token) throw new HttpError(401, "Unauthorized Token Missing");
-    const decoded = jwt.verify(token, JWT_SECRET) as Record<string, any>;
-    if (!decoded || !decoded.id)
-      throw new HttpError(401, "Unauthorized Token Invalid");
-
-    const user = await userRepository.getUserByID(decoded.id);
-    if (!user) throw new HttpError(401, "Unauthorized User Not Found");
-
-    req.user = user;
-    return next();
-  } catch (error: Error | any) {
-    return res.status(error.statusCode ?? 500).json({
-      success: false,
-      message: error.message || "Internal Server Error",
-    });
+      throw new HttpError(401, "Unauthorized JWT invalid");
+    // JWT token should start with "Bearer <token>"
+    const token = authHeader.split(" ")[1]; // 0 -> Bearer, 1 -> token
+    if (!token) throw new HttpError(401, "Unauthorized JWT missing");
+    const decodedToken = jwt.verify(token, JWT_SECRET) as Record<string, any>;
+    if (!decodedToken || !decodedToken.id) {
+      throw new HttpError(401, "Unauthorized JWT unverified");
+    } // make function async
+    const user = await userRepository.getUserByID(decodedToken.id);
+    if (!user) throw new HttpError(401, "Unauthorized user not found");
+    req.user = user; // attach user to request (like tag)
+    next();
+  } catch (err: Error | any) {
+    return res
+      .status(err.statusCode || 500)
+      .json({ success: false, message: err.message });
   }
 };
 
-export const adminOnlyMiddleware = async (
+export const adminMiddleware = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
-      throw new HttpError(401, "Unauthorized User Not Found");
+      throw new HttpError(401, "Unauthorized no user info");
     }
     if (req.user.role !== "admin") {
-      throw new HttpError(403, "Forbidden Admins Only");
+      throw new HttpError(403, "Forbidden not admin");
     }
     return next();
-  } catch (error: Error | any) {
-    return res.status(error.statusCode ?? 500).json({
-      success: false,
-      message: error.message || "Internal Server Error",
-    });
+  } catch (err: Error | any) {
+    return res
+      .status(err.statusCode || 500)
+      .json({ success: false, message: err.message });
   }
 };
