@@ -21,20 +21,31 @@ export default function LoginForm() {
     mode: "onSubmit",
   });
 
-  const [pending, startTransition] = useTransition();
+  const [pending, setTransition] = useTransition();
 
   const submit = async (values: LoginData) => {
     setError(null);
-    startTransition(async () => {
-      const response = await handleLogin(values);
-      if (response.success) {
-        console.log("Logged in successfully");
-        router.push("/dashboard");
-      } else {
-        setError(response.message || "Login failed");
+    setTransition(async () => {
+      try {
+        const response = await handleLogin(values);
+        if (!response.success) {
+          throw new Error(response.message);
+        }
+        if (response.success) {
+          if (response.data?.role == "admin") {
+            return router.replace("/admin");
+          }
+          if (response.data?.role === "user") {
+            return router.replace("/user/dashboard");
+          }
+          return router.replace("/");
+        } else {
+          setError("Login failed");
+        }
+      } catch (err: Error | any) {
+        setError(err.message || "Login failed");
       }
     });
-    console.log("login", values);
   };
 
   return (
