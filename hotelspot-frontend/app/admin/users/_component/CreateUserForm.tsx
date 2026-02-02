@@ -130,11 +130,11 @@ export default function CreateUserForm() {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
-          <label className="text-sm font-medium" htmlFor="firstName">
-            First name
+          <label className="text-sm font-medium" htmlFor="fullName">
+            Full name
           </label>
           <input
-            id="firstName"
+            id="fullName"
             type="text"
             autoComplete="given-name"
             className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
