@@ -13,7 +13,6 @@ const router = Router();
 router.use(authorizedMiddleware); // apply all with middleware
 router.use(adminMiddleware); // apply all with middleware
 
-router.post("/", adminUserController.createUser);
 router.post("/", uploads.single("image"), adminUserController.createUser);
 router.get("/", adminUserController.getAllUsers);
 router.put("/:id", adminUserController.updateUser);

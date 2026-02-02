@@ -9,7 +9,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { icon: "🏠", label: "Dashboard", href: "/dashboard", badge: null },
+    { icon: "🏠", label: "Dashboard", href: "/user/dashboard", badge: null },
     { icon: "🔍", label: "Discover", href: "/dashboard/discover", badge: null },
     { icon: "📧", label: "Inbox", href: "/dashboard/inbox", badge: 3 },
     { icon: "💰", label: "My Wallet", href: "/dashboard/wallet", badge: null },
@@ -25,13 +25,13 @@ export default function Sidebar() {
       href: "/dashboard/notifications",
       badge: 6,
     },
-    { icon: "⚙️", label: "Settings", href: "/dashboard/settings", badge: null },
+    { icon: "⚙️", label: "Profile", href: "/user/profile", badge: null },
   ];
 
   return (
-    <div className="w-64 bg-gradient-to-br from-emerald-400 to-teal-500 min-h-screen p-6 flex flex-col">
+    <div className="w-64 bg-gradient-to-br from-red-400 to-black min-h-screen p-6 flex flex-col">
       {/* User Profile */}
-      <div className="bg-white rounded-2xl p-6 mb-8">
+      <div className="bg-gray-200 rounded-2xl p-6 mb-8">
         <div className="flex flex-col items-center">
           <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border-4 border-emerald-100">
             {user?.imageUrl ? (
