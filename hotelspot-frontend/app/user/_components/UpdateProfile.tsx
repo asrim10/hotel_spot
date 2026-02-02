@@ -173,11 +173,11 @@ export default function UpdateUserForm({ user }: { user: any }) {
         </div>
         {/* First Name Input */}
         <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="firstName">
-            First Name
+          <label className="block text-sm font-medium mb-1" htmlFor="fullName">
+            Full Name
           </label>
           <input
-            id="firstName"
+            id="fullName"
             type="text"
             {...register("fullName")}
             className="w-full border border-gray-300 rounded px-3 py-2"
