@@ -18,5 +18,6 @@ router.put(
   uploads.single("image"), // "image" - field name from frontend/client
   authController.updateProfile,
 );
+router.post("/request-password-reset", authController.requestPasswordReset);
 
 export default router;
