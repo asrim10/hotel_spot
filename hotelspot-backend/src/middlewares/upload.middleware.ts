@@ -1,5 +1,5 @@
 import multer from "multer";
-import uuid from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import { Request } from "express";
 import path from "path";
 import { HttpError } from "../errors/http-error";
@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, "../../uploads/"));
   },
   filename: function (req, file, cb) {
-    const fileSuffix = uuid.v4();
+    const fileSuffix = uuidv4();
     cb(null, fileSuffix + "-" + file.originalname);
   },
 });
