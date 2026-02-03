@@ -9,9 +9,9 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
     "test": "jest --verbose --detectOpenHandles"
-
   },
   "dependencies": {
+    "@types/nodemailer": "^7.0.9",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.1",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.13",
     "ts-jest": "^29.4.6",
     "uuid": "^11.1.0",
     "zod": "^4.3.5"
