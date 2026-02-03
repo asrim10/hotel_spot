@@ -1,6 +1,5 @@
 "use client";
 import { useAuth } from "@/app/context/AuthContext";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -35,12 +34,10 @@ export default function Sidebar() {
         <div className="flex flex-col items-center">
           <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border-4 border-emerald-100">
             {user?.imageUrl ? (
-              <Image
+              <img
                 src={process.env.NEXT_PUBLIC_API_BASE_URL + user.imageUrl}
                 alt={user.username || "User"}
-                width={80}
-                height={80}
-                className="object-cover"
+                className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-2xl font-bold">
