@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { handleLogin } from "@/lib/actions/auth-action";
+import Link from "next/link";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -111,6 +112,12 @@ export default function LoginForm() {
             <p className="text-xs text-red-600">{errors.password.message}</p>
           )}
         </div>
+        <Link
+          href="/forgot-password"
+          className="text-sm text-blue-600 hover:text-blue-700 font-medium transition md:ml-auto block text-right"
+        >
+          Forgot password?
+        </Link>
 
         <button
           type="submit"
@@ -130,12 +137,6 @@ export default function LoginForm() {
             className="flex-1 flex items-center justify-center gap-2 rounded-md border border-gray-200 py-2 bg-black"
           >
             <FcGoogle /> Continue with Google
-          </button>
-          <button
-            type="button"
-            className="flex-1 flex items-center justify-center gap-2 rounded-md border border-gray-200 py-2 bg-black"
-          >
-            <FaApple /> Continue with Apple
           </button>
         </div>
       </form>
