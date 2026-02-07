@@ -1,5 +1,5 @@
 import z from "zod";
-import { UserSchema } from "../types/user.types";
+import { UserSchema } from "../types/user.type";
 
 export const CreateUserDTO = UserSchema.pick({
   username: true,
