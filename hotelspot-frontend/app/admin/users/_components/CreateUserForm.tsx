@@ -6,8 +6,10 @@ import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { handleCreateUser } from "@/lib/actions/admin/user-action";
+import { useRouter } from "next/navigation";
 export default function CreateUserForm() {
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -70,6 +72,7 @@ export default function CreateUserForm() {
         reset();
         handleDismissImage();
         toast.success("Profile Created successfully");
+        router.push("/admin/users");
       } catch (error: Error | any) {
         toast.error(error.message || "Create profile failed");
         setError(error.message || "Create profile failed");

@@ -6,9 +6,10 @@ import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { handleUpdateUser } from "@/lib/actions/admin/user-action";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 export default function UpdateUserForm({ user }: { user: any }) {
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -78,6 +79,7 @@ export default function UpdateUserForm({ user }: { user: any }) {
         reset();
         handleDismissImage();
         toast.success("Profile Updated successfully");
+        router.push("/admin/users");
       } catch (error: Error | any) {
         toast.error(error.message || "Update profile failed");
         setError(error.message || "Update profile failed");
@@ -115,7 +117,7 @@ export default function UpdateUserForm({ user }: { user: any }) {
             <img
               src={process.env.NEXT_PUBLIC_API_BASE_URL + user.imageUrl}
               alt="Profile Image"
-              className="w-full h-full object-cover"
+              className="w-full h-full rounded-full object-cover"
               height={96}
               width={96}
             />
