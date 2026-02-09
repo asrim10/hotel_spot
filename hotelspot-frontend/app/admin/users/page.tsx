@@ -1,5 +1,5 @@
 import Link from "next/link";
-import UserTable from "./_component/UserTable";
+import UserTable from "./_components/UserTable";
 
 // Dummy data for testing
 const DUMMY_USERS = [
