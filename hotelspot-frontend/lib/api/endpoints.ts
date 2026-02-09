@@ -15,5 +15,12 @@ export const API = {
       UPDATE: (userId: string) => `/api/admin/users/${userId}`,
       DELETE: (userId: string) => `/api/admin/users/${userId}`,
     },
+    HOTEL: {
+      CREATE: "/api/admin/hotels/",
+      GET_ALL: "/api/admin/hotels/",
+      GET_ONE: (hotelId: string) => `/api/admin/hotels/${hotelId}`,
+      UPDATE: (hotelId: string) => `/api/admin/hotels/${hotelId}`,
+      DELETE: (hotelId: string) => `/api/admin/hotels/${hotelId}`,
+    },
   },
 };
