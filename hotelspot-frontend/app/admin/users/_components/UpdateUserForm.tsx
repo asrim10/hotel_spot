@@ -112,12 +112,12 @@ export default function UpdateUserForm({ user }: { user: any }) {
           </div>
         ) : user.imageUrl ? (
           <div className="relative w-24 h-24">
-            <Image
-              src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${user.imageUrl}`}
+            <img
+              src={process.env.NEXT_PUBLIC_API_BASE_URL + user.imageUrl}
               alt="Profile Image"
-              className="w-24 h-24 rounded-full object-cover"
-              width={96}
+              className="w-full h-full object-cover"
               height={96}
+              width={96}
             />
           </div>
         ) : (
@@ -148,11 +148,11 @@ export default function UpdateUserForm({ user }: { user: any }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
-          <label className="text-sm font-medium" htmlFor="firstName">
-            First name
+          <label className="text-sm font-medium" htmlFor="fullName">
+            Full name
           </label>
           <input
-            id="firstName"
+            id="fullName"
             type="text"
             autoComplete="given-name"
             className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"

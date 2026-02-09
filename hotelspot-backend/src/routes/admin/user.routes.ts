@@ -15,7 +15,6 @@ router.use(adminMiddleware); // apply all with middleware
 
 router.post("/", uploads.single("image"), adminUserController.createUser);
 router.get("/", adminUserController.getAllUsers);
-router.put("/:id", adminUserController.updateUser);
 router.put("/:id", uploads.single("image"), adminUserController.updateUser);
 router.delete("/:id", adminUserController.deleteUser);
 router.get("/:id", adminUserController.getUserById);
