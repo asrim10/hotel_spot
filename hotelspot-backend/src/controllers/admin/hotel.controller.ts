@@ -2,6 +2,7 @@ import { CreateHotelDTO, UpdateHotelDTO } from "../../dtos/hotel.dto";
 import { Request, Response, NextFunction } from "express";
 import z from "zod";
 import { AdminHotelService } from "../../services/admin/hotel.service";
+import mongoose from "mongoose";
 
 let adminHotelService = new AdminHotelService();
 
@@ -94,17 +95,25 @@ export class AdminHotelController {
       });
     }
   }
-
   async getHotelById(req: Request, res: Response, next: NextFunction) {
     try {
       const hotelId = req.params.id;
+
+      if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid hotel ID",
+        });
+      }
+
       const hotel = await adminHotelService.getHotelById(hotelId);
+
       return res.status(200).json({
         success: true,
         data: hotel,
         message: "Single Hotel Retrieved",
       });
-    } catch (error: Error | any) {
+    } catch (error: any) {
       return res.status(error.statusCode ?? 500).json({
         success: false,
         message: error.message || "Internal Server Error",
