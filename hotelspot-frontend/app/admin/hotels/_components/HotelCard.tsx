@@ -5,6 +5,7 @@ import { handleDeleteHotel } from "@/lib/actions/admin/hotel-action";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import DeleteModal from "@/app/_components/DeleteModal";
 
 interface Hotel {
   _id: string;
@@ -16,7 +17,7 @@ interface Hotel {
   description?: string;
   price: number;
   availableRooms: number;
-  imageUrl?: string; // Changed from 'image' to 'imageUrl'
+  imageUrl?: string;
 }
 
 interface HotelCardsProps {
@@ -26,15 +27,25 @@ interface HotelCardsProps {
 export default function HotelCards({ hotels }: HotelCardsProps) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
 
-  const handleDelete = async (id: string, hotelName: string) => {
-    if (!confirm(`Are you sure you want to delete ${hotelName}?`)) {
-      return;
-    }
+  const openDeleteModal = (hotel: Hotel) => {
+    setSelectedHotel(hotel);
+    setModalOpen(true);
+  };
 
-    setDeletingId(id);
+  const closeDeleteModal = () => {
+    setSelectedHotel(null);
+    setModalOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedHotel) return;
+
+    setDeletingId(selectedHotel._id);
     try {
-      const response = await handleDeleteHotel(id);
+      const response = await handleDeleteHotel(selectedHotel._id);
       if (response.success) {
         toast.success("Hotel deleted successfully");
         router.refresh();
@@ -45,6 +56,7 @@ export default function HotelCards({ hotels }: HotelCardsProps) {
       toast.error(error.message || "Failed to delete hotel");
     } finally {
       setDeletingId(null);
+      closeDeleteModal();
     }
   };
 
@@ -109,22 +121,15 @@ export default function HotelCards({ hotels }: HotelCardsProps) {
 
                 {/* Hotel Info */}
                 <div className="p-4">
-                  {/* Hotel Name */}
                   <h3 className="font-semibold text-lg text-foreground mb-1 truncate">
                     {hotel.hotelName}
                   </h3>
-
-                  {/* City, Country */}
                   <p className="text-sm text-muted-foreground mb-3">
                     {hotel.city}, {hotel.country}
                   </p>
-
-                  {/* Address */}
                   <p className="text-xs text-muted-foreground mb-3 truncate">
                     {hotel.address}
                   </p>
-
-                  {/* Price and Rating */}
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <span className="text-xl font-bold text-foreground">
@@ -148,16 +153,12 @@ export default function HotelCards({ hotels }: HotelCardsProps) {
                       </div>
                     )}
                   </div>
-
-                  {/* Available Rooms */}
                   <div className="mb-4">
                     <span className="text-xs text-muted-foreground">
                       {hotel.availableRooms} room
                       {hotel.availableRooms !== 1 ? "s" : ""} available
                     </span>
                   </div>
-
-                  {/* Description (if exists) */}
                   {hotel.description && (
                     <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
                       {hotel.description}
@@ -173,7 +174,7 @@ export default function HotelCards({ hotels }: HotelCardsProps) {
                       Edit
                     </Link>
                     <button
-                      onClick={() => handleDelete(hotel._id, hotel.hotelName)}
+                      onClick={() => openDeleteModal(hotel)}
                       disabled={deletingId === hotel._id}
                       className="flex-1 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -184,6 +185,17 @@ export default function HotelCards({ hotels }: HotelCardsProps) {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Delete Modal */}
+        {selectedHotel && (
+          <DeleteModal
+            isOpen={modalOpen}
+            onClose={closeDeleteModal}
+            onConfirm={handleConfirmDelete}
+            title={`Delete ${selectedHotel.hotelName}?`}
+            description="Are you sure you want to delete this hotel? This action cannot be undone."
+          />
         )}
       </div>
     </div>
