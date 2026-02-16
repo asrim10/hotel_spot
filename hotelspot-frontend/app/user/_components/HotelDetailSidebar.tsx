@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useState } from "react";
 
 interface HotelDetailSidebarProps {
@@ -32,11 +31,10 @@ export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
     <div className="w-96 bg-white rounded-2xl p-6 shadow-lg">
       {/* Main Image */}
       <div className="relative h-56 rounded-2xl overflow-hidden mb-4">
-        <Image
+        <img
           src={hotel.images[0] || "/placeholder-hotel.jpg"}
           alt={hotel.name}
-          fill
-          className="object-cover"
+          className="w-full h-full object-cover"
         />
       </div>
 
@@ -44,11 +42,10 @@ export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
       <div className="grid grid-cols-3 gap-2 mb-6">
         {hotel.images.slice(1, 3).map((img, idx) => (
           <div key={idx} className="relative h-20 rounded-lg overflow-hidden">
-            <Image
+            <img
               src={img}
               alt={`${hotel.name} ${idx + 2}`}
-              fill
-              className="object-cover"
+              className="w-full h-full object-cover"
             />
           </div>
         ))}
@@ -62,7 +59,9 @@ export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() =>
+              setActiveTab(tab.id as "overview" | "details" | "reviews")
+            }
             className={`pb-2 px-1 font-medium transition-all ${
               activeTab === tab.id
                 ? "text-gray-800 border-b-2 border-emerald-500"

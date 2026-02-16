@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 
 interface PopularHotelCardProps {
   id: string;
@@ -20,11 +19,10 @@ export default function PopularHotelCard({
     <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group">
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
-        <Image
+        <img
           src={image}
           alt={name}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
       </div>
 

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "./axios";
 import { API } from "./endpoints";
 
 export const getAllHotels = async (

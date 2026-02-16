@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useState } from "react";
 
 interface HotelCardProps {
@@ -31,11 +30,10 @@ export default function HotelCard({
     >
       {/* Background Image */}
       <div className="absolute inset-0">
-        <Image
+        <img
           src={image}
           alt={name}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
       </div>
