@@ -7,9 +7,7 @@ import PopularHotelCard from "../_components/PopulatHotelCard";
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<
-    "destination" | "hotels" | "car" | "packages"
-  >("hotels");
+  const [activeTab, setActiveTab] = useState<"hotels">("hotels");
   const [activeFilter, setActiveFilter] = useState<
     "recommended" | "popular" | "nearest"
   >("popular");
@@ -109,17 +107,11 @@ export default function DashboardPage() {
     location: "Phuket City, Thailand",
   };
 
-  const tabs = [
-    { id: "destination", label: "Destination" },
-    { id: "hotels", label: "Hotels" },
-    { id: "car", label: "Car Rent" },
-    { id: "packages", label: "Packages" },
-  ];
+  const tabs = [{ id: "hotels", label: "Hotels" }];
 
   const filters = [
     { id: "recommended", label: "Recommended" },
     { id: "popular", label: "Popular" },
-    { id: "nearest", label: "Nearest" },
   ];
 
   return (

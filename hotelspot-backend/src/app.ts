@@ -6,6 +6,7 @@ import { HttpError } from "./errors/http-error";
 import path from "path";
 
 import authRoutes from "./routes/auth.routes";
+import hotelRoutes from "./routes/hotel.routes";
 import adminUserRoutes from "./routes/admin/user.routes";
 import adminHotelRoutes from "./routes/admin/hotel.routes";
 dotenv.config();
@@ -31,6 +32,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use(bodyParser.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/hotels", hotelRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/hotels", adminHotelRoutes);
 

@@ -7,6 +7,10 @@ export const API = {
     REQUEST_RESET_PASSWORD: "/api/auth/request-password-reset",
     RESET_PASSWORD: (token: string) => `/api/auth/reset-password/${token}`,
   },
+  HOTELS: {
+    GET_ALL: "/api/hotels/",
+    GET_ONE: (hotelId: string) => `/api/hotels/${hotelId}`,
+  },
   ADMIN: {
     USER: {
       CREATE: "/api/admin/users/",

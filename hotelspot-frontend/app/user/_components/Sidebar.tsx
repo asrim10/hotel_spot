@@ -8,27 +8,16 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { icon: "🏠", label: "Dashboard", href: "/user/dashboard", badge: null },
-    { icon: "🔍", label: "Discover", href: "/dashboard/discover", badge: null },
-    { icon: "📧", label: "Inbox", href: "/dashboard/inbox", badge: 3 },
-    { icon: "💰", label: "My Wallet", href: "/dashboard/wallet", badge: null },
-    {
-      icon: "📊",
-      label: "Analytics",
-      href: "/dashboard/analytics",
-      badge: null,
-    },
-    {
-      icon: "🔔",
-      label: "Notifications",
-      href: "/dashboard/notifications",
-      badge: 6,
-    },
-    { icon: "⚙️", label: "Profile", href: "/user/profile", badge: null },
+    { label: "Dashboard", href: "/user/dashboard", badge: null },
+    { label: "Discover", href: "/user/discover", badge: null },
+    { label: "Inbox", href: "/dashboard/inbox", badge: 0 },
+    { label: "Booking History", href: "/dashboard/history" },
+
+    { label: "Profile", href: "/user/profile", badge: null },
   ];
 
   return (
-    <div className="w-64 bg-gradient-to-br from-red-400 to-black min-h-screen p-6 flex flex-col">
+    <div className="w-64 bg-gray-700 min-h-screen p-6 flex flex-col">
       {/* User Profile */}
       <div className="bg-gray-200 rounded-2xl p-6 mb-8">
         <div className="flex flex-col items-center">
@@ -65,7 +54,6 @@ export default function Sidebar() {
             }`}
           >
             <div className="flex items-center gap-3">
-              <span className="text-xl">{item.icon}</span>
               <span className="font-medium">{item.label}</span>
             </div>
             {item.badge && (
@@ -82,15 +70,11 @@ export default function Sidebar() {
         <Link
           href="/help"
           className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all"
-        >
-          <span className="text-xl">❓</span>
-          <span className="font-medium">Help & Support</span>
-        </Link>
+        ></Link>
         <button
           onClick={logout}
           className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all"
         >
-          <span className="text-xl">🚪</span>
           <span className="font-medium">Log Out</span>
         </button>
       </div>
