@@ -11,6 +11,13 @@ export const API = {
     GET_ALL: "/api/hotels/",
     GET_ONE: (hotelId: string) => `/api/hotels/${hotelId}`,
   },
+  BOOKING: {
+    CREATE: "/api/bookings/",
+    GET_MY: "/api/bookings/me",
+    GET_ONE: (bookingId: string) => `/api/bookings/${bookingId}`,
+    UPDATE: (bookingId: string) => `/api/bookings/${bookingId}`,
+    DELETE: (bookingId: string) => `/api/bookings/${bookingId}`,
+  },
   ADMIN: {
     USER: {
       CREATE: "/api/admin/users/",
