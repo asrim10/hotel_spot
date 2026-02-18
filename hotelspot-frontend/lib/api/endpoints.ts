@@ -18,6 +18,12 @@ export const API = {
     UPDATE: (bookingId: string) => `/api/bookings/${bookingId}`,
     DELETE: (bookingId: string) => `/api/bookings/${bookingId}`,
   },
+  FAVOURITE: {
+    CREATE: "/api/fav/",
+    GET_MY: "/api/fav/me",
+    GET_ONE: (favouriteId: string) => `/api/fav/${favouriteId}`,
+    DELETE: (favouriteId: string) => `/api/fav/${favouriteId}`,
+  },
   ADMIN: {
     USER: {
       CREATE: "/api/admin/users/",
