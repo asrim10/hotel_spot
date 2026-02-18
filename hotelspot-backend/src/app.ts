@@ -8,6 +8,7 @@ import path from "path";
 import authRoutes from "./routes/auth.routes";
 import hotelRoutes from "./routes/hotel.routes";
 import bookingRoutes from "./routes/booking.routes";
+import favourtieRoutes from "./routes/favourite.routes";
 import adminUserRoutes from "./routes/admin/user.routes";
 import adminHotelRoutes from "./routes/admin/hotel.routes";
 dotenv.config();
@@ -35,6 +36,7 @@ app.use(bodyParser.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/hotels", hotelRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/fav", favourtieRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/hotels", adminHotelRoutes);
 

@@ -101,48 +101,6 @@ export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
               <button className="text-emerald-600 font-medium">View Map</button>
             </div>
           </div>
-
-          {/* Calendar */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={() => setCurrentMonth("January 2025")}
-                className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200"
-              >
-                ←
-              </button>
-              <h4 className="font-bold text-gray-800">{currentMonth}</h4>
-              <button
-                onClick={() => setCurrentMonth("March 2025")}
-                className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center hover:bg-emerald-200"
-              >
-                →
-              </button>
-            </div>
-
-            <div className="grid grid-cols-7 gap-2">
-              {["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"].map((day) => (
-                <div
-                  key={day}
-                  className="text-center text-xs text-gray-500 font-medium mb-1"
-                >
-                  {day}
-                </div>
-              ))}
-              {daysInMonth.map((day) => (
-                <button
-                  key={day}
-                  className={`aspect-square rounded-lg flex items-center justify-center text-sm transition-all ${
-                    selectedDates.includes(day)
-                      ? "bg-emerald-500 text-white font-bold"
-                      : "hover:bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       )}
 
