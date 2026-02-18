@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface HotelDetailSidebarProps {
   hotel: {
@@ -12,6 +13,8 @@ interface HotelDetailSidebarProps {
 }
 
 export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
+  const router = useRouter();
+
   const [activeTab, setActiveTab] = useState<
     "overview" | "details" | "reviews"
   >("overview");
@@ -23,9 +26,12 @@ export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
     { id: "reviews", label: "Reviews" },
   ];
 
-  // Sample calendar data
   const daysInMonth = Array.from({ length: 28 }, (_, i) => i + 1);
   const selectedDates = [11, 15];
+
+  const handleBookNow = () => {
+    router.push(`/user/booking?hotelId=${hotel.id}`);
+  };
 
   return (
     <div className="w-96 bg-white rounded-2xl p-6 shadow-lg">
@@ -114,7 +120,6 @@ export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
               </button>
             </div>
 
-            {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-2">
               {["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"].map((day) => (
                 <div
@@ -152,6 +157,16 @@ export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
           <p>Guest reviews will be displayed here...</p>
         </div>
       )}
+
+      {/* Book Now Button */}
+      <div className="mt-6">
+        <button
+          onClick={handleBookNow}
+          className="w-full bg-emerald-600 text-white py-3 rounded-xl font-semibold text-lg hover:bg-emerald-700 transition-all shadow-md"
+        >
+          Book Now
+        </button>
+      </div>
     </div>
   );
 }
