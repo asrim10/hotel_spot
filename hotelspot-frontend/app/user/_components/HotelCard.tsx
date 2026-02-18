@@ -35,7 +35,7 @@ export default function HotelCard({
           alt={name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
       </div>
 
       {/* Like Button */}
@@ -44,7 +44,7 @@ export default function HotelCard({
           e.stopPropagation();
           setIsLiked(!isLiked);
         }}
-        className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center hover:bg-white transition-all z-10"
+        className="absolute top-4 right-4 w-10 h-10 bg-gray-600 backdrop-blur rounded-full flex items-center justify-center hover:bg-black transition-all z-10"
       >
         <span
           className={`text-xl ${isLiked ? "text-red-500" : "text-gray-400"}`}
@@ -65,8 +65,8 @@ export default function HotelCard({
           </span>
         </div>
         {price && (
-          <div className="mt-2 text-lg font-semibold">
-            $ {price.toFixed(2)}{" "}
+          <div className="mt-2 text-sm font-semibold">
+            Rs. {price.toFixed(2)}{" "}
             <span className="text-sm font-normal">/night</span>
           </div>
         )}
@@ -74,7 +74,7 @@ export default function HotelCard({
 
       {/* Next Button for Featured */}
       {isFeatured && (
-        <button className="absolute bottom-5 right-5 w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-all">
+        <button className="absolute bottom-5 right-5 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-all">
           <span className="text-white text-xl">→</span>
         </button>
       )}

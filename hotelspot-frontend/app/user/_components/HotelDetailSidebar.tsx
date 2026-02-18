@@ -49,9 +49,6 @@ export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
             />
           </div>
         ))}
-        <div className="relative h-20 rounded-lg overflow-hidden bg-gray-800 flex items-center justify-center cursor-pointer">
-          <span className="text-white font-bold">10+</span>
-        </div>
       </div>
 
       {/* Tabs */}
