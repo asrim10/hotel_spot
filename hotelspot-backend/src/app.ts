@@ -11,6 +11,7 @@ import bookingRoutes from "./routes/booking.routes";
 import favourtieRoutes from "./routes/favourite.routes";
 import adminUserRoutes from "./routes/admin/user.routes";
 import adminHotelRoutes from "./routes/admin/hotel.routes";
+import adminBookingRoutes from "./routes/admin/booking.routes";
 dotenv.config();
 
 console.log(process.env.PORT);
@@ -39,6 +40,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/fav", favourtieRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/hotels", adminHotelRoutes);
+app.use("/api/admin/bookings", adminBookingRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to API World!");
