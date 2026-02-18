@@ -501,7 +501,7 @@ export default function HotelPage() {
                       const res = await createBooking(payload);
                       if (res?.success) {
                         toast.success("Booking created successfully");
-                        router.push("/dashboard/history");
+                        router.push("/user/booking/history");
                       } else {
                         toast.error(res?.message || "Booking failed");
                       }

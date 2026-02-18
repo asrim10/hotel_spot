@@ -11,7 +11,7 @@ export default function Sidebar() {
     { label: "Dashboard", href: "/user/dashboard", badge: null },
     { label: "Discover", href: "/user/discover", badge: null },
     { label: "Inbox", href: "/dashboard/inbox", badge: 0 },
-    { label: "Booking History", href: "/dashboard/history" },
+    { label: "Booking History", href: "/user/booking/history" },
 
     { label: "Profile", href: "/user/profile", badge: null },
   ];
