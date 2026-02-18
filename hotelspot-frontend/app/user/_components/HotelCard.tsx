@@ -1,5 +1,11 @@
 "use client";
-import { useState } from "react";
+
+import {
+  handleAddFavourite,
+  handleRemoveFavourite,
+} from "@/lib/actions/favourite-action";
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 interface HotelCardProps {
   id: string;
@@ -9,6 +15,9 @@ interface HotelCardProps {
   image: string;
   price?: number;
   isFeatured?: boolean;
+  isFavorited?: boolean;
+  favouriteId?: string;
+  onFavoriteChange?: (hotelId: string, isFavorited: boolean) => void;
 }
 
 export default function HotelCard({
@@ -19,14 +28,78 @@ export default function HotelCard({
   image,
   price,
   isFeatured = false,
+  isFavorited = false,
+  favouriteId,
+  onFavoriteChange,
 }: HotelCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(isFavorited);
+  const [currentFavouriteId, setCurrentFavouriteId] = useState(favouriteId);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    setIsLiked(isFavorited);
+    setCurrentFavouriteId(favouriteId);
+  }, [isFavorited, favouriteId]);
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
+    try {
+      if (isLiked && currentFavouriteId) {
+        // Remove from favorites
+        const result = await handleRemoveFavourite(currentFavouriteId);
+
+        if (result.success) {
+          setIsLiked(false);
+          setCurrentFavouriteId(undefined);
+          toast.success("Removed from favorites");
+          onFavoriteChange?.(id, false);
+        } else {
+          toast.error(result.message || "Failed to remove from favorites");
+        }
+      } else {
+        // Add to favorites
+        const result = await handleAddFavourite(id);
+
+        if (result.success && result.data) {
+          setIsLiked(true);
+          setCurrentFavouriteId(result.data.favourite._id);
+          toast.success("Added to favorites");
+          onFavoriteChange?.(id, true);
+        } else {
+          // Check if already in favorites
+          if (result.message?.toLowerCase().includes("already")) {
+            toast.info("Hotel already in favorites");
+          } else {
+            toast.error(result.message || "Failed to add to favorites");
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error("Favorite action error:", error);
+      if (error.message?.toLowerCase().includes("already")) {
+        toast.info("Hotel already in favorites");
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div
       className={`group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer ${
         isFeatured ? "h-80" : "h-64"
       }`}
+      onClick={() => {
+        window.location.href = `/user/booking?hotelId=${id}`;
+      }}
     >
       {/* Background Image */}
       <div className="absolute inset-0">
@@ -40,15 +113,14 @@ export default function HotelCard({
 
       {/* Like Button */}
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsLiked(!isLiked);
-        }}
-        className="absolute top-4 right-4 w-10 h-10 bg-gray-600 backdrop-blur rounded-full flex items-center justify-center hover:bg-black transition-all z-10"
+        onClick={handleFavoriteClick}
+        disabled={isProcessing}
+        className={`absolute top-4 right-4 w-10 h-10 bg-gray-900/60 backdrop-blur rounded-full flex items-center justify-center hover:bg-gray-900/80 transition-all z-10 ${
+          isProcessing ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
       >
-        <span
-          className={`text-xl ${isLiked ? "text-red-500" : "text-gray-400"}`}
-        >
+        <span className={`text-xl ${isLiked ? "text-red-500" : "text-white"}`}>
           {isLiked ? "❤️" : "🤍"}
         </span>
       </button>

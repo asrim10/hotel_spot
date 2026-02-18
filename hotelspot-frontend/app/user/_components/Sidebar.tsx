@@ -10,6 +10,7 @@ export default function Sidebar() {
   const menuItems = [
     { label: "Dashboard", href: "/user/dashboard", badge: null },
     { label: "Discover", href: "/user/discover", badge: null },
+    { label: "Favourite", href: "/user/favourite", badge: null },
     { label: "Inbox", href: "/dashboard/inbox", badge: 0 },
     { label: "Booking History", href: "/user/booking/history" },
 
@@ -29,7 +30,7 @@ export default function Sidebar() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-full h-full bg-linear-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-2xl font-bold">
                 {user?.username?.charAt(0).toUpperCase() || "U"}
               </div>
             )}

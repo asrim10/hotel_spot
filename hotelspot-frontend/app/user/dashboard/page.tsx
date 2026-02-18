@@ -7,6 +7,7 @@ import HotelDetailSidebar from "../_components/HotelDetailSidebar";
 import PopularHotelCard from "../_components/PopularHotelCard";
 import { handleGetAllHotels } from "@/lib/actions/hotel-action";
 import { toast } from "react-toastify";
+import { handleGetMyFavourites } from "@/lib/actions/favourite-action";
 
 interface Hotel {
   _id: string;
@@ -19,6 +20,10 @@ interface Hotel {
   price: number;
   availableRooms: number;
   imageUrl?: string;
+}
+
+interface FavoriteMap {
+  [hotelId: string]: string; // hotelId -> favouriteId
 }
 
 export default function DashboardPage() {
@@ -37,6 +42,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
 
+  // Favorites state
+  const [favoriteMap, setFavoriteMap] = useState<FavoriteMap>({});
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -50,6 +59,13 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchHotels();
   }, [debouncedSearch]);
+
+  // Fetch favorites
+  useEffect(() => {
+    if (user) {
+      fetchFavorites();
+    }
+  }, [user]);
 
   const fetchHotels = async () => {
     setLoading(true);
@@ -70,6 +86,40 @@ export default function DashboardPage() {
       toast.error(error.message || "Failed to fetch hotels");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFavorites = async () => {
+    setFavoritesLoading(true);
+    try {
+      const response = await handleGetMyFavourites();
+
+      if (response.success && response.data) {
+        // Create a map of hotelId -> favouriteId for quick lookup
+        const favMap: FavoriteMap = {};
+        response.data.forEach((fav: any) => {
+          favMap[fav.hotelId] = fav._id;
+        });
+        setFavoriteMap(favMap);
+      }
+    } catch (error: any) {
+      console.error("Fetch favorites error:", error);
+    } finally {
+      setFavoritesLoading(false);
+    }
+  };
+
+  const handleFavoriteChange = (hotelId: string, isFavorited: boolean) => {
+    if (isFavorited) {
+      // Refresh favorites to get the new favouriteId
+      fetchFavorites();
+    } else {
+      // Remove from local state
+      setFavoriteMap((prev) => {
+        const newMap = { ...prev };
+        delete newMap[hotelId];
+        return newMap;
+      });
     }
   };
 
@@ -116,7 +166,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex-1 bg-gray-900 overflow-y-auto min-h-screen">
-      <div className="max-w-[1600px] mx-auto p-8">
+      <div className="max-w-400 mx-auto p-8">
         <div className="flex gap-8">
           {/* Main Content */}
           <div className="flex-1">
@@ -207,6 +257,9 @@ export default function DashboardPage() {
                             image={getImageUrl(hotel.imageUrl)}
                             price={hotel.price}
                             isFeatured
+                            isFavorited={!!favoriteMap[hotel._id]}
+                            favouriteId={favoriteMap[hotel._id]}
+                            onFavoriteChange={handleFavoriteChange}
                           />
                         </div>
                       ))}
@@ -250,6 +303,9 @@ export default function DashboardPage() {
                         location={hotel.address}
                         price={hotel.price}
                         image={getImageUrl(hotel.imageUrl)}
+                        isFavorited={!!favoriteMap[hotel._id]}
+                        favouriteId={favoriteMap[hotel._id]}
+                        onFavoriteChange={handleFavoriteChange}
                       />
                     </div>
                   ))}

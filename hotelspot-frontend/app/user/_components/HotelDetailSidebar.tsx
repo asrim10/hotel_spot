@@ -90,7 +90,7 @@ export default function HotelDetailSidebar({ hotel }: HotelDetailSidebarProps) {
           <div>
             <h4 className="font-bold text-gray-800 mb-3">Location</h4>
             <div className="bg-gray-100 rounded-xl h-32 flex items-center justify-center relative overflow-hidden mb-2">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 opacity-50" />
+              <div className="absolute inset-0 bg-linear-to-br from-pink-200 via-purple-200 to-blue-200 opacity-50" />
               <div className="relative">
                 <div className="w-24 h-24 border-2 border-red-500 rounded-full" />
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-red-500 rounded-full" />

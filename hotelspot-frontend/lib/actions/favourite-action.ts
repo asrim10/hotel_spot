@@ -29,9 +29,12 @@ export const handleAddFavourite = async (hotelId: string) => {
       },
     };
   } catch (error: Error | any) {
+    // Check if error message indicates already in favorites
+    const errorMessage = error.message || "Add favourite action failed";
+
     return {
       success: false,
-      message: error.message || "Add favourite action failed",
+      message: errorMessage,
     };
   }
 };
@@ -49,8 +52,13 @@ export const handleGetMyFavourites = async () => {
 
     const favouritesWithHotels = await Promise.all(
       response.data.map(async (fav: any) => {
-        const hotelInfo = await getHotelById(fav.hotelId);
-        return { ...fav, hotel: hotelInfo.success ? hotelInfo.data : null };
+        try {
+          const hotelInfo = await getHotelById(fav.hotelId);
+          return { ...fav, hotel: hotelInfo.success ? hotelInfo.data : null };
+        } catch (error) {
+          console.error(`Failed to fetch hotel ${fav.hotelId}:`, error);
+          return { ...fav, hotel: null };
+        }
       }),
     );
 
