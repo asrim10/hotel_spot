@@ -235,19 +235,26 @@ export class AdminBookingService {
     const allBookings = await bookingRepository.getAll();
 
     const stats = {
-      total: allBookings.length,
-      pending: allBookings.filter((b) => b.status === "pending").length,
-      confirmed: allBookings.filter((b) => b.status === "confirmed").length,
-      checkedIn: allBookings.filter((b) => b.status === "checked_in").length,
-      checkedOut: allBookings.filter((b) => b.status === "checked_out").length,
-      cancelled: allBookings.filter((b) => b.status === "cancelled").length,
+      totalBookings: allBookings.length,
+      pendingBookings: allBookings.filter((b) => b.status === "pending").length,
+      confirmedBookings: allBookings.filter((b) => b.status === "confirmed")
+        .length,
+      checkedInBookings: allBookings.filter((b) => b.status === "checked_in")
+        .length,
+      checkedOutBookings: allBookings.filter((b) => b.status === "checked_out")
+        .length,
+      cancelledBookings: allBookings.filter((b) => b.status === "cancelled")
+        .length,
 
       // Payment stats
-      paymentPending: allBookings.filter((b) => b.paymentStatus === "pending")
+      paymentPendingBookings: allBookings.filter(
+        (b) => b.paymentStatus === "pending",
+      ).length,
+      paymentPaidBookings: allBookings.filter((b) => b.paymentStatus === "paid")
         .length,
-      paymentPaid: allBookings.filter((b) => b.paymentStatus === "paid").length,
-      paymentFailed: allBookings.filter((b) => b.paymentStatus === "failed")
-        .length,
+      paymentFailedBookings: allBookings.filter(
+        (b) => b.paymentStatus === "failed",
+      ).length,
 
       // Revenue (only paid bookings)
       totalRevenue: allBookings
