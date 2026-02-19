@@ -39,5 +39,36 @@ export const API = {
       UPDATE: (hotelId: string) => `/api/admin/hotels/${hotelId}`,
       DELETE: (hotelId: string) => `/api/admin/hotels/${hotelId}`,
     },
+    BOOKING: {
+      CREATE: "/api/admin/bookings/",
+      GET_ALL: "/api/admin/bookings/",
+      GET_ONE: (bookingId: string) => `/api/admin/bookings/${bookingId}`,
+      UPDATE: (bookingId: string) => `/api/admin/bookings/${bookingId}`,
+      DELETE: (bookingId: string) => `/api/admin/bookings/${bookingId}`,
+
+      // STATUS MANAGEMENT
+      UPDATE_STATUS: (bookingId: string) =>
+        `/api/admin/bookings/${bookingId}/status`,
+      UPDATE_PAYMENT_STATUS: (bookingId: string) =>
+        `/api/admin/bookings/${bookingId}/payment-status`,
+
+      CONFIRM: (bookingId: string) =>
+        `/api/admin/bookings/${bookingId}/confirm`,
+      CANCEL: (bookingId: string) => `/api/admin/bookings/${bookingId}/cancel`,
+      CHECK_IN: (bookingId: string) =>
+        `/api/admin/bookings/${bookingId}/check-in`,
+      CHECK_OUT: (bookingId: string) =>
+        `/api/admin/bookings/${bookingId}/check-out`,
+
+      // FILTER / QUERY
+      ANALYTICS_STATS: "/api/admin/bookings/analytics/stats",
+      GET_BY_USER: (userId: string) => `/api/admin/bookings/user/${userId}`,
+      GET_BY_STATUS: (status: string) => `/api/admin/bookings/status/${status}`,
+      GET_BY_PAYMENT_STATUS: (paymentStatus: string) =>
+        `/api/admin/bookings/payment-status/${paymentStatus}`,
+      FILTER_DATE_RANGE: "/api/admin/bookings/filter/date-range",
+      UPCOMING_CHECK_INS: "/api/admin/bookings/upcoming/check-ins",
+      UPCOMING_CHECK_OUTS: "/api/admin/bookings/upcoming/check-outs",
+    },
   },
 };
