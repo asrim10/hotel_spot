@@ -84,9 +84,16 @@ export class ReviewController {
     }
   }
 
-  async getReviewsByUserId(req: Request, res: Response, next: NextFunction) {
+  async getMyReviews(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.params.userId;
+      const userId = (req as any).user?.id || (req as any).user?._id;
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized - User not authenticated",
+        });
+      }
 
       if (!mongoose.Types.ObjectId.isValid(userId)) {
         return res.status(400).json({
@@ -100,7 +107,7 @@ export class ReviewController {
       return res.status(200).json({
         success: true,
         data: reviews,
-        message: "User reviews retrieved successfully",
+        message: "Your reviews retrieved successfully",
       });
     } catch (error: any) {
       return res.status(error.statusCode ?? 500).json({
