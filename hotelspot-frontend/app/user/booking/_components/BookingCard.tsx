@@ -1,3 +1,5 @@
+"use client";
+
 import {
   formatDate,
   getImageUrl,
@@ -9,12 +11,11 @@ import {
   Calendar,
   MapPin,
   Users,
-  Download,
   ChevronRight,
   Star,
   Phone,
-  MessageSquare,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface BookingCardProps {
   booking: any;
@@ -27,11 +28,12 @@ export default function BookingCard({
   hotelData,
   onReview,
 }: BookingCardProps) {
+  const router = useRouter();
+
   return (
     <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow">
       <div className="flex flex-col lg:flex-row">
-        {/* Hotel Image */}
-        <div className="lg:w-80 h-48 lg:h-auto flex-shrink-0">
+        <div className="lg:w-80 h-48 lg:h-auto shrink-0">
           <img
             src={getImageUrl(hotelData?.imageUrl || booking.image)}
             alt={hotelData?.hotelName || booking.hotelName}
@@ -39,9 +41,7 @@ export default function BookingCard({
           />
         </div>
 
-        {/* Booking Details */}
         <div className="flex-1 p-6">
-          {/* Top Row: Name + Status + Rating */}
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
@@ -49,9 +49,7 @@ export default function BookingCard({
                   {hotelData?.hotelName || booking.hotelName || "Hotel"}
                 </h3>
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                    booking.status,
-                  )}`}
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}
                 >
                   {getStatusText(booking.status)}
                 </span>
@@ -75,7 +73,6 @@ export default function BookingCard({
             )}
           </div>
 
-          {/* Dates + Guests */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 pb-4 border-b border-gray-700">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
@@ -115,7 +112,6 @@ export default function BookingCard({
             </div>
           </div>
 
-          {/* Bottom Row: Room info + Price + Actions */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="text-sm text-gray-300 mb-1">
@@ -148,30 +144,12 @@ export default function BookingCard({
                   </>
                 )}
 
-                {booking.status === "completed" && (
-                  <>
-                    {!booking.rating && (
-                      <button
-                        onClick={() => onReview(booking)}
-                        className="px-4 py-2 bg-yellow-600 text-yellow-100 border border-yellow-600 rounded-lg hover:bg-yellow-500 flex items-center gap-2"
-                      >
-                        <Star className="w-4 h-4" />
-                        Rate Stay
-                      </button>
-                    )}
-                    <button
-                      onClick={() => onReview(booking)}
-                      className="px-4 py-2 bg-emerald-700 text-emerald-100 border border-emerald-700 rounded-lg hover:bg-emerald-600 flex items-center gap-2"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      <span className="hidden md:inline">Review</span>
-                    </button>
-                  </>
-                )}
-
-                <button className="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-700 flex items-center gap-2 text-gray-100">
-                  <Download className="w-4 h-4" />
-                  <span className="hidden md:inline">Invoice</span>
+                <button
+                  onClick={() => router.push(`/user/review`)}
+                  className="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-700 flex items-center gap-2 text-gray-100"
+                >
+                  <Star className="w-4 h-4 fill-amber-500" />
+                  <span className="hidden md:inline">Review</span>
                 </button>
 
                 <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2">
