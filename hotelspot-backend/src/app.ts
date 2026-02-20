@@ -21,7 +21,7 @@ const app: Application = express();
 const corsOptions = {
   origin: [
     "http://localhost:3000",
-    "http://localhost:3003",
+    "http://localhost:3001",
     "http://localhost:3005",
   ],
   optionsSuccessStatus: 200,

@@ -28,7 +28,6 @@ export class BookingController {
         });
       }
 
-      // ✅ create final booking object with userId
       const bookingData = {
         ...parsedData.data,
         userId: userId.toString(),
@@ -68,21 +67,6 @@ export class BookingController {
         success: true,
         message: "User Bookings Retrieved",
         data: bookings,
-      });
-    } catch (error: any) {
-      return res.status(error.statusCode ?? 500).json({
-        success: false,
-        message: error.message || "Internal Service Error",
-      });
-    }
-  }
-
-  // ❌ USER SHOULD NOT ACCESS THIS (ADMIN ONLY)
-  async getAllBookings(req: Request, res: Response) {
-    try {
-      return res.status(403).json({
-        success: false,
-        message: "Forbidden: Only admin can access all bookings",
       });
     } catch (error: any) {
       return res.status(error.statusCode ?? 500).json({
