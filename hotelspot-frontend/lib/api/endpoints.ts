@@ -24,6 +24,15 @@ export const API = {
     GET_ONE: (favouriteId: string) => `/api/fav/${favouriteId}`,
     DELETE: (favouriteId: string) => `/api/fav/${favouriteId}`,
   },
+  REVIEW: {
+    CREATE: "/api/reviews/",
+    GET_MY: "/api/reviews/me",
+    GET_BY_HOTEL: (hotelId: string) => `/api/reviews/hotel/${hotelId}`,
+    GET_ONE: (reviewId: string) => `/api/reviews/${reviewId}`,
+    UPDATE: (reviewId: string) => `/api/reviews/${reviewId}`,
+    DELETE: (reviewId: string) => `/api/reviews/${reviewId}`,
+  },
+
   ADMIN: {
     USER: {
       CREATE: "/api/admin/users/",
@@ -69,6 +78,15 @@ export const API = {
       FILTER_DATE_RANGE: "/api/admin/bookings/filter/date-range",
       UPCOMING_CHECK_INS: "/api/admin/bookings/upcoming/check-ins",
       UPCOMING_CHECK_OUTS: "/api/admin/bookings/upcoming/check-outs",
+    },
+    REVIEW: {
+      GET_ALL: "/api/admin/reviews/",
+      GET_ONE: (reviewId: string) => `/api/admin/reviews/${reviewId}`,
+      GET_BY_USER: (userId: string) => `/api/admin/reviews/user/${userId}`,
+      GET_BY_HOTEL: (hotelId: string) => `/api/admin/reviews/hotel/${hotelId}`,
+      UPDATE: (reviewId: string) => `/api/admin/reviews/${reviewId}`,
+      DELETE: (reviewId: string) => `/api/admin/reviews/${reviewId}`,
+      ANALYTICS_STATS: "/api/admin/reviews/analytics/stats",
     },
   },
 };
