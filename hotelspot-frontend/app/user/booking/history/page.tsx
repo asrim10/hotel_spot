@@ -11,8 +11,7 @@ import BookingTabs from "../_components/BookingTabs";
 import BookingCard from "../_components/BookingCard";
 import EmptyState from "../_components/EmptyState";
 import BookingSummaryStats from "../_components/BookingSummary";
-import ReviewModal from "../_components/ReviewModal";
-import { getLocationString } from "../bookingUtils";
+import { getLocationString } from "@/app/BookingUtils";
 
 export default function BookingHistoryPage() {
   const [activeTab, setActiveTab] = useState("all");
@@ -136,19 +135,6 @@ export default function BookingHistoryPage() {
 
         <BookingSummaryStats bookings={bookings} />
       </div>
-
-      {reviewBooking && (
-        <ReviewModal
-          booking={reviewBooking}
-          hotelName={
-            getHotelData(reviewBooking)?.hotelName ||
-            reviewBooking.hotelName ||
-            "Hotel"
-          }
-          onClose={() => setReviewBooking(null)}
-          onSubmit={handleReviewSubmit}
-        />
-      )}
     </div>
   );
 }

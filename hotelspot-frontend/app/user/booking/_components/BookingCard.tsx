@@ -1,4 +1,11 @@
 import {
+  formatDate,
+  getImageUrl,
+  getLocationString,
+  getStatusColor,
+  getStatusText,
+} from "@/app/BookingUtils";
+import {
   Calendar,
   MapPin,
   Users,
@@ -8,13 +15,6 @@ import {
   Phone,
   MessageSquare,
 } from "lucide-react";
-import {
-  formatDate,
-  getStatusColor,
-  getStatusText,
-  getLocationString,
-  getImageUrl,
-} from "@/app/user/booking/BookingUtils";
 
 interface BookingCardProps {
   booking: any;
