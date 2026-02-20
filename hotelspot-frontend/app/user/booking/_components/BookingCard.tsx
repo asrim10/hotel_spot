@@ -145,7 +145,11 @@ export default function BookingCard({
                 )}
 
                 <button
-                  onClick={() => router.push(`/user/review`)}
+                  onClick={() =>
+                    router.push(
+                      `/user/review?hotelId=${hotelData?._id || booking.hotelId || booking.hotel?._id}`,
+                    )
+                  }
                   className="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-700 flex items-center gap-2 text-gray-100"
                 >
                   <Star className="w-4 h-4 fill-amber-500" />

@@ -7,317 +7,35 @@ import { toast } from "react-toastify";
 import {
   handleCreateReview,
   handleGetMyReviews,
-  handleDeleteReview,
-  handleUpdateReview,
 } from "@/lib/actions/review-action";
 import { useAuth } from "@/app/context/AuthContext";
+import { ReviewCreateData } from "@/app/user/review/schema";
+import { Stars } from "../_components/Stars";
+import { ReviewCard } from "../_components/ReviewCard";
 
-/* ─── Types ─────────────────────────────────────────────── */
 interface ReviewData {
   _id?: string;
   id?: string;
-  hotel?: { hotelName?: string };
+  hotel?: {
+    _id?: string;
+    hotelName?: string;
+    imageUrl?: string;
+    city?: string;
+    country?: string;
+  };
   hotelName?: string;
   rating: number;
-  title: string;
   comment: string;
   createdAt?: string;
 }
 
-/* ─── Star component ─────────────────────────────────────── */
-function Stars({
-  value,
-  onChange,
-  size = 32,
-}: {
-  value: number;
-  onChange?: (v: number) => void;
-  size?: number;
-}) {
-  const [hov, setHov] = useState(0);
-  const labels = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
-  const active = hov || value;
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => onChange?.(s)}
-            onMouseEnter={() => onChange && setHov(s)}
-            onMouseLeave={() => onChange && setHov(0)}
-            style={{ cursor: onChange ? "pointer" : "default" }}
-          >
-            <svg
-              width={size}
-              height={size}
-              viewBox="0 0 24 24"
-              fill={s <= active ? "#c9a96e" : "none"}
-              stroke={s <= active ? "#c9a96e" : "#4b5563"}
-              strokeWidth="1.5"
-            >
-              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
-            </svg>
-          </button>
-        ))}
-      </div>
-      {onChange && active > 0 && (
-        <span
-          style={{
-            color: "#c9a96e",
-            fontSize: 11,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-          }}
-        >
-          {labels[active]}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/* ─── Review Card ────────────────────────────────────────── */
-function ReviewCard({
-  review,
-  onDeleted,
-  onUpdated,
-}: {
-  review: ReviewData;
-  onDeleted: (id: string) => void;
-  onUpdated: (r: ReviewData) => void;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [editRating, setEditRating] = useState(review.rating);
-  const [editTitle, setEditTitle] = useState(review.title);
-  const [editComment, setEditComment] = useState(review.comment);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const id = review._id || review.id || "";
-  const hotel = review.hotel?.hotelName || review.hotelName || "Hotel";
-  const date = review.createdAt
-    ? new Date(review.createdAt).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })
-    : "";
-
-  const save = async () => {
-    setSaving(true);
-    const result = await handleUpdateReview(id, {
-      rating: editRating,
-      comment: editComment,
-    });
-    setSaving(false);
-    if (result.success) {
-      toast.success("Review updated");
-      onUpdated({
-        ...review,
-        rating: editRating,
-        title: editTitle,
-        comment: editComment,
-      });
-      setEditing(false);
-    } else toast.error(result.message);
-  };
-
-  const del = async () => {
-    if (!confirm("Delete this review?")) return;
-    setDeleting(true);
-    const result = await handleDeleteReview(id);
-    setDeleting(false);
-    if (result.success) {
-      toast.success("Deleted");
-      onDeleted(id);
-    } else toast.error(result.message);
-  };
-
-  return (
-    <div
-      style={{
-        borderTop: "1px solid #1f1f1f",
-        padding: "2.5rem 0",
-        display: "grid",
-        gridTemplateColumns: "1fr 2fr",
-        gap: "3rem",
-      }}
-    >
-      {/* Left meta */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-        <p
-          style={{
-            color: "#c9a96e",
-            fontSize: 11,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            margin: 0,
-          }}
-        >
-          {hotel}
-        </p>
-        <Stars
-          value={editing ? editRating : review.rating}
-          onChange={editing ? setEditRating : undefined}
-          size={18}
-        />
-        <p style={{ color: "#4b5563", fontSize: 12, margin: 0 }}>{date}</p>
-
-        {/* Actions */}
-        <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
-          {!editing ? (
-            <>
-              <button
-                onClick={() => setEditing(true)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#6b7280",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  padding: 0,
-                }}
-              >
-                Edit
-              </button>
-              <button
-                onClick={del}
-                disabled={deleting}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#6b7280",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  padding: 0,
-                }}
-              >
-                {deleting ? "..." : "Delete"}
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={save}
-                disabled={saving}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#c9a96e",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  padding: 0,
-                }}
-              >
-                {saving ? "Saving..." : "Save"}
-              </button>
-              <button
-                onClick={() => setEditing(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#6b7280",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  padding: 0,
-                }}
-              >
-                Cancel
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Right content */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-        {editing ? (
-          <>
-            <input
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              style={{
-                background: "transparent",
-                border: "none",
-                borderBottom: "1px solid #333",
-                color: "#fff",
-                fontSize: 20,
-                fontFamily: "inherit",
-                fontWeight: 600,
-                padding: "0.25rem 0",
-                outline: "none",
-                width: "100%",
-              }}
-            />
-            <textarea
-              value={editComment}
-              onChange={(e) => setEditComment(e.target.value)}
-              rows={4}
-              style={{
-                background: "transparent",
-                border: "1px solid #222",
-                borderRadius: 4,
-                color: "#9ca3af",
-                fontSize: 14,
-                fontFamily: "inherit",
-                lineHeight: 1.7,
-                padding: "0.75rem",
-                outline: "none",
-                resize: "none",
-                width: "100%",
-              }}
-            />
-          </>
-        ) : (
-          <>
-            <h3
-              style={{
-                color: "#fff",
-                fontSize: 20,
-                fontWeight: 600,
-                margin: 0,
-              }}
-            >
-              {review.title}
-            </h3>
-            <p
-              style={{
-                color: "#9ca3af",
-                fontSize: 14,
-                lineHeight: 1.8,
-                margin: 0,
-              }}
-            >
-              {review.comment}
-            </p>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ─── Main Page ──────────────────────────────────────────── */
-export default function ReviewsPage() {
+export default function MyReviewsPage() {
   const searchParams = useSearchParams();
   const hotelId = searchParams.get("hotelId") || "";
-  const bookingId = searchParams.get("bookingId") || "";
   const { user } = useAuth();
-
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"write" | "my">(
-    hotelId && bookingId ? "write" : "my",
-  );
+  const [tab, setTab] = useState<"write" | "my">(hotelId ? "write" : "my");
   const [rating, setRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
@@ -327,16 +45,17 @@ export default function ReviewsPage() {
     reset,
     formState: { errors },
   } = useForm({
-    defaultValues: { title: "", comment: "" },
+    defaultValues: { comment: "" },
   });
+
+  const fetchReviews = async () => {
+    const r = await handleGetMyReviews();
+    if (r.success) setReviews(Array.isArray(r.data) ? r.data : []);
+  };
 
   useEffect(() => {
     if (!user) return;
-    handleGetMyReviews()
-      .then((r) => {
-        setReviews(r.success && Array.isArray(r.data) ? r.data : []);
-      })
-      .finally(() => setLoading(false));
+    fetchReviews().finally(() => setLoading(false));
   }, [user]);
 
   const onSubmit = async (data: any) => {
@@ -345,20 +64,19 @@ export default function ReviewsPage() {
       return;
     }
     setSubmitting(true);
-    const result = await handleCreateReview({
-      ...data,
-      rating,
+    const payload: ReviewCreateData = {
       hotelId,
-      bookingId,
-    });
+      rating,
+      comment: data.comment,
+    };
+    const result = await handleCreateReview(payload);
     setSubmitting(false);
     if (result.success) {
       toast.success("Review submitted");
       reset();
       setRating(0);
       setTab("my");
-      const r = await handleGetMyReviews();
-      if (r.success) setReviews(r.data);
+      fetchReviews();
     } else toast.error(result.message);
   };
 
@@ -378,6 +96,53 @@ export default function ReviewsPage() {
     width: "100%",
     letterSpacing: "0.02em",
   };
+
+  if (!user) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#0a0a0a",
+        }}
+      >
+        <p
+          style={{
+            fontSize: 18,
+            color: "#c9a96e",
+            fontFamily: "Georgia, serif",
+          }}
+        >
+          You must be logged in to view your reviews.
+        </p>
+      </div>
+    );
+  }
+
+  if (tab === "write" && !hotelId) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#0a0a0a",
+        }}
+      >
+        <div style={{ textAlign: "center", fontFamily: "Georgia, serif" }}>
+          <h2 style={{ color: "#c9a96e", marginBottom: 16 }}>
+            No Hotel Selected
+          </h2>
+          <p style={{ color: "#aaa" }}>
+            Please select a hotel to write a review.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -399,7 +164,6 @@ export default function ReviewsPage() {
           alignItems: "flex-end",
         }}
       >
-        {/* Background */}
         <div
           style={{
             position: "absolute",
@@ -408,7 +172,6 @@ export default function ReviewsPage() {
               "linear-gradient(135deg, #0d1117 0%, #1a1a0f 40%, #0f0f0f 100%)",
           }}
         />
-        {/* Decorative orbs matching the reference */}
         {[
           { top: "30%", left: "20%" },
           { top: "55%", left: "45%" },
@@ -429,7 +192,6 @@ export default function ReviewsPage() {
             }}
           />
         ))}
-        {/* Gradient overlay */}
         <div
           style={{
             position: "absolute",
@@ -438,7 +200,6 @@ export default function ReviewsPage() {
               "linear-gradient(to top, #0a0a0a 0%, rgba(10,10,10,0.5) 50%, transparent 100%)",
           }}
         />
-        {/* Top-right secondary headline */}
         <div
           style={{
             position: "absolute",
@@ -473,7 +234,6 @@ export default function ReviewsPage() {
             TO US
           </h2>
         </div>
-        {/* Main headline */}
         <div style={{ position: "relative", zIndex: 1, padding: "0 5% 4rem" }}>
           <p
             style={{
@@ -503,12 +263,12 @@ export default function ReviewsPage() {
         </div>
       </div>
 
-      {/* ── STATS BAR ────────────────────────────────────── */}
+      {/* ── STATS ────────────────────────────────────────── */}
       {reviews.length > 0 && (
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: "repeat(3,1fr)",
             borderTop: "1px solid #1a1a1a",
             borderBottom: "1px solid #1a1a1a",
           }}
@@ -520,10 +280,11 @@ export default function ReviewsPage() {
               value: avgRating ? `${avgRating} / 5` : "—",
             },
             {
-              label: "Positive Stays",
-              value: reviews.filter((r) => r.rating >= 4).length,
+              label: "Hotels Reviewed",
+              value: new Set(reviews.map((r) => r.hotel?._id || r.hotelName))
+                .size,
             },
-          ].map((stat, i) => (
+          ].map((s, i) => (
             <div
               key={i}
               style={{
@@ -540,7 +301,7 @@ export default function ReviewsPage() {
                   margin: "0 0 0.5rem",
                 }}
               >
-                {stat.label}
+                {s.label}
               </p>
               <p
                 style={{
@@ -550,7 +311,7 @@ export default function ReviewsPage() {
                   margin: 0,
                 }}
               >
-                {stat.value}
+                {s.value}
               </p>
             </div>
           ))}
@@ -566,7 +327,7 @@ export default function ReviewsPage() {
           gap: "3rem",
         }}
       >
-        {hotelId && bookingId && (
+        {hotelId && (
           <button
             onClick={() => setTab("write")}
             style={{
@@ -580,7 +341,6 @@ export default function ReviewsPage() {
               paddingBottom: "1rem",
               borderBottom:
                 tab === "write" ? "1px solid #c9a96e" : "1px solid transparent",
-              transition: "color 0.2s",
             }}
           >
             Write a Review
@@ -599,7 +359,6 @@ export default function ReviewsPage() {
             paddingBottom: "1rem",
             borderBottom:
               tab === "my" ? "1px solid #c9a96e" : "1px solid transparent",
-            transition: "color 0.2s",
           }}
         >
           My Reviews {reviews.length > 0 && `(${reviews.length})`}
@@ -607,7 +366,7 @@ export default function ReviewsPage() {
       </div>
 
       {/* ── WRITE REVIEW ─────────────────────────────────── */}
-      {tab === "write" && hotelId && bookingId && (
+      {tab === "write" && hotelId && (
         <div style={{ padding: "4rem 5%" }}>
           <div style={{ maxWidth: 720 }}>
             <p
@@ -621,7 +380,6 @@ export default function ReviewsPage() {
             >
               Share Your Experience
             </p>
-
             <form
               onSubmit={handleSubmit(onSubmit)}
               style={{
@@ -630,7 +388,6 @@ export default function ReviewsPage() {
                 gap: "2.5rem",
               }}
             >
-              {/* Rating */}
               <div>
                 <p
                   style={{
@@ -645,36 +402,6 @@ export default function ReviewsPage() {
                 </p>
                 <Stars value={rating} onChange={setRating} size={36} />
               </div>
-
-              {/* Title */}
-              <div>
-                <p
-                  style={{
-                    color: "#6b7280",
-                    fontSize: 11,
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                    marginBottom: "0.75rem",
-                  }}
-                >
-                  Review Title
-                </p>
-                <input
-                  {...register("title", {
-                    required: "Title is required",
-                    minLength: { value: 3, message: "Min 3 characters" },
-                  })}
-                  placeholder="Summarize your stay..."
-                  style={{ ...inputStyle, fontSize: 18 }}
-                />
-                {errors.title && (
-                  <p style={{ color: "#ef4444", fontSize: 12, marginTop: 6 }}>
-                    {errors.title.message as string}
-                  </p>
-                )}
-              </div>
-
-              {/* Comment */}
               <div>
                 <p
                   style={{
@@ -690,7 +417,8 @@ export default function ReviewsPage() {
                 <textarea
                   {...register("comment", {
                     required: "Review is required",
-                    minLength: { value: 10, message: "Min 10 characters" },
+                    minLength: { value: 5, message: "Min 5 characters" },
+                    maxLength: { value: 1000, message: "Max 1000 characters" },
                   })}
                   rows={6}
                   placeholder="Describe your experience in detail..."
@@ -709,8 +437,6 @@ export default function ReviewsPage() {
                   </p>
                 )}
               </div>
-
-              {/* Submit — matches the beige/tan CTA from reference */}
               <div>
                 <button
                   type="submit"
@@ -726,7 +452,6 @@ export default function ReviewsPage() {
                     padding: "1rem 2.5rem",
                     cursor: submitting ? "not-allowed" : "pointer",
                     opacity: submitting ? 0.6 : 1,
-                    transition: "opacity 0.2s",
                   }}
                 >
                   {submitting ? "Submitting..." : "Submit Review"}
@@ -763,11 +488,9 @@ export default function ReviewsPage() {
           >
             MY REVIEWS
           </h2>
-
           {loading ? (
             <p style={{ color: "#4b5563", fontSize: 14 }}>Loading...</p>
           ) : reviews.length === 0 ? (
-            /* Empty state — matches the 3-col principles layout from reference */
             <div
               style={{
                 display: "grid",
@@ -805,9 +528,9 @@ export default function ReviewsPage() {
                   >
                     {
                       [
-                        "Your honest feedback helps us improve and helps fellow travelers make better decisions about their stay.",
-                        "Rate your experience from 1 to 5 stars and tell the world what made your visit memorable.",
-                        "Every review contributes to a community of informed travelers seeking the perfect hotel experience.",
+                        "Your honest feedback helps us improve and helps fellow travelers make better decisions.",
+                        "Rate from 1 to 5 stars and tell the world what made your visit memorable.",
+                        "Every review contributes to a community of informed travelers.",
                       ][i]
                     }
                   </p>
