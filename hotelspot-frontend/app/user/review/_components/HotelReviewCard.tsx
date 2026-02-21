@@ -3,21 +3,25 @@ import { Stars } from "./Stars";
 interface ReviewData {
   _id?: string;
   id?: string;
-  user?: { name?: string; email?: string };
-  userName?: string;
+  userId?: {
+    fullName?: string;
+    email?: string;
+  };
   rating: number;
   comment: string;
   createdAt?: string;
 }
 
 export function HotelReviewCard({ review }: { review: ReviewData }) {
-  const name = review.user?.name || review.userName || "Guest";
+  const name = review.userId?.fullName || review.userId?.email || "Guest";
+
   const initials = name
     .split(" ")
     .map((n: string) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
   const date = review.createdAt
     ? new Date(review.createdAt).toLocaleDateString("en-US", {
         month: "long",
@@ -54,15 +58,24 @@ export function HotelReviewCard({ review }: { review: ReviewData }) {
         >
           {initials}
         </div>
+
         <p style={{ color: "#fff", fontSize: 13, fontWeight: 600, margin: 0 }}>
           {name}
         </p>
+
         <Stars value={review.rating} size={14} />
+
         <p style={{ color: "#4b5563", fontSize: 12, margin: 0 }}>{date}</p>
       </div>
+
       <div>
         <p
-          style={{ color: "#9ca3af", fontSize: 14, lineHeight: 1.8, margin: 0 }}
+          style={{
+            color: "#9ca3af",
+            fontSize: 14,
+            lineHeight: 1.8,
+            margin: 0,
+          }}
         >
           {review.comment}
         </p>

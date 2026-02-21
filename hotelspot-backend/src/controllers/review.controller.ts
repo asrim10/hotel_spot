@@ -8,7 +8,33 @@ const reviewService = new ReviewService();
 export class ReviewController {
   async createReview(req: Request, res: Response, next: NextFunction) {
     try {
-      const data: CreateReviewDTO = req.body;
+      const user = (req as any).user;
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized - User not authenticated",
+        });
+      }
+
+      const { hotelId, rating, comment } = req.body;
+
+      if (!hotelId || !rating || !comment) {
+        return res.status(400).json({
+          success: false,
+          message: "Hotel ID, rating and comment are required",
+        });
+      }
+
+      const data: CreateReviewDTO = {
+        hotelId,
+        rating,
+        comment,
+        userId: user._id || user.id,
+        fullName: user.fullName,
+        email: user.email,
+      };
+
       const newReview = await reviewService.createReview(data);
 
       return res.status(201).json({

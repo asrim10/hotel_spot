@@ -21,8 +21,14 @@ export const getImageUrl = (
   fallback = "/api/placeholder/300/200",
 ) => {
   if (!imageUrl) return fallback;
-  if (imageUrl.startsWith("http")) return imageUrl;
-  return (process.env.NEXT_PUBLIC_API_BASE_URL || "") + imageUrl;
+
+  if (imageUrl.startsWith("http") || imageUrl.startsWith("https"))
+    return imageUrl;
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  if (imageUrl.startsWith("/uploads")) return `${baseUrl}${imageUrl}`;
+
+  return `${baseUrl}/${imageUrl}`;
 };
 
 export const parseDate = (dateInput: any) => {

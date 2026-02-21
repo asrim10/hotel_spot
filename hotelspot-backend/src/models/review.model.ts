@@ -1,15 +1,27 @@
-import mongoose, { Document, Schema } from "mongoose";
-import { ReviewType } from "../types/review.types";
+import mongoose, { Schema, Document } from "mongoose";
 
-const ReviewSchema: Schema = new Schema<ReviewType>(
+export interface IReview extends Document {
+  userId: mongoose.Types.ObjectId;
+  hotelId: mongoose.Types.ObjectId;
+  fullName: string;
+  email: string;
+  rating: number;
+  comment: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const ReviewSchema = new Schema(
   {
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
 
     hotelId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Hotel",
       required: true,
     },
 
@@ -39,15 +51,7 @@ const ReviewSchema: Schema = new Schema<ReviewType>(
       maxlength: 1000,
     },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
-
-export interface IReview extends ReviewType, Document {
-  _id: mongoose.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export const ReviewModel = mongoose.model<IReview>("Review", ReviewSchema);

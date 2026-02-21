@@ -26,8 +26,13 @@ interface HotelData {
 interface ReviewData {
   _id?: string;
   id?: string;
-  user?: { name?: string; email?: string };
-  userName?: string;
+
+  userId?: {
+    _id?: string;
+    fullName?: string;
+    email?: string;
+  };
+
   rating: number;
   comment: string;
   createdAt?: string;
@@ -35,33 +40,14 @@ interface ReviewData {
 
 export default function HotelReviewsPage() {
   const searchParams = useSearchParams();
-  const hotelId = searchParams.get("hotelId") || "";
   const { user } = useAuth();
 
-  // Fallback for missing hotelId
-  if (!hotelId) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#0a0a0a",
-          color: "#fff",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <h2 style={{ color: "#c9a96e", marginBottom: 16 }}>
-            No Hotel Selected
-          </h2>
-          <p style={{ color: "#aaa" }}>
-            Please select a hotel to view reviews.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const [hotelId, setHotelId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const id = searchParams.get("hotelId");
+    if (id) setHotelId(id);
+  }, [searchParams]);
 
   const [hotel, setHotel] = useState<HotelData | null>(null);
   const [reviews, setReviews] = useState<ReviewData[]>([]);
@@ -123,7 +109,32 @@ export default function HotelReviewsPage() {
     );
   }
 
-  // Fallback for hotel not found
+  // fallback when hotelId is missing
+  if (!hotelId) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#0a0a0a",
+          color: "#fff",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <h2 style={{ color: "#c9a96e", marginBottom: 16 }}>
+            No Hotel Selected
+          </h2>
+          <p style={{ color: "#aaa" }}>
+            Please select a hotel to view reviews.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // fallback for hotel not found
   if (!hotel) {
     return (
       <div
@@ -157,7 +168,7 @@ export default function HotelReviewsPage() {
         fontFamily: "'Georgia', serif",
       }}
     >
-      {/* ── HERO ─────────────────────────────────────────── */}
+      {/*  HERO  */}
       <div
         style={{
           position: "relative",
@@ -247,7 +258,6 @@ export default function HotelReviewsPage() {
                 fontSize: 52,
                 fontWeight: 700,
                 lineHeight: 1,
-
                 margin: "0 0 0.5rem",
               }}
             >
@@ -307,7 +317,7 @@ export default function HotelReviewsPage() {
         </div>
       </div>
 
-      {/* ── HOTEL DETAILS BAR ────────────────────────────── */}
+      {/*  HOTEL DETAILS BAR  */}
       {hotel && (
         <div
           style={{
@@ -358,7 +368,7 @@ export default function HotelReviewsPage() {
         </div>
       )}
 
-      {/* ── DESCRIPTION ──────────────────────────────────── */}
+      {/*  DESCRIPTION  */}
       {hotel?.description && (
         <div
           style={{
@@ -393,7 +403,7 @@ export default function HotelReviewsPage() {
         </div>
       )}
 
-      {/* ── REVIEWS ──────────────────────────────────────── */}
+      {/*  REVIEWS  */}
       <div style={{ padding: "4rem 5%" }}>
         <div
           style={{
@@ -503,7 +513,7 @@ export default function HotelReviewsPage() {
 
       {showModal && hotel && (
         <ReviewModal
-          hotelId={hotelId}
+          hotelId={hotelId!}
           hotelName={hotel.hotelName || "Hotel"}
           onClose={() => setShowModal(false)}
           onSuccess={fetchReviews}

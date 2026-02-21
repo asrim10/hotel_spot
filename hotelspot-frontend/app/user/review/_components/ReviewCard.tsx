@@ -12,8 +12,7 @@ import { ReviewUpdateData } from "@/app/user/review/schema";
 interface ReviewData {
   _id?: string;
   id?: string;
-  hotel?: {
-    _id?: string;
+  hotelId?: {
     hotelName?: string;
     imageUrl?: string;
     city?: string;
@@ -40,11 +39,11 @@ export function ReviewCard({ review, onDeleted, onUpdated }: ReviewCardProps) {
   const [imgError, setImgError] = useState(false);
 
   const id = review._id || review.id || "";
-  const hotel = review.hotel?.hotelName || review.hotelName || "Hotel";
-  const location = [review.hotel?.city, review.hotel?.country]
+  const hotel = review.hotelId?.hotelName || review.hotelName || "Hotel";
+  const location = [review.hotelId?.city, review.hotelId?.country]
     .filter(Boolean)
     .join(", ");
-  const imageUrl = getImageUrl(review.hotel?.imageUrl);
+  const imageUrl = getImageUrl(review.hotelId?.imageUrl);
   const date = review.createdAt
     ? new Date(review.createdAt).toLocaleDateString("en-US", {
         month: "long",
