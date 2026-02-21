@@ -10,14 +10,6 @@ import {
   LogOut,
 } from "lucide-react";
 
-interface StatCard {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-  bgColor: string;
-  textColor: string;
-}
-
 interface BookingStatsProps {
   stats: {
     totalBookings: number;
@@ -30,80 +22,156 @@ interface BookingStatsProps {
   isLoading?: boolean;
 }
 
-export function BookingStats({ stats, isLoading }: BookingStatsProps) {
-  const statCards: StatCard[] = [
-    {
-      label: "Total Bookings",
-      value: stats.totalBookings,
-      icon: <BookOpen className="w-6 h-6" />,
-      bgColor: "bg-blue-500/10",
-      textColor: "text-blue-600",
-    },
-    {
-      label: "Confirmed",
-      value: stats.confirmedBookings,
-      icon: <CheckCircle className="w-6 h-6" />,
-      bgColor: "bg-green-500/10",
-      textColor: "text-green-600",
-    },
-    {
-      label: "Pending",
-      value: stats.pendingBookings,
-      icon: <Clock className="w-6 h-6" />,
-      bgColor: "bg-yellow-500/10",
-      textColor: "text-yellow-600",
-    },
-    {
-      label: "Cancelled",
-      value: stats.cancelledBookings,
-      icon: <XCircle className="w-6 h-6" />,
-      bgColor: "bg-red-500/10",
-      textColor: "text-red-600",
-    },
-    {
-      label: "Checked In",
-      value: stats.checkedInBookings,
-      icon: <LogIn className="w-6 h-6" />,
-      bgColor: "bg-purple-500/10",
-      textColor: "text-purple-600",
-    },
-    {
-      label: "Checked Out",
-      value: stats.checkedOutBookings,
-      icon: <LogOut className="w-6 h-6" />,
-      bgColor: "bg-indigo-500/10",
-      textColor: "text-indigo-600",
-    },
-  ];
+const CARDS = [
+  { key: "totalBookings", label: "Total", Icon: BookOpen, accent: "#c9a96e" },
+  {
+    key: "confirmedBookings",
+    label: "Confirmed",
+    Icon: CheckCircle,
+    accent: "#4ade80",
+  },
+  { key: "pendingBookings", label: "Pending", Icon: Clock, accent: "#facc15" },
+  {
+    key: "cancelledBookings",
+    label: "Cancelled",
+    Icon: XCircle,
+    accent: "#f87171",
+  },
+  {
+    key: "checkedInBookings",
+    label: "Checked In",
+    Icon: LogIn,
+    accent: "#a78bfa",
+  },
+  {
+    key: "checkedOutBookings",
+    label: "Checked Out",
+    Icon: LogOut,
+    accent: "#60a5fa",
+  },
+] as const;
 
+export function BookingStats({ stats, isLoading }: BookingStatsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-      {statCards.map((stat, index) => (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(6, 1fr)",
+        borderTop: "1px solid #1a1a1a",
+        borderLeft: "1px solid #1a1a1a",
+      }}
+    >
+      {CARDS.map(({ key, label, Icon, accent }, i) => (
         <motion.div
-          key={stat.label}
-          initial={{ opacity: 0, y: 20 }}
+          key={label}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
-          whileHover={{ scale: 1.05, y: -5 }}
-          className={`${stat.bgColor} rounded-2xl p-6 border border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-300 hover:shadow-lg`}
+          transition={{ delay: i * 0.06 }}
+          style={{
+            background: "#0d0d0d",
+            borderRight: "1px solid #1a1a1a",
+            borderBottom: "1px solid #1a1a1a",
+            padding: "1.75rem 1.5rem",
+          }}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                {stat.label}
-              </p>
-              <p className={`text-3xl font-bold mt-2 ${stat.textColor}`}>
-                {isLoading ? (
-                  <span className="animate-pulse">--</span>
-                ) : (
-                  stat.value
-                )}
-              </p>
-            </div>
-            <div className={`${stat.textColor} opacity-20`}>{stat.icon}</div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "1.25rem",
+            }}
+          >
+            <p
+              style={{
+                color: "#3a3a3a",
+                fontSize: 9,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                margin: 0,
+                fontFamily: "'Rethink Sans', sans-serif",
+              }}
+            >
+              {label}
+            </p>
+            <Icon size={13} style={{ color: accent, opacity: 0.65 }} />
           </div>
+          <p
+            style={{
+              color: "#fff",
+              fontSize: 34,
+              fontWeight: 700,
+              margin: "0 0 1rem",
+              fontFamily: "'Georgia', serif",
+              lineHeight: 1,
+            }}
+          >
+            {isLoading ? (
+              <span style={{ color: "#2a2a2a" }}>—</span>
+            ) : (
+              stats[key]
+            )}
+          </p>
+          <div
+            style={{ width: 20, height: 2, background: accent, opacity: 0.5 }}
+          />
         </motion.div>
       ))}
     </div>
   );
 }
+
+export const BOOKING_STATUS = {
+  PENDING: "pending",
+  CONFIRMED: "confirmed",
+  CANCELLED: "cancelled",
+  CHECKED_IN: "checked_in",
+  CHECKED_OUT: "checked_out",
+} as const;
+export const PAYMENT_STATUS = {
+  PAID: "paid",
+  UNPAID: "unpaid",
+  REFUNDED: "refunded",
+} as const;
+
+export const getStatusColor = (
+  status: string,
+): "default" | "success" | "warning" | "destructive" => {
+  switch (status?.toLowerCase()) {
+    case "confirmed":
+    case "paid":
+      return "success";
+    case "pending":
+    case "unpaid":
+      return "warning";
+    case "cancelled":
+    case "refunded":
+      return "destructive";
+    default:
+      return "default";
+  }
+};
+
+export const formatDate = (date: string | Date) => {
+  if (!date) return "N/A";
+  try {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "Invalid Date";
+  }
+};
+
+export const calculateDays = (checkIn: string, checkOut: string) => {
+  if (!checkIn || !checkOut) return 0;
+  try {
+    return Math.ceil(
+      (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000,
+    );
+  } catch {
+    return 0;
+  }
+};

@@ -1,17 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
-import DeleteModal from "@/app/_components/DeleteModal";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/app/_components/ui/dialog";
-import { Badge } from "@/app/_components/ui/badge";
 import {
   Eye,
   CheckCircle,
@@ -20,14 +11,14 @@ import {
   LogOut,
   Trash2,
   CreditCard,
+  X,
 } from "lucide-react";
 import {
   formatDate,
   calculateDays,
-  getStatusColor,
   BOOKING_STATUS,
   PAYMENT_STATUS,
-} from "./booking-utils";
+} from "./BookingStats";
 import {
   handleConfirmBookingAdmin,
   handleCancelBookingAdmin,
@@ -52,11 +43,6 @@ interface Booking {
   updatedAt?: string;
 }
 
-interface BookingActionsProps {
-  booking: Booking;
-  onActionComplete?: () => void;
-}
-
 type ActionType =
   | "confirm"
   | "cancel"
@@ -65,88 +51,188 @@ type ActionType =
   | "delete"
   | null;
 
+const ACTION_MESSAGES: Record<string, string> = {
+  confirm: "Booking confirmed successfully",
+  cancel: "Booking cancelled successfully",
+  checkin: "Checked in successfully",
+  checkout: "Checked out successfully",
+  delete: "Booking deleted",
+};
+
+// ── Dark modal wrapper ──────────────────────────────────────────────────────
+
+function DarkModal({
+  open,
+  onClose,
+  title,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        onClick={onClose}
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.8)",
+        }}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        style={{
+          position: "relative",
+          background: "#0d0d0d",
+          border: "1px solid #1a1a1a",
+          width: "90%",
+          maxWidth: 640,
+          maxHeight: "90vh",
+          overflowY: "auto",
+          fontFamily: "'Rethink Sans', sans-serif",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "1.5rem 2rem",
+            borderBottom: "1px solid #1a1a1a",
+          }}
+        >
+          <div>
+            <p
+              style={{
+                color: "#c9a96e",
+                fontSize: 9,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                margin: "0 0 0.3rem",
+              }}
+            >
+              Admin
+            </p>
+            <h2
+              style={{
+                color: "#fff",
+                fontSize: 18,
+                fontWeight: 700,
+                margin: 0,
+                fontFamily: "'Georgia', serif",
+                textTransform: "uppercase",
+              }}
+            >
+              {title}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#6b7280",
+              cursor: "pointer",
+              display: "flex",
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <div style={{ padding: "2rem" }}>{children}</div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Icon button ─────────────────────────────────────────────────────────────
+
+function IconBtn({
+  onClick,
+  title,
+  color,
+  children,
+}: {
+  onClick: () => void;
+  title: string;
+  color: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={onClick}
+      title={title}
+      style={{
+        background: "none",
+        border: "1px solid #1a1a1a",
+        color,
+        padding: "0.4rem",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "border-color 0.15s",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.borderColor = color)}
+      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#1a1a1a")}
+    >
+      {children}
+    </motion.button>
+  );
+}
+
+const infoLabel: React.CSSProperties = {
+  color: "#c9a96e",
+  fontSize: 9,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  margin: "0 0 0.4rem",
+  display: "block",
+};
+const infoValue: React.CSSProperties = {
+  color: "#fff",
+  fontSize: 14,
+  fontWeight: 600,
+  margin: 0,
+};
+const infoSub: React.CSSProperties = {
+  color: "#6b7280",
+  fontSize: 12,
+  margin: 0,
+};
+
 export function BookingActions({
   booking,
   onActionComplete,
-}: BookingActionsProps) {
+}: {
+  booking: Booking;
+  onActionComplete?: () => void;
+}) {
   const [showDetails, setShowDetails] = useState(false);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
   const [confirmAction, setConfirmAction] = useState<ActionType>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(
     booking.paymentStatus || PAYMENT_STATUS.UNPAID,
   );
-
-  const getActionMessage = (action: ActionType | null) => {
-    const messages: Record<string, string> = {
-      confirm: "Booking confirmed successfully",
-      cancel: "Booking cancelled successfully",
-      checkin: "Booking checked in successfully",
-      checkout: "Booking checked out successfully",
-      delete: "Booking deleted successfully",
-    };
-    return action ? messages[action] : "";
-  };
-
-  const handleAction = async () => {
-    setIsLoading(true);
-    try {
-      let response;
-
-      switch (confirmAction) {
-        case "confirm":
-          response = await handleConfirmBookingAdmin(booking._id);
-          break;
-        case "cancel":
-          response = await handleCancelBookingAdmin(booking._id);
-          break;
-        case "checkin":
-          response = await handleCheckInBookingAdmin(booking._id);
-          break;
-        case "checkout":
-          response = await handleCheckOutBookingAdmin(booking._id);
-          break;
-        case "delete":
-          response = await handleDeleteBookingAdmin(booking._id);
-          break;
-        default:
-          return;
-      }
-
-      if (response?.success) {
-        toast.success(getActionMessage(confirmAction));
-        onActionComplete?.();
-      } else {
-        toast.error(response?.message || "Something went wrong");
-      }
-    } catch (error) {
-      toast.error("An error occurred");
-    } finally {
-      setIsLoading(false);
-      setConfirmAction(null);
-    }
-  };
-
-  const handlePaymentStatusUpdate = async () => {
-    setIsLoading(true);
-    try {
-      const response = await handleUpdatePaymentStatusAdmin(
-        booking._id,
-        paymentStatus,
-      );
-      if (response?.success) {
-        toast.success("Payment status updated successfully");
-        setShowPaymentDialog(false);
-        onActionComplete?.();
-      } else {
-        toast.error(response?.message || "Failed to update payment status");
-      }
-    } catch (error) {
-      toast.error("An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const canConfirm = booking.status === BOOKING_STATUS.PENDING;
   const canCancel = [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED].includes(
@@ -155,277 +241,402 @@ export function BookingActions({
   const canCheckIn = booking.status === BOOKING_STATUS.CONFIRMED;
   const canCheckOut = booking.status === "checked_in";
 
+  const handleAction = async () => {
+    setIsLoading(true);
+    try {
+      const map: Record<string, () => Promise<any>> = {
+        confirm: () => handleConfirmBookingAdmin(booking._id),
+        cancel: () => handleCancelBookingAdmin(booking._id),
+        checkin: () => handleCheckInBookingAdmin(booking._id),
+        checkout: () => handleCheckOutBookingAdmin(booking._id),
+        delete: () => handleDeleteBookingAdmin(booking._id),
+      };
+      const res = await map[confirmAction!]?.();
+      if (res?.success) {
+        toast.success(ACTION_MESSAGES[confirmAction!]);
+        onActionComplete?.();
+      } else toast.error(res?.message || "Something went wrong");
+    } catch {
+      toast.error("An error occurred");
+    } finally {
+      setIsLoading(false);
+      setConfirmAction(null);
+    }
+  };
+
+  const handlePaymentUpdate = async () => {
+    setIsLoading(true);
+    try {
+      const res = await handleUpdatePaymentStatusAdmin(
+        booking._id,
+        paymentStatus,
+      );
+      if (res?.success) {
+        toast.success("Payment status updated");
+        setShowPayment(false);
+        onActionComplete?.();
+      } else toast.error(res?.message || "Failed to update");
+    } catch {
+      toast.error("An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const btnStyle: React.CSSProperties = {
+    background: "#111",
+    border: "1px solid #2a2a2a",
+    color: "#9ca3af",
+    fontSize: 11,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    padding: "0.6rem 1.25rem",
+    cursor: "pointer",
+    fontFamily: "'Rethink Sans', sans-serif",
+  };
+  const selStyle: React.CSSProperties = {
+    width: "100%",
+    background: "#111",
+    border: "1px solid #2a2a2a",
+    color: "#fff",
+    fontSize: 13,
+    padding: "0.75rem 1rem",
+    outline: "none",
+    fontFamily: "'Rethink Sans', sans-serif",
+    cursor: "pointer",
+    marginTop: "0.5rem",
+  };
+
   return (
     <>
-      {/* Action Buttons */}
-      <div className="flex gap-2 flex-wrap">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+        <IconBtn
           onClick={() => setShowDetails(true)}
-          className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-          title="View Details"
+          title="View"
+          color="#60a5fa"
         >
-          <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-        </motion.button>
-
+          <Eye size={13} />
+        </IconBtn>
         {canConfirm && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <IconBtn
             onClick={() => setConfirmAction("confirm")}
-            className="p-2 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors"
-            title="Confirm Booking"
+            title="Confirm"
+            color="#4ade80"
           >
-            <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
-          </motion.button>
+            <CheckCircle size={13} />
+          </IconBtn>
         )}
-
         {canCancel && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <IconBtn
             onClick={() => setConfirmAction("cancel")}
-            className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-            title="Cancel Booking"
+            title="Cancel"
+            color="#f87171"
           >
-            <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-          </motion.button>
+            <XCircle size={13} />
+          </IconBtn>
         )}
-
         {canCheckIn && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <IconBtn
             onClick={() => setConfirmAction("checkin")}
-            className="p-2 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
             title="Check In"
+            color="#a78bfa"
           >
-            <LogIn className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-          </motion.button>
+            <LogIn size={13} />
+          </IconBtn>
         )}
-
         {canCheckOut && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <IconBtn
             onClick={() => setConfirmAction("checkout")}
-            className="p-2 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
             title="Check Out"
+            color="#60a5fa"
           >
-            <LogOut className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          </motion.button>
+            <LogOut size={13} />
+          </IconBtn>
         )}
-
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowPaymentDialog(true)}
-          className="p-2 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
-          title="Update Payment"
+        <IconBtn
+          onClick={() => setShowPayment(true)}
+          title="Payment"
+          color="#c9a96e"
         >
-          <CreditCard className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-        </motion.button>
-
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          <CreditCard size={13} />
+        </IconBtn>
+        <IconBtn
           onClick={() => setConfirmAction("delete")}
-          className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-          title="Delete Booking"
+          title="Delete"
+          color="#f87171"
         >
-          <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-        </motion.button>
+          <Trash2 size={13} />
+        </IconBtn>
       </div>
 
-      {/* Details Dialog */}
-      <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Booking Details</DialogTitle>
-            <DialogDescription>Booking ID: {booking._id}</DialogDescription>
-          </DialogHeader>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6 py-4"
+      {/* Details modal */}
+      <AnimatePresence>
+        {showDetails && (
+          <DarkModal
+            open={showDetails}
+            onClose={() => setShowDetails(false)}
+            title="Booking Details"
           >
-            {/* User Information */}
-            <div className="grid grid-cols-2 gap-4">
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1.5rem",
+              }}
+            >
+              {/* ID */}
               <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  Customer Name
-                </label>
-                <p className="text-lg font-medium mt-1">{booking.fullName}</p>
+                <span style={infoLabel}>Booking ID</span>
+                <code
+                  style={{
+                    ...infoValue,
+                    color: "#c9a96e",
+                    fontFamily: "monospace",
+                    fontSize: 13,
+                  }}
+                >
+                  #{booking._id}
+                </code>
               </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  Email
-                </label>
-                <p className="text-lg font-medium mt-1">{booking.email}</p>
-              </div>
-            </div>
-
-            {/* Hotel Information */}
-            <div>
-              <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                Hotel
-              </label>
-              <p className="text-lg font-medium mt-1">
-                {booking.hotelName || "N/A"}
-              </p>
-            </div>
-
-            {/* Date Range */}
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  Check In
-                </label>
-                <p className="text-lg font-medium mt-1">
-                  {formatDate(booking.checkInDate)}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  Check Out
-                </label>
-                <p className="text-lg font-medium mt-1">
-                  {formatDate(booking.checkOutDate)}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  Total Days
-                </label>
-                <p className="text-lg font-medium mt-1">
-                  {calculateDays(booking.checkInDate, booking.checkOutDate)}{" "}
-                  nights
-                </p>
-              </div>
-            </div>
-
-            {/* Pricing */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-lg p-4">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  Total Price
-                </label>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  Rs. {booking.totalPrice}
-                </p>
-              </div>
-            </div>
-
-            {/* Status Badges */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  Booking Status
-                </label>
-                <div className="mt-2">
-                  <Badge variant={getStatusColor(booking.status)}>
-                    {booking.status?.toUpperCase()}
-                  </Badge>
+              {/* Customer */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "1.5rem",
+                }}
+              >
+                <div>
+                  <span style={infoLabel}>Customer</span>
+                  <p style={infoValue}>{booking.fullName}</p>
+                </div>
+                <div>
+                  <span style={infoLabel}>Email</span>
+                  <p style={infoSub}>{booking.email}</p>
                 </div>
               </div>
+              {/* Hotel */}
               <div>
-                <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  Payment Status
-                </label>
-                <div className="mt-2">
-                  <Badge variant={getStatusColor(booking.paymentStatus || "")}>
-                    {booking.paymentStatus?.toUpperCase() || "N/A"}
-                  </Badge>
+                <span style={infoLabel}>Hotel</span>
+                <p style={infoValue}>{booking.hotelName || "N/A"}</p>
+              </div>
+              {/* Dates */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr 1fr",
+                  gap: "1rem",
+                }}
+              >
+                <div>
+                  <span style={infoLabel}>Check In</span>
+                  <p style={infoValue}>{formatDate(booking.checkInDate)}</p>
+                </div>
+                <div>
+                  <span style={infoLabel}>Check Out</span>
+                  <p style={infoValue}>{formatDate(booking.checkOutDate)}</p>
+                </div>
+                <div>
+                  <span style={infoLabel}>Nights</span>
+                  <p style={infoValue}>
+                    {calculateDays(booking.checkInDate, booking.checkOutDate)}
+                  </p>
                 </div>
               </div>
+              {/* Price */}
+              <div
+                style={{
+                  background: "#111",
+                  border: "1px solid #1a1a1a",
+                  padding: "1.25rem 1.5rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={infoLabel}>Total Price</span>
+                <span
+                  style={{
+                    color: "#c9a96e",
+                    fontSize: 24,
+                    fontWeight: 700,
+                    fontFamily: "'Georgia', serif",
+                  }}
+                >
+                  Rs. {booking.totalPrice.toLocaleString()}
+                </span>
+              </div>
+              {/* Status */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "1rem",
+                }}
+              >
+                <div>
+                  <span style={infoLabel}>Booking Status</span>
+                  <span
+                    style={{
+                      color: "#fff",
+                      fontSize: 12,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                    }}
+                  >
+                    {booking.status?.replace("_", " ")}
+                  </span>
+                </div>
+                <div>
+                  <span style={infoLabel}>Payment Status</span>
+                  <span
+                    style={{
+                      color: "#fff",
+                      fontSize: 12,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                    }}
+                  >
+                    {booking.paymentStatus || "N/A"}
+                  </span>
+                </div>
+              </div>
+              {/* Created */}
+              <div>
+                <span style={infoLabel}>Created</span>
+                <p style={infoSub}>{formatDate(booking.createdAt)}</p>
+              </div>
             </div>
+          </DarkModal>
+        )}
+      </AnimatePresence>
 
-            {/* Timeline */}
-            <div>
-              <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                Created Date
-              </label>
-              <p className="text-lg font-medium mt-1">
-                {formatDate(booking.createdAt)}
+      {/* Payment modal */}
+      <AnimatePresence>
+        {showPayment && (
+          <DarkModal
+            open={showPayment}
+            onClose={() => setShowPayment(false)}
+            title="Update Payment"
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1.5rem",
+              }}
+            >
+              <div>
+                <span style={infoLabel}>Payment Status</span>
+                <select
+                  value={paymentStatus}
+                  onChange={(e) => setPaymentStatus(e.target.value)}
+                  style={selStyle}
+                >
+                  <option value="">Select status</option>
+                  <option value={PAYMENT_STATUS.UNPAID}>Unpaid</option>
+                  <option value={PAYMENT_STATUS.PAID}>Paid</option>
+                  <option value={PAYMENT_STATUS.REFUNDED}>Refunded</option>
+                </select>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: "0.75rem",
+                }}
+              >
+                <button onClick={() => setShowPayment(false)} style={btnStyle}>
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePaymentUpdate}
+                  disabled={isLoading}
+                  style={{
+                    ...btnStyle,
+                    background: "#c9a96e",
+                    color: "#0a0a0a",
+                    fontWeight: 700,
+                    borderColor: "#c9a96e",
+                    opacity: isLoading ? 0.6 : 1,
+                  }}
+                >
+                  {isLoading ? "Updating..." : "Update"}
+                </button>
+              </div>
+            </div>
+          </DarkModal>
+        )}
+      </AnimatePresence>
+
+      {/* Confirm action modal */}
+      <AnimatePresence>
+        {confirmAction && (
+          <DarkModal
+            open={!!confirmAction}
+            onClose={() => setConfirmAction(null)}
+            title={
+              confirmAction === "delete"
+                ? "Delete Booking"
+                : confirmAction === "confirm"
+                  ? "Confirm Booking"
+                  : confirmAction === "cancel"
+                    ? "Cancel Booking"
+                    : confirmAction === "checkin"
+                      ? "Check In"
+                      : "Check Out"
+            }
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1.5rem",
+              }}
+            >
+              <p
+                style={{
+                  color: "#9ca3af",
+                  fontSize: 14,
+                  margin: 0,
+                  lineHeight: 1.7,
+                }}
+              >
+                {confirmAction === "delete"
+                  ? "This action cannot be undone. The booking will be permanently deleted."
+                  : `Are you sure you want to ${confirmAction === "confirm" ? "confirm" : confirmAction === "cancel" ? "cancel" : confirmAction === "checkin" ? "check in" : "check out"} this booking?`}
               </p>
-            </div>
-          </motion.div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Payment Status Dialog */}
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update Payment Status</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div>
-              <label className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                Payment Status
-              </label>
-              <select
-                value={paymentStatus}
-                onChange={(e) => setPaymentStatus(e.target.value)}
-                className="w-full mt-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:border-blue-400 dark:focus:ring-blue-400/20 transition-colors cursor-pointer"
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: "0.75rem",
+                }}
               >
-                <option value="">Select Payment Status</option>
-                <option value={PAYMENT_STATUS.UNPAID}>Unpaid</option>
-                <option value={PAYMENT_STATUS.PAID}>Paid</option>
-                <option value={PAYMENT_STATUS.REFUNDED}>Refunded</option>
-              </select>
+                <button onClick={() => setConfirmAction(null)} style={btnStyle}>
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAction}
+                  disabled={isLoading}
+                  style={{
+                    ...btnStyle,
+                    background:
+                      confirmAction === "delete" ? "#7f1d1d" : "#c9a96e",
+                    color: confirmAction === "delete" ? "#fff" : "#0a0a0a",
+                    fontWeight: 700,
+                    borderColor:
+                      confirmAction === "delete" ? "#7f1d1d" : "#c9a96e",
+                    opacity: isLoading ? 0.6 : 1,
+                  }}
+                >
+                  {isLoading ? "Processing..." : "Confirm"}
+                </button>
+              </div>
             </div>
-
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setShowPaymentDialog(false)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePaymentStatusUpdate}
-                disabled={isLoading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {isLoading ? "Updating..." : "Update"}
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Confirmation Modal */}
-      <DeleteModal
-        isOpen={confirmAction !== null}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={handleAction}
-        title={
-          confirmAction === "delete"
-            ? "Delete Booking"
-            : confirmAction === "confirm"
-              ? "Confirm Booking"
-              : confirmAction === "cancel"
-                ? "Cancel Booking"
-                : confirmAction === "checkin"
-                  ? "Check In Booking"
-                  : "Check Out Booking"
-        }
-        description={
-          confirmAction === "confirm"
-            ? "Are you sure you want to confirm this booking?"
-            : confirmAction === "cancel"
-              ? "Are you sure you want to cancel this booking?"
-              : confirmAction === "checkin"
-                ? "Are you sure you want to check in this booking?"
-                : confirmAction === "checkout"
-                  ? "Are you sure you want to check out this booking?"
-                  : "This action cannot be undone. Are you sure you want to delete this booking?"
-        }
-      />
+          </DarkModal>
+        )}
+      </AnimatePresence>
     </>
   );
 }
