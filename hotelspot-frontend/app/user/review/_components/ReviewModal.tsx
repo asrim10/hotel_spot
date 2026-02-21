@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -24,9 +26,7 @@ export function ReviewModal({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    defaultValues: { comment: "" },
-  });
+  } = useForm({ defaultValues: { comment: "" } });
 
   const onSubmit = async (data: any) => {
     if (rating === 0) {
@@ -50,101 +50,40 @@ export function ReviewModal({
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 50,
-        background: "rgba(0,0,0,0.85)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1rem",
-      }}
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div
-        style={{
-          background: "#0f0f0f",
-          border: "1px solid #1f1f1f",
-          maxWidth: 520,
-          width: "100%",
-          padding: "3rem",
-          position: "relative",
-        }}
+        className="bg-[#0f0f0f] border border-[#1f1f1f] max-w-lg w-full p-12 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          style={{
-            position: "absolute",
-            top: "1.5rem",
-            right: "1.5rem",
-            background: "none",
-            border: "none",
-            color: "#4b5563",
-            cursor: "pointer",
-            fontSize: 20,
-          }}
+          className="absolute top-6 right-6 text-[#4b5563] hover:text-white transition-colors text-xl bg-transparent border-none cursor-pointer"
         >
           ✕
         </button>
 
-        <p
-          style={{
-            color: "#c9a96e",
-            fontSize: 11,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            margin: "0 0 0.5rem",
-          }}
-        >
+        <p className="text-[#c9a96e] text-[11px] tracking-[0.2em] uppercase mb-2">
           Guest Review
         </p>
         <h2
-          style={{
-            color: "#fff",
-            fontSize: 22,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            margin: "0 0 0.5rem",
-          }}
+          className="text-white text-[22px] font-bold uppercase mb-2"
+          style={{ fontFamily: "'Georgia', serif" }}
         >
           Rate Your Stay
         </h2>
-        <p style={{ color: "#4b5563", fontSize: 13, margin: "0 0 2.5rem" }}>
-          {hotelName}
-        </p>
+        <p className="text-[#4b5563] text-sm mb-10">{hotelName}</p>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          style={{ display: "flex", flexDirection: "column", gap: "2rem" }}
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
           <div>
-            <p
-              style={{
-                color: "#6b7280",
-                fontSize: 11,
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                margin: "0 0 0.75rem",
-              }}
-            >
+            <p className="text-[#6b7280] text-[11px] tracking-[0.15em] uppercase mb-3">
               Your Rating
             </p>
             <Stars value={rating} onChange={setRating} size={32} />
           </div>
-
           <div>
-            <p
-              style={{
-                color: "#6b7280",
-                fontSize: 11,
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                margin: "0 0 0.5rem",
-              }}
-            >
+            <p className="text-[#6b7280] text-[11px] tracking-[0.15em] uppercase mb-2">
               Your Review
             </p>
             <textarea
@@ -155,42 +94,18 @@ export function ReviewModal({
               })}
               rows={5}
               placeholder="Share the details of your stay..."
-              style={{
-                background: "transparent",
-                border: "1px solid #1f1f1f",
-                color: "#9ca3af",
-                fontSize: 13,
-                fontFamily: "inherit",
-                lineHeight: 1.8,
-                padding: "0.75rem",
-                outline: "none",
-                resize: "none",
-                width: "100%",
-              }}
+              className="w-full bg-transparent border border-[#1f1f1f] text-[#9ca3af] text-sm leading-relaxed p-3 outline-none resize-none focus:border-[#c9a96e] transition-colors"
             />
             {errors.comment && (
-              <p style={{ color: "#ef4444", fontSize: 11, marginTop: 4 }}>
+              <p className="text-[#ef4444] text-[11px] mt-1">
                 {errors.comment.message as string}
               </p>
             )}
           </div>
-
           <button
             type="submit"
             disabled={submitting}
-            style={{
-              background: "#c9a96e",
-              border: "none",
-              color: "#0a0a0a",
-              fontSize: 11,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              fontWeight: 700,
-              padding: "1rem 2rem",
-              cursor: submitting ? "not-allowed" : "pointer",
-              opacity: submitting ? 0.6 : 1,
-              alignSelf: "flex-start",
-            }}
+            className="self-start bg-[#c9a96e] text-[#0a0a0a] text-[11px] tracking-[0.2em] uppercase font-bold px-10 py-4 cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed border-none"
           >
             {submitting ? "Submitting..." : "Submit Review"}
           </button>

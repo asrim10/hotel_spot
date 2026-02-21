@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { Stars } from "./Stars";
 import { getImageUrl } from "./utils";
@@ -24,13 +25,15 @@ interface ReviewData {
   createdAt?: string;
 }
 
-interface ReviewCardProps {
+export function ReviewCard({
+  review,
+  onDeleted,
+  onUpdated,
+}: {
   review: ReviewData;
   onDeleted: (id: string) => void;
   onUpdated: (r: ReviewData) => void;
-}
-
-export function ReviewCard({ review, onDeleted, onUpdated }: ReviewCardProps) {
+}) {
   const [editing, setEditing] = useState(false);
   const [editRating, setEditRating] = useState(review.rating);
   const [editComment, setEditComment] = useState(review.comment);
@@ -54,8 +57,10 @@ export function ReviewCard({ review, onDeleted, onUpdated }: ReviewCardProps) {
 
   const save = async () => {
     setSaving(true);
-    const data: ReviewUpdateData = { rating: editRating, comment: editComment };
-    const result = await handleUpdateReview(id, data);
+    const result = await handleUpdateReview(id, {
+      rating: editRating,
+      comment: editComment,
+    } as ReviewUpdateData);
     setSaving(false);
     if (result.success) {
       toast.success("Review updated");
@@ -75,119 +80,66 @@ export function ReviewCard({ review, onDeleted, onUpdated }: ReviewCardProps) {
     } else toast.error(result.message);
   };
 
+  const actionBtnCls =
+    "bg-transparent border-none text-[11px] tracking-[0.1em] uppercase p-0 cursor-pointer transition-colors";
+
   return (
-    <div style={{ borderTop: "1px solid #1f1f1f", padding: "2.5rem 0" }}>
-      {/* Hotel image + meta header */}
+    <div className="border-t border-[#1f1f1f] py-10">
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "180px 1fr",
-          gap: "2rem",
-          marginBottom: "1.5rem",
-        }}
+        className="grid gap-8 mb-6"
+        style={{ gridTemplateColumns: "180px 1fr" }}
       >
-        <div
-          style={{
-            height: 110,
-            overflow: "hidden",
-            background: "#111",
-            flexShrink: 0,
-          }}
-        >
+        <div className="h-27.5 overflow-hidden bg-[#111] shrink-0">
           {imageUrl && !imgError ? (
             <img
               src={imageUrl}
               alt={hotel}
               onError={() => setImgError(true)}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              className="w-full h-full object-cover"
             />
           ) : (
             <div
-              style={{
-                width: "100%",
-                height: "100%",
-                background: "linear-gradient(135deg, #1a1a0f, #111)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              className="w-full h-full flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #1a1a0f, #111)" }}
             >
-              <span style={{ color: "#2a2a2a", fontSize: 28 }}>⌂</span>
+              <span className="text-[#2a2a2a] text-3xl">⌂</span>
             </div>
           )}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            gap: "0.4rem",
-          }}
-        >
+        <div className="flex flex-col justify-center gap-1.5">
           {location && (
-            <p
-              style={{
-                color: "#c9a96e",
-                fontSize: 11,
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                margin: 0,
-              }}
-            >
+            <p className="text-[#c9a96e] text-[11px] tracking-[0.15em] uppercase m-0">
               {location}
             </p>
           )}
           <h3
-            style={{
-              color: "#fff",
-              fontSize: 18,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              margin: 0,
-            }}
+            className="text-white text-lg font-bold uppercase m-0"
+            style={{ fontFamily: "'Georgia', serif" }}
           >
             {hotel}
           </h3>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div className="flex items-center gap-4">
             <Stars
               value={editing ? editRating : review.rating}
               onChange={editing ? setEditRating : undefined}
               size={15}
             />
-            <p style={{ color: "#4b5563", fontSize: 12, margin: 0 }}>{date}</p>
+            <p className="text-[#4b5563] text-xs m-0">{date}</p>
           </div>
-          <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
+          <div className="flex gap-4 mt-1">
             {!editing ? (
               <>
                 <button
                   onClick={() => setEditing(true)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#6b7280",
-                    cursor: "pointer",
-                    fontSize: 11,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: 0,
-                  }}
+                  className={`${actionBtnCls} text-[#6b7280] hover:text-white`}
                 >
                   Edit
                 </button>
                 <button
                   onClick={del}
                   disabled={deleting}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#6b7280",
-                    cursor: "pointer",
-                    fontSize: 11,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: 0,
-                  }}
+                  className={`${actionBtnCls} text-[#6b7280] hover:text-[#f87171] disabled:opacity-50`}
                 >
                   {deleting ? "..." : "Delete"}
                 </button>
@@ -197,31 +149,13 @@ export function ReviewCard({ review, onDeleted, onUpdated }: ReviewCardProps) {
                 <button
                   onClick={save}
                   disabled={saving}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#c9a96e",
-                    cursor: "pointer",
-                    fontSize: 11,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: 0,
-                  }}
+                  className={`${actionBtnCls} text-[#c9a96e] hover:opacity-70 disabled:opacity-50`}
                 >
                   {saving ? "Saving..." : "Save"}
                 </button>
                 <button
                   onClick={() => setEditing(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#6b7280",
-                    cursor: "pointer",
-                    fontSize: 11,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: 0,
-                  }}
+                  className={`${actionBtnCls} text-[#6b7280] hover:text-white`}
                 >
                   Cancel
                 </button>
@@ -231,35 +165,16 @@ export function ReviewCard({ review, onDeleted, onUpdated }: ReviewCardProps) {
         </div>
       </div>
 
-      {/* Comment content */}
       <div style={{ paddingLeft: "calc(180px + 2rem)" }}>
         {editing ? (
           <textarea
             value={editComment}
             onChange={(e) => setEditComment(e.target.value)}
             rows={4}
-            style={{
-              background: "transparent",
-              border: "1px solid #222",
-              color: "#9ca3af",
-              fontSize: 14,
-              fontFamily: "inherit",
-              lineHeight: 1.7,
-              padding: "0.75rem",
-              outline: "none",
-              resize: "none",
-              width: "100%",
-            }}
+            className="w-full bg-transparent border border-[#222] text-[#9ca3af] text-sm leading-relaxed p-3 outline-none resize-none focus:border-[#c9a96e] transition-colors"
           />
         ) : (
-          <p
-            style={{
-              color: "#9ca3af",
-              fontSize: 14,
-              lineHeight: 1.8,
-              margin: 0,
-            }}
-          >
+          <p className="text-[#9ca3af] text-sm leading-relaxed m-0">
             {review.comment}
           </p>
         )}

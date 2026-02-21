@@ -29,6 +29,28 @@ interface ReviewData {
   createdAt?: string;
 }
 
+const DOTS = [
+  { top: "30%", left: "20%" },
+  { top: "55%", left: "45%" },
+  { top: "25%", right: "30%" },
+  { top: "60%", right: "15%" },
+];
+
+const EMPTY_COLS = [
+  {
+    title: "Share Your Stay",
+    body: "Your honest feedback helps us improve and helps fellow travelers make better decisions.",
+  },
+  {
+    title: "Rate Your Experience",
+    body: "Rate from 1 to 5 stars and tell the world what made your visit memorable.",
+  },
+  {
+    title: "Help Others Choose",
+    body: "Every review contributes to a community of informed travelers.",
+  },
+];
+
 export default function MyReviewsPage() {
   const searchParams = useSearchParams();
   const hotelId = searchParams.get("hotelId") || "";
@@ -44,9 +66,7 @@ export default function MyReviewsPage() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({
-    defaultValues: { comment: "" },
-  });
+  } = useForm({ defaultValues: { comment: "" } });
 
   const fetchReviews = async () => {
     const r = await handleGetMyReviews();
@@ -64,12 +84,11 @@ export default function MyReviewsPage() {
       return;
     }
     setSubmitting(true);
-    const payload: ReviewCreateData = {
+    const result = await handleCreateReview({
       hotelId,
       rating,
       comment: data.comment,
-    };
-    const result = await handleCreateReview(payload);
+    } as ReviewCreateData);
     setSubmitting(false);
     if (result.success) {
       toast.success("Review submitted");
@@ -84,36 +103,12 @@ export default function MyReviewsPage() {
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
-  const inputStyle: React.CSSProperties = {
-    background: "transparent",
-    border: "none",
-    borderBottom: "1px solid #2a2a2a",
-    color: "#fff",
-    fontSize: 15,
-    fontFamily: "inherit",
-    padding: "0.75rem 0",
-    outline: "none",
-    width: "100%",
-    letterSpacing: "0.02em",
-  };
-
   if (!user) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#0a0a0a",
-        }}
-      >
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
         <p
-          style={{
-            fontSize: 18,
-            color: "#c9a96e",
-            fontFamily: "Georgia, serif",
-          }}
+          className="text-[#c9a96e] text-lg"
+          style={{ fontFamily: "Georgia, serif" }}
         >
           You must be logged in to view your reviews.
         </p>
@@ -123,20 +118,10 @@ export default function MyReviewsPage() {
 
   if (tab === "write" && !hotelId) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#0a0a0a",
-        }}
-      >
-        <div style={{ textAlign: "center", fontFamily: "Georgia, serif" }}>
-          <h2 style={{ color: "#c9a96e", marginBottom: 16 }}>
-            No Hotel Selected
-          </h2>
-          <p style={{ color: "#aaa" }}>
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
+        <div className="text-center" style={{ fontFamily: "Georgia, serif" }}>
+          <h2 className="text-[#c9a96e] mb-4">No Hotel Selected</h2>
+          <p className="text-[#aaa]">
             Please select a hotel to write a review.
           </p>
         </div>
@@ -146,116 +131,50 @@ export default function MyReviewsPage() {
 
   return (
     <div
-      style={{
-        minHeight: "100vh",
-        background: "#0a0a0a",
-        color: "#fff",
-        fontFamily: "'Georgia', serif",
-      }}
+      className="min-h-screen bg-[#0a0a0a] text-white"
+      style={{ fontFamily: "'Georgia', serif" }}
     >
-      {/* ── HERO ─────────────────────────────────────────── */}
+      {/* HERO */}
       <div
-        style={{
-          position: "relative",
-          height: "55vh",
-          minHeight: 400,
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "flex-end",
-        }}
+        className="relative flex items-end overflow-hidden"
+        style={{ height: "55vh", minHeight: 400 }}
       >
         <div
+          className="absolute inset-0"
           style={{
-            position: "absolute",
-            inset: 0,
             background:
               "linear-gradient(135deg, #0d1117 0%, #1a1a0f 40%, #0f0f0f 100%)",
           }}
         />
-        {[
-          { top: "30%", left: "20%" },
-          { top: "55%", left: "45%" },
-          { top: "25%", right: "30%" },
-          { top: "60%", right: "15%" },
-        ].map((pos, i) => (
+        {DOTS.map((pos, i) => (
           <div
             key={i}
-            style={{
-              position: "absolute",
-              ...(pos as any),
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "#fff",
-              opacity: 0.6,
-              boxShadow: "0 0 20px 4px rgba(255,255,255,0.3)",
-            }}
+            className="absolute w-2.5 h-2.5 rounded-full bg-white opacity-60"
+            style={{ ...pos, boxShadow: "0 0 20px 4px rgba(255,255,255,0.3)" }}
           />
         ))}
         <div
+          className="absolute inset-0"
           style={{
-            position: "absolute",
-            inset: 0,
             background:
               "linear-gradient(to top, #0a0a0a 0%, rgba(10,10,10,0.5) 50%, transparent 100%)",
           }}
         />
-        <div
-          style={{
-            position: "absolute",
-            top: "28%",
-            right: "8%",
-            textAlign: "right",
-          }}
-        >
-          <p
-            style={{
-              color: "#c9a96e",
-              fontSize: 13,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              margin: "0 0 0.5rem",
-            }}
-          >
+        <div className="absolute top-[28%] right-[8%] text-right">
+          <p className="text-[#c9a96e] text-sm tracking-[0.2em] uppercase mb-2">
             Your Experience
           </p>
-          <h2
-            style={{
-              color: "#fff",
-              fontSize: "clamp(18px,3vw,28px)",
-              fontWeight: 300,
-              lineHeight: 1.3,
-              margin: 0,
-              letterSpacing: "0.05em",
-            }}
-          >
+          <h2 className="text-white text-[clamp(18px,3vw,28px)] font-light leading-snug tracking-[0.05em] m-0">
             MATTERS
             <br />
             TO US
           </h2>
         </div>
-        <div style={{ position: "relative", zIndex: 1, padding: "0 5% 4rem" }}>
-          <p
-            style={{
-              color: "#c9a96e",
-              fontSize: 12,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              margin: "0 0 1rem",
-            }}
-          >
+        <div className="relative z-10 px-[5%] pb-16">
+          <p className="text-[#c9a96e] text-xs tracking-[0.2em] uppercase mb-4">
             Guest Reviews
           </p>
-          <h1
-            style={{
-              fontSize: "clamp(32px,6vw,72px)",
-              fontWeight: 700,
-              lineHeight: 1.05,
-              letterSpacing: "-0.01em",
-              textTransform: "uppercase",
-              margin: 0,
-            }}
-          >
+          <h1 className="text-[clamp(32px,6vw,72px)] font-bold leading-tight uppercase tracking-tight m-0">
             SHARE YOUR
             <br />
             STAY
@@ -263,16 +182,9 @@ export default function MyReviewsPage() {
         </div>
       </div>
 
-      {/* ── STATS ────────────────────────────────────────── */}
+      {/* STATS */}
       {reviews.length > 0 && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3,1fr)",
-            borderTop: "1px solid #1a1a1a",
-            borderBottom: "1px solid #1a1a1a",
-          }}
-        >
+        <div className="grid grid-cols-3 border-t border-b border-[#1a1a1a]">
           {[
             { label: "Total Reviews", value: reviews.length },
             {
@@ -287,131 +199,62 @@ export default function MyReviewsPage() {
           ].map((s, i) => (
             <div
               key={i}
-              style={{
-                padding: "2rem 5%",
-                borderRight: i < 2 ? "1px solid #1a1a1a" : "none",
-              }}
+              className={`px-[5%] py-8 ${i < 2 ? "border-r border-[#1a1a1a]" : ""}`}
             >
-              <p
-                style={{
-                  color: "#c9a96e",
-                  fontSize: 11,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  margin: "0 0 0.5rem",
-                }}
-              >
+              <p className="text-[#c9a96e] text-[11px] tracking-[0.18em] uppercase mb-2">
                 {s.label}
               </p>
-              <p
-                style={{
-                  color: "#fff",
-                  fontSize: 32,
-                  fontWeight: 700,
-                  margin: 0,
-                }}
-              >
-                {s.value}
-              </p>
+              <p className="text-white text-[32px] font-bold m-0">{s.value}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* ── TABS ─────────────────────────────────────────── */}
-      <div
-        style={{
-          padding: "3rem 5% 0",
-          borderBottom: "1px solid #1a1a1a",
-          display: "flex",
-          gap: "3rem",
-        }}
-      >
+      {/* TABS */}
+      <div className="px-[5%] pt-12 pb-0 border-b border-[#1a1a1a] flex gap-12">
         {hotelId && (
           <button
             onClick={() => setTab("write")}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: tab === "write" ? "#c9a96e" : "#4b5563",
-              fontSize: 11,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              paddingBottom: "1rem",
-              borderBottom:
-                tab === "write" ? "1px solid #c9a96e" : "1px solid transparent",
-            }}
+            className={`bg-transparent border-none cursor-pointer text-[11px] tracking-[0.2em] uppercase pb-4 transition-colors border-b ${
+              tab === "write"
+                ? "text-[#c9a96e] border-[#c9a96e]"
+                : "text-[#4b5563] border-transparent"
+            }`}
           >
             Write a Review
           </button>
         )}
         <button
           onClick={() => setTab("my")}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: tab === "my" ? "#c9a96e" : "#4b5563",
-            fontSize: 11,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            paddingBottom: "1rem",
-            borderBottom:
-              tab === "my" ? "1px solid #c9a96e" : "1px solid transparent",
-          }}
+          className={`bg-transparent border-none cursor-pointer text-[11px] tracking-[0.2em] uppercase pb-4 transition-colors border-b ${
+            tab === "my"
+              ? "text-[#c9a96e] border-[#c9a96e]"
+              : "text-[#4b5563] border-transparent"
+          }`}
         >
           My Reviews {reviews.length > 0 && `(${reviews.length})`}
         </button>
       </div>
 
-      {/* ── WRITE REVIEW ─────────────────────────────────── */}
+      {/* WRITE REVIEW */}
       {tab === "write" && hotelId && (
-        <div style={{ padding: "4rem 5%" }}>
-          <div style={{ maxWidth: 720 }}>
-            <p
-              style={{
-                color: "#c9a96e",
-                fontSize: 11,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                marginBottom: "3rem",
-              }}
-            >
+        <div className="px-[5%] py-16">
+          <div className="max-w-2xl">
+            <p className="text-[#c9a96e] text-[11px] tracking-[0.18em] uppercase mb-12">
               Share Your Experience
             </p>
             <form
               onSubmit={handleSubmit(onSubmit)}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "2.5rem",
-              }}
+              className="flex flex-col gap-10"
             >
               <div>
-                <p
-                  style={{
-                    color: "#6b7280",
-                    fontSize: 11,
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                    marginBottom: "1rem",
-                  }}
-                >
+                <p className="text-[#6b7280] text-[11px] tracking-[0.15em] uppercase mb-4">
                   Your Rating
                 </p>
                 <Stars value={rating} onChange={setRating} size={36} />
               </div>
               <div>
-                <p
-                  style={{
-                    color: "#6b7280",
-                    fontSize: 11,
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                    marginBottom: "0.75rem",
-                  }}
-                >
+                <p className="text-[#6b7280] text-[11px] tracking-[0.15em] uppercase mb-3">
                   Your Review
                 </p>
                 <textarea
@@ -422,117 +265,49 @@ export default function MyReviewsPage() {
                   })}
                   rows={6}
                   placeholder="Describe your experience in detail..."
-                  style={{
-                    ...inputStyle,
-                    borderBottom: "none",
-                    border: "1px solid #1f1f1f",
-                    padding: "1rem",
-                    resize: "none",
-                    lineHeight: 1.8,
-                  }}
+                  className="w-full bg-transparent border border-[#1f1f1f] text-[#9ca3af] text-sm leading-relaxed p-4 outline-none resize-none focus:border-[#c9a96e] transition-colors"
                 />
                 {errors.comment && (
-                  <p style={{ color: "#ef4444", fontSize: 12, marginTop: 6 }}>
+                  <p className="text-[#ef4444] text-xs mt-1.5">
                     {errors.comment.message as string}
                   </p>
                 )}
               </div>
-              <div>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  style={{
-                    background: "#c9a96e",
-                    border: "none",
-                    color: "#0a0a0a",
-                    fontSize: 11,
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    fontWeight: 700,
-                    padding: "1rem 2.5rem",
-                    cursor: submitting ? "not-allowed" : "pointer",
-                    opacity: submitting ? 0.6 : 1,
-                  }}
-                >
-                  {submitting ? "Submitting..." : "Submit Review"}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="self-start bg-[#c9a96e] text-[#0a0a0a] text-[11px] tracking-[0.2em] uppercase font-bold px-10 py-4 border-none cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? "Submitting..." : "Submit Review"}
+              </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* ── MY REVIEWS ───────────────────────────────────── */}
+      {/* MY REVIEWS */}
       {tab === "my" && (
-        <div style={{ padding: "4rem 5%" }}>
-          <p
-            style={{
-              color: "#c9a96e",
-              fontSize: 11,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              marginBottom: "1rem",
-            }}
-          >
+        <div className="px-[5%] py-16">
+          <p className="text-[#c9a96e] text-[11px] tracking-[0.18em] uppercase mb-4">
             Your Feedback
           </p>
-          <h2
-            style={{
-              color: "#fff",
-              fontSize: "clamp(24px,4vw,48px)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              marginBottom: "3rem",
-              lineHeight: 1.1,
-            }}
-          >
+          <h2 className="text-white text-[clamp(24px,4vw,48px)] font-bold uppercase mb-12 leading-tight">
             MY REVIEWS
           </h2>
           {loading ? (
-            <p style={{ color: "#4b5563", fontSize: 14 }}>Loading...</p>
+            <p className="text-[#4b5563] text-sm">Loading...</p>
           ) : reviews.length === 0 ? (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3,1fr)",
-                gap: 0,
-                borderTop: "1px solid #1a1a1a",
-              }}
-            >
-              {[
-                "Share Your Stay",
-                "Rate Your Experience",
-                "Help Others Choose",
-              ].map((title, i) => (
+            <div className="grid grid-cols-3 border-t border-[#1a1a1a]">
+              {EMPTY_COLS.map(({ title, body }, i) => (
                 <div
                   key={i}
-                  style={{
-                    padding: "2.5rem 2rem 2.5rem 0",
-                    borderRight: i < 2 ? "1px solid #1a1a1a" : "none",
-                    paddingLeft: i > 0 ? "2rem" : 0,
-                  }}
+                  className={`py-10 ${i > 0 ? "pl-8 border-l border-[#1a1a1a]" : "pr-8"}`}
                 >
-                  <p
-                    style={{
-                      color: "#c9a96e",
-                      fontSize: 11,
-                      letterSpacing: "0.15em",
-                      textTransform: "uppercase",
-                      marginBottom: "1rem",
-                    }}
-                  >
+                  <p className="text-[#c9a96e] text-[11px] tracking-[0.15em] uppercase mb-4">
                     {title}
                   </p>
-                  <p
-                    style={{ color: "#6b7280", fontSize: 13, lineHeight: 1.7 }}
-                  >
-                    {
-                      [
-                        "Your honest feedback helps us improve and helps fellow travelers make better decisions.",
-                        "Rate from 1 to 5 stars and tell the world what made your visit memorable.",
-                        "Every review contributes to a community of informed travelers.",
-                      ][i]
-                    }
+                  <p className="text-[#6b7280] text-sm leading-relaxed">
+                    {body}
                   </p>
                 </div>
               ))}

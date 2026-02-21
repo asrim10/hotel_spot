@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 
 interface StarsProps {
@@ -10,9 +12,10 @@ export function Stars({ value, onChange, size = 24 }: StarsProps) {
   const [hov, setHov] = useState(0);
   const labels = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
   const active = hov || value;
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <div style={{ display: "flex", gap: 3 }}>
+    <div className="flex flex-col gap-1">
+      <div className="flex gap-0.5">
         {[1, 2, 3, 4, 5].map((s) => (
           <button
             key={s}
@@ -20,12 +23,7 @@ export function Stars({ value, onChange, size = 24 }: StarsProps) {
             onClick={() => onChange?.(s)}
             onMouseEnter={() => onChange && setHov(s)}
             onMouseLeave={() => onChange && setHov(0)}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: onChange ? "pointer" : "default",
-            }}
+            className={`bg-transparent border-none p-0 ${onChange ? "cursor-pointer" : "cursor-default"}`}
           >
             <svg
               width={size}
@@ -41,14 +39,7 @@ export function Stars({ value, onChange, size = 24 }: StarsProps) {
         ))}
       </div>
       {onChange && active > 0 && (
-        <span
-          style={{
-            color: "#c9a96e",
-            fontSize: 11,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-          }}
-        >
+        <span className="text-[#c9a96e] text-[11px] tracking-[0.12em] uppercase">
           {labels[active]}
         </span>
       )}
