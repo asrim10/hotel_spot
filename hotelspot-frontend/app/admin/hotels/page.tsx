@@ -10,62 +10,23 @@ export default async function Page() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0a0a0a",
-        fontFamily: "'Rethink Sans', sans-serif",
-      }}
-    >
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700;800&display=swap');`}</style>
-      <div
-        style={{
-          borderBottom: "1px solid #1a1a1a",
-          padding: "3rem 3rem 2.5rem",
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-        }}
-      >
+    <div className="min-h-screen bg-[#0a0a0a] font-[Rethink_Sans]">
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700;800&display=swap'); * { font-family: 'Rethink Sans', sans-serif; }`}</style>
+      <div className="border-b border-[#1a1a1a] px-12 py-12 flex items-end justify-between">
         <div>
-          <p
-            style={{
-              color: "#c9a96e",
-              fontSize: 10,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              margin: "0 0 0.75rem",
-            }}
-          >
+          <p className="text-[#c9a96e] text-[10px] tracking-[0.22em] uppercase mb-3">
             Admin Panel
           </p>
           <h1
-            style={{
-              color: "#fff",
-              fontSize: "clamp(28px, 4vw, 52px)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              margin: 0,
-              lineHeight: 1.05,
-              fontFamily: "'Georgia', serif",
-            }}
+            className="text-white font-bold uppercase leading-tight m-0 text-5xl"
+            style={{ fontFamily: "'Georgia', serif" }}
           >
             Hotels
           </h1>
         </div>
         <Link
           href="/admin/hotels/create"
-          style={{
-            background: "#c9a96e",
-            color: "#0a0a0a",
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            padding: "0.85rem 2rem",
-            textDecoration: "none",
-            display: "inline-block",
-          }}
+          className="bg-[#c9a96e] text-[#0a0a0a] text-[11px] font-bold tracking-[0.18em] uppercase px-8 py-3.5 hover:opacity-90 transition-opacity no-underline"
         >
           + Create Hotel
         </Link>

@@ -10,35 +10,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { X } from "lucide-react";
 
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  background: "#111",
-  border: "1px solid #2a2a2a",
-  color: "#fff",
-  fontSize: 13,
-  padding: "0.85rem 1.25rem",
-  outline: "none",
-  fontFamily: "'Rethink Sans', sans-serif",
-  boxSizing: "border-box",
-  transition: "border-color 0.2s",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  color: "#c9a96e",
-  fontSize: 9,
-  letterSpacing: "0.2em",
-  textTransform: "uppercase",
-  marginBottom: "0.6rem",
-  fontFamily: "'Rethink Sans', sans-serif",
-};
-
-const errorStyle: React.CSSProperties = {
-  color: "#f87171",
-  fontSize: 11,
-  marginTop: "0.4rem",
-  fontFamily: "'Rethink Sans', sans-serif",
-};
+const inputCls =
+  "w-full bg-[#111] border border-[#2a2a2a] text-white text-sm px-5 py-3.5 outline-none focus:border-[#c9a96e] transition-colors placeholder:text-[#3a3a3a] box-border";
+const labelCls =
+  "block text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2.5 pt-3.5";
+const errCls = "text-[#f87171] text-[11px] mt-1.5";
+const rowCls =
+  "grid grid-cols-[1fr_2fr] gap-12 py-8 border-b border-[#1a1a1a] items-start";
 
 export default function CreateHotelForm() {
   const [pending, startTransition] = useTransition();
@@ -62,9 +40,7 @@ export default function CreateHotelForm() {
       const reader = new FileReader();
       reader.onloadend = () => setPreviewImage(reader.result as string);
       reader.readAsDataURL(file);
-    } else {
-      setPreviewImage(null);
-    }
+    } else setPreviewImage(null);
     onChange(file);
   };
 
@@ -89,11 +65,9 @@ export default function CreateHotelForm() {
           formData.append("rating", data.rating.toString());
         if (data.description) formData.append("description", data.description);
         if (data.image) formData.append("image", data.image);
-
         const response = await handleCreateHotel(formData);
         if (!response.success)
           throw new Error(response.message || "Create hotel failed");
-
         reset();
         handleDismissImage();
         toast.success("Hotel created successfully");
@@ -106,98 +80,41 @@ export default function CreateHotelForm() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0a0a0a",
-        fontFamily: "'Rethink Sans', sans-serif",
-      }}
-    >
+    <div className="min-h-screen bg-[#0a0a0a]">
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700;800&display=swap');`}</style>
 
-      <div
-        style={{
-          borderBottom: "1px solid #1a1a1a",
-          padding: "3rem 3rem 2.5rem",
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-        }}
-      >
+      <div className="border-b border-[#1a1a1a] px-12 py-12 flex items-end justify-between">
         <div>
-          <p
-            style={{
-              color: "#c9a96e",
-              fontSize: 10,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              margin: "0 0 0.75rem",
-            }}
-          >
+          <p className="text-[#c9a96e] text-[10px] tracking-[0.22em] uppercase mb-3">
             Admin Panel
           </p>
           <h1
-            style={{
-              color: "#fff",
-              fontSize: "clamp(24px, 3vw, 44px)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              margin: 0,
-              lineHeight: 1.05,
-              fontFamily: "'Georgia', serif",
-            }}
+            className="text-white text-4xl font-bold uppercase leading-tight m-0"
+            style={{ fontFamily: "'Georgia', serif" }}
           >
             Create Hotel
           </h1>
         </div>
         <Link
           href="/admin/hotels"
-          style={{
-            background: "none",
-            border: "1px solid #2a2a2a",
-            color: "#6b7280",
-            fontSize: 11,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            padding: "0.75rem 1.5rem",
-            textDecoration: "none",
-            fontFamily: "'Rethink Sans', sans-serif",
-          }}
+          className="border border-[#2a2a2a] text-[#6b7280] text-[11px] tracking-[0.14em] uppercase px-6 py-3 hover:border-[#3a3a3a] hover:text-[#9ca3af] transition-colors no-underline"
         >
           ← Back
         </Link>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} style={{ padding: "3rem" }}>
-        <div style={{ marginBottom: "3rem" }}>
-          <p
-            style={{
-              color: "#3a3a3a",
-              fontSize: 9,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              margin: "0 0 1.5rem",
-            }}
-          >
+      <form onSubmit={handleSubmit(onSubmit)} className="px-12 py-12">
+        <div className="mb-12">
+          <p className="text-[#3a3a3a] text-[9px] tracking-[0.2em] uppercase mb-6">
             Hotel Image
           </p>
-          <div
-            style={{
-              position: "relative",
-              width: "100%",
-              height: 200,
-              background: "#0d0d0d",
-              border: "1px solid #1a1a1a",
-              overflow: "hidden",
-              marginBottom: "1rem",
-            }}
-          >
+          <div className="relative w-full h-50 bg-[#0d0d0d] border border-[#1a1a1a] overflow-hidden mb-4">
             {previewImage ? (
               <>
                 <img
                   src={previewImage}
                   alt="Preview"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  className="w-full h-full object-cover"
                 />
                 <Controller
                   name="image"
@@ -206,20 +123,7 @@ export default function CreateHotelForm() {
                     <button
                       type="button"
                       onClick={() => handleDismissImage(onChange)}
-                      style={{
-                        position: "absolute",
-                        top: 12,
-                        right: 12,
-                        background: "#0a0a0a",
-                        border: "1px solid #2a2a2a",
-                        color: "#fff",
-                        width: 28,
-                        height: 28,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                      }}
+                      className="absolute top-3 right-3 bg-[#0a0a0a] border border-[#2a2a2a] text-white w-7 h-7 flex items-center justify-center cursor-pointer hover:border-[#3a3a3a] transition-colors"
                     >
                       <X size={12} />
                     </button>
@@ -227,23 +131,8 @@ export default function CreateHotelForm() {
                 />
               </>
             ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <p
-                  style={{
-                    color: "#2a2a2a",
-                    fontSize: 10,
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                  }}
-                >
+              <div className="w-full h-full flex items-center justify-center">
+                <p className="text-[#2a2a2a] text-[10px] tracking-[0.2em] uppercase">
                   No Image Selected
                 </p>
               </div>
@@ -260,32 +149,16 @@ export default function CreateHotelForm() {
                   handleImageChange(e.target.files?.[0], onChange)
                 }
                 accept=".jpg,.jpeg,.png,.webp"
-                style={{
-                  color: "#6b7280",
-                  fontSize: 12,
-                  fontFamily: "'Rethink Sans', sans-serif",
-                }}
+                className="text-[#6b7280] text-xs"
               />
             )}
           />
-          {errors.image && <p style={errorStyle}>{errors.image.message}</p>}
+          {errors.image && <p className={errCls}>{errors.image.message}</p>}
         </div>
 
-        <div style={{ borderTop: "1px solid #1a1a1a" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 2fr",
-              gap: "3rem",
-              padding: "2rem 0",
-              borderBottom: "1px solid #1a1a1a",
-              alignItems: "start",
-            }}
-          >
-            <label
-              style={{ ...labelStyle, paddingTop: "0.9rem" }}
-              htmlFor="hotelName"
-            >
+        <div className="border-t border-[#1a1a1a]">
+          <div className={rowCls}>
+            <label className={labelCls} htmlFor="hotelName">
               Hotel Name
             </label>
             <div>
@@ -294,30 +167,16 @@ export default function CreateHotelForm() {
                 type="text"
                 {...register("hotelName")}
                 placeholder="Grand Plaza Hotel"
-                style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = "#c9a96e")}
-                onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
+                className={inputCls}
               />
               {errors.hotelName?.message && (
-                <p style={errorStyle}>{errors.hotelName.message}</p>
+                <p className={errCls}>{errors.hotelName.message}</p>
               )}
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 2fr",
-              gap: "3rem",
-              padding: "2rem 0",
-              borderBottom: "1px solid #1a1a1a",
-              alignItems: "start",
-            }}
-          >
-            <label
-              style={{ ...labelStyle, paddingTop: "0.9rem" }}
-              htmlFor="address"
-            >
+          <div className={rowCls}>
+            <label className={labelCls} htmlFor="address">
               Address
             </label>
             <div>
@@ -326,48 +185,27 @@ export default function CreateHotelForm() {
                 type="text"
                 {...register("address")}
                 placeholder="123 Main Street"
-                style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = "#c9a96e")}
-                onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
+                className={inputCls}
               />
               {errors.address?.message && (
-                <p style={errorStyle}>{errors.address.message}</p>
+                <p className={errCls}>{errors.address.message}</p>
               )}
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 2fr",
-              gap: "3rem",
-              padding: "2rem 0",
-              borderBottom: "1px solid #1a1a1a",
-              alignItems: "start",
-            }}
-          >
-            <label style={{ ...labelStyle, paddingTop: "0.9rem" }}>
-              City & Country
-            </label>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "1rem",
-              }}
-            >
+          <div className={rowCls}>
+            <label className={labelCls}>City & Country</label>
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <input
                   id="city"
                   type="text"
                   {...register("city")}
                   placeholder="Kathmandu"
-                  style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a96e")}
-                  onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
+                  className={inputCls}
                 />
                 {errors.city?.message && (
-                  <p style={errorStyle}>{errors.city.message}</p>
+                  <p className={errCls}>{errors.city.message}</p>
                 )}
               </div>
               <div>
@@ -376,50 +214,21 @@ export default function CreateHotelForm() {
                   type="text"
                   {...register("country")}
                   placeholder="Nepal"
-                  style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a96e")}
-                  onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
+                  className={inputCls}
                 />
                 {errors.country?.message && (
-                  <p style={errorStyle}>{errors.country.message}</p>
+                  <p className={errCls}>{errors.country.message}</p>
                 )}
               </div>
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 2fr",
-              gap: "3rem",
-              padding: "2rem 0",
-              borderBottom: "1px solid #1a1a1a",
-              alignItems: "start",
-            }}
-          >
-            <label style={{ ...labelStyle, paddingTop: "0.9rem" }}>
-              Price & Rooms
-            </label>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "1rem",
-              }}
-            >
+          <div className={rowCls}>
+            <label className={labelCls}>Price & Rooms</label>
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <div style={{ position: "relative" }}>
-                  <span
-                    style={{
-                      position: "absolute",
-                      left: 14,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: "#c9a96e",
-                      fontSize: 12,
-                      pointerEvents: "none",
-                    }}
-                  >
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#c9a96e] text-xs pointer-events-none">
                     Rs.
                   </span>
                   <input
@@ -428,13 +237,11 @@ export default function CreateHotelForm() {
                     step="0.01"
                     {...register("price", { valueAsNumber: true })}
                     placeholder="5000"
-                    style={{ ...inputStyle, paddingLeft: 44 }}
-                    onFocus={(e) => (e.target.style.borderColor = "#c9a96e")}
-                    onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
+                    className={`${inputCls} pl-11`}
                   />
                 </div>
                 {errors.price?.message && (
-                  <p style={errorStyle}>{errors.price.message}</p>
+                  <p className={errCls}>{errors.price.message}</p>
                 )}
               </div>
               <div>
@@ -443,31 +250,17 @@ export default function CreateHotelForm() {
                   type="number"
                   {...register("availableRooms", { valueAsNumber: true })}
                   placeholder="25"
-                  style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a96e")}
-                  onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
+                  className={inputCls}
                 />
                 {errors.availableRooms?.message && (
-                  <p style={errorStyle}>{errors.availableRooms.message}</p>
+                  <p className={errCls}>{errors.availableRooms.message}</p>
                 )}
               </div>
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 2fr",
-              gap: "3rem",
-              padding: "2rem 0",
-              borderBottom: "1px solid #1a1a1a",
-              alignItems: "start",
-            }}
-          >
-            <label
-              style={{ ...labelStyle, paddingTop: "0.9rem" }}
-              htmlFor="rating"
-            >
+          <div className={rowCls}>
+            <label className={labelCls} htmlFor="rating">
               Rating (0–5)
             </label>
             <div>
@@ -477,30 +270,16 @@ export default function CreateHotelForm() {
                 step="0.1"
                 {...register("rating", { valueAsNumber: true })}
                 placeholder="4.5"
-                style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = "#c9a96e")}
-                onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
+                className={inputCls}
               />
               {errors.rating?.message && (
-                <p style={errorStyle}>{errors.rating.message}</p>
+                <p className={errCls}>{errors.rating.message}</p>
               )}
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 2fr",
-              gap: "3rem",
-              padding: "2rem 0",
-              borderBottom: "1px solid #1a1a1a",
-              alignItems: "start",
-            }}
-          >
-            <label
-              style={{ ...labelStyle, paddingTop: "0.9rem" }}
-              htmlFor="description"
-            >
+          <div className={rowCls}>
+            <label className={labelCls} htmlFor="description">
               Description
             </label>
             <div>
@@ -509,73 +288,32 @@ export default function CreateHotelForm() {
                 rows={4}
                 {...register("description")}
                 placeholder="Describe the hotel amenities, location, and features..."
-                style={{ ...inputStyle, resize: "vertical", lineHeight: 1.7 }}
-                onFocus={(e) => (e.target.style.borderColor = "#c9a96e")}
-                onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
+                className={`${inputCls} resize-y leading-relaxed`}
               />
               {errors.description?.message && (
-                <p style={errorStyle}>{errors.description.message}</p>
+                <p className={errCls}>{errors.description.message}</p>
               )}
             </div>
           </div>
         </div>
 
         {error && (
-          <div
-            style={{
-              margin: "2rem 0",
-              padding: "1rem 1.25rem",
-              border: "1px solid #7f1d1d",
-              background: "#1a0a0a",
-              color: "#f87171",
-              fontSize: 13,
-            }}
-          >
+          <div className="mt-8 px-5 py-4 border border-[#7f1d1d] bg-[#1a0a0a] text-[#f87171] text-sm">
             {error}
           </div>
         )}
 
-        <div
-          style={{
-            marginTop: "3rem",
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "1rem",
-          }}
-        >
+        <div className="mt-12 flex justify-end gap-4">
           <Link
             href="/admin/hotels"
-            style={{
-              background: "none",
-              border: "1px solid #2a2a2a",
-              color: "#6b7280",
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              padding: "0.85rem 1.75rem",
-              textDecoration: "none",
-              display: "inline-block",
-              fontFamily: "'Rethink Sans', sans-serif",
-            }}
+            className="border border-[#2a2a2a] text-[#6b7280] text-[11px] tracking-[0.14em] uppercase px-7 py-3.5 hover:border-[#3a3a3a] hover:text-[#9ca3af] transition-colors no-underline"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSubmitting || pending}
-            style={{
-              background: "#c9a96e",
-              border: "none",
-              color: "#0a0a0a",
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              padding: "0.85rem 2.5rem",
-              cursor: isSubmitting || pending ? "not-allowed" : "pointer",
-              opacity: isSubmitting || pending ? 0.6 : 1,
-              fontFamily: "'Rethink Sans', sans-serif",
-            }}
+            className="bg-[#c9a96e] text-[#0a0a0a] text-[11px] font-bold tracking-[0.18em] uppercase px-10 py-3.5 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border-none"
           >
             {isSubmitting || pending ? "Creating..." : "Create Hotel"}
           </button>

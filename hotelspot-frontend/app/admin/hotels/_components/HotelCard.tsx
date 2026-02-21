@@ -31,125 +31,44 @@ function ConfirmModal({
   onConfirm: () => void;
 }) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        onClick={onClose}
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(0,0,0,0.85)",
-        }}
-      />
+    <div className="fixed inset-0 z-1000 flex items-center justify-center">
+      <div onClick={onClose} className="absolute inset-0 bg-black/85" />
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.96 }}
-        style={{
-          position: "relative",
-          background: "#0d0d0d",
-          border: "1px solid #1a1a1a",
-          width: "90%",
-          maxWidth: 420,
-          padding: "2rem",
-          fontFamily: "'Rethink Sans', sans-serif",
-        }}
+        className="relative bg-[#0d0d0d] border border-[#1a1a1a] w-[90%] max-w-sm p-8"
       >
         <button
           onClick={onClose}
-          style={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            background: "none",
-            border: "none",
-            color: "#6b7280",
-            cursor: "pointer",
-            display: "flex",
-          }}
+          className="absolute top-4 right-4 text-[#6b7280] hover:text-white transition-colors bg-transparent border-none cursor-pointer"
         >
           <X size={16} />
         </button>
-        <p
-          style={{
-            color: "#c9a96e",
-            fontSize: 9,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            margin: "0 0 0.5rem",
-          }}
-        >
+        <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2">
           Confirm Action
         </p>
         <h3
-          style={{
-            color: "#fff",
-            fontSize: 18,
-            fontWeight: 700,
-            fontFamily: "'Georgia', serif",
-            textTransform: "uppercase",
-            margin: "0 0 1rem",
-          }}
+          className="text-white text-lg font-bold uppercase mb-4 m-0"
+          style={{ fontFamily: "'Georgia', serif" }}
         >
           Delete Hotel
         </h3>
-        <p
-          style={{
-            color: "#6b7280",
-            fontSize: 13,
-            lineHeight: 1.7,
-            margin: "0 0 2rem",
-          }}
-        >
+        <p className="text-[#6b7280] text-sm leading-relaxed mb-8">
           Are you sure you want to delete{" "}
-          <strong style={{ color: "#fff" }}>{hotel.hotelName}</strong>? This
-          action cannot be undone.
+          <strong className="text-white">{hotel.hotelName}</strong>? This action
+          cannot be undone.
         </p>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "0.75rem",
-          }}
-        >
+        <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            style={{
-              background: "none",
-              border: "1px solid #2a2a2a",
-              color: "#6b7280",
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              padding: "0.65rem 1.5rem",
-              cursor: "pointer",
-              fontFamily: "'Rethink Sans', sans-serif",
-            }}
+            className="border border-[#2a2a2a] text-[#6b7280] text-[11px] tracking-[0.14em] uppercase px-6 py-2.5 hover:text-white hover:border-[#3a3a3a] transition-colors cursor-pointer bg-transparent"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            style={{
-              background: "#7f1d1d",
-              border: "1px solid #7f1d1d",
-              color: "#fff",
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              padding: "0.65rem 1.5rem",
-              cursor: "pointer",
-              fontFamily: "'Rethink Sans', sans-serif",
-            }}
+            className="bg-[#7f1d1d] border border-[#7f1d1d] text-white text-[11px] font-bold tracking-[0.14em] uppercase px-6 py-2.5 hover:bg-red-900 transition-colors cursor-pointer"
           >
             Delete
           </button>
@@ -183,40 +102,13 @@ export default function HotelCards({ hotels }: { hotels: Hotel[] }) {
 
   if (!hotels || hotels.length === 0) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "8rem 0",
-          borderTop: "1px solid #1a1a1a",
-          fontFamily: "'Rethink Sans', sans-serif",
-        }}
-      >
-        <p
-          style={{
-            color: "#2a2a2a",
-            fontSize: 11,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            margin: "0 0 2rem",
-          }}
-        >
+      <div className="flex flex-col items-center justify-center py-32 border-t border-[#1a1a1a]">
+        <p className="text-[#2a2a2a] text-[11px] tracking-[0.2em] uppercase mb-8">
           No hotels found
         </p>
         <Link
           href="/admin/hotels/create"
-          style={{
-            background: "#c9a96e",
-            color: "#0a0a0a",
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            padding: "0.85rem 2rem",
-            textDecoration: "none",
-          }}
+          className="bg-[#c9a96e] text-[#0a0a0a] text-[11px] font-bold tracking-[0.18em] uppercase px-8 py-3.5 hover:opacity-90 transition-opacity no-underline"
         >
           + Create First Hotel
         </Link>
@@ -225,31 +117,16 @@ export default function HotelCards({ hotels }: { hotels: Hotel[] }) {
   }
 
   return (
-    <div
-      style={{
-        padding: "2.5rem 3rem 4rem",
-        fontFamily: "'Rethink Sans', sans-serif",
-      }}
-    >
-      <p
-        style={{
-          color: "#3a3a3a",
-          fontSize: 9,
-          letterSpacing: "0.2em",
-          textTransform: "uppercase",
-          margin: "0 0 1.5rem",
-        }}
-      >
+    <div className="px-12 py-10 pb-16">
+      <p className="text-[#3a3a3a] text-[9px] tracking-[0.2em] uppercase mb-6">
         {hotels.length} {hotels.length === 1 ? "property" : "properties"}
       </p>
 
       <div
+        className="grid border-t border-l border-[#1a1a1a]"
         style={{
-          display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
           gap: 1,
-          borderTop: "1px solid #1a1a1a",
-          borderLeft: "1px solid #1a1a1a",
         }}
       >
         {hotels.map((hotel, i) => (
@@ -258,274 +135,88 @@ export default function HotelCards({ hotels }: { hotels: Hotel[] }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
-            style={{
-              background: "#0d0d0d",
-              borderRight: "1px solid #1a1a1a",
-              borderBottom: "1px solid #1a1a1a",
-              display: "flex",
-              flexDirection: "column",
-            }}
+            className="bg-[#0d0d0d] border-r border-b border-[#1a1a1a] flex flex-col"
           >
-            <div
-              style={{
-                position: "relative",
-                height: 180,
-                overflow: "hidden",
-                background: "#111",
-                flexShrink: 0,
-              }}
-            >
+            <div className="relative h-45 overflow-hidden bg-[#111] shrink-0">
               {hotel.imageUrl ? (
                 <img
                   src={process.env.NEXT_PUBLIC_API_BASE_URL + hotel.imageUrl}
                   alt={hotel.hotelName}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    transition: "transform 0.4s",
-                    display: "block",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.transform = "scale(1.05)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.transform = "scale(1)")
-                  }
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105 block"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
                 />
               ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <p
-                    style={{
-                      color: "#2a2a2a",
-                      fontSize: 10,
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                    }}
-                  >
+                <div className="w-full h-full flex items-center justify-center">
+                  <p className="text-[#2a2a2a] text-[10px] tracking-[0.2em] uppercase">
                     No Image
                   </p>
                 </div>
               )}
               {hotel.rating !== undefined && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 12,
-                    right: 12,
-                    background: "rgba(10,10,10,0.9)",
-                    border: "1px solid #2a2a2a",
-                    padding: "0.3rem 0.6rem",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.35rem",
-                  }}
-                >
-                  <Star
-                    size={10}
-                    style={{ color: "#c9a96e", fill: "#c9a96e" }}
-                  />
-                  <span
-                    style={{ color: "#c9a96e", fontSize: 11, fontWeight: 700 }}
-                  >
+                <div className="absolute top-3 right-3 bg-[#0a0a0a]/90 border border-[#2a2a2a] px-2.5 py-1 flex items-center gap-1.5">
+                  <Star size={10} className="text-[#c9a96e] fill-[#c9a96e]" />
+                  <span className="text-[#c9a96e] text-[11px] font-bold">
                     {hotel.rating.toFixed(1)}
                   </span>
                 </div>
               )}
             </div>
 
-            <div
-              style={{
-                padding: "1.5rem",
-                display: "flex",
-                flexDirection: "column",
-                flex: 1,
-              }}
-            >
-              <p
-                style={{
-                  color: "#c9a96e",
-                  fontSize: 9,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  margin: "0 0 0.4rem",
-                }}
-              >
+            <div className="p-6 flex flex-col flex-1">
+              <p className="text-[#c9a96e] text-[9px] tracking-[0.18em] uppercase mb-1.5">
                 {hotel.city}, {hotel.country}
               </p>
               <h3
-                style={{
-                  color: "#fff",
-                  fontSize: 15,
-                  fontWeight: 700,
-                  margin: "0 0 0.4rem",
-                  fontFamily: "'Georgia', serif",
-                  lineHeight: 1.2,
-                  textTransform: "uppercase",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
+                className="text-white text-[15px] font-bold mb-1.5 uppercase truncate leading-snug"
+                style={{ fontFamily: "'Georgia', serif" }}
               >
                 {hotel.hotelName}
               </h3>
-              <p
-                style={{
-                  color: "#4b5563",
-                  fontSize: 11,
-                  margin: "0 0 0.875rem",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <p className="text-[#4b5563] text-[11px] mb-3.5 truncate">
                 {hotel.address}
               </p>
               {hotel.description && (
-                <p
-                  style={{
-                    color: "#4b5563",
-                    fontSize: 11,
-                    lineHeight: 1.7,
-                    margin: "0 0 1rem",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical" as any,
-                    overflow: "hidden",
-                  }}
-                >
+                <p className="text-[#4b5563] text-[11px] leading-relaxed mb-4 line-clamp-2">
                   {hotel.description}
                 </p>
               )}
 
-              <div
-                style={{
-                  marginTop: "auto",
-                  paddingTop: "1rem",
-                  borderTop: "1px solid #1a1a1a",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "1rem",
-                  }}
-                >
+              <div className="mt-auto pt-4 border-t border-[#1a1a1a]">
+                <div className="flex items-center justify-between mb-4">
                   <div>
                     <span
-                      style={{
-                        color: "#fff",
-                        fontSize: 19,
-                        fontWeight: 700,
-                        fontFamily: "'Georgia', serif",
-                      }}
+                      className="text-white text-[19px] font-bold"
+                      style={{ fontFamily: "'Georgia', serif" }}
                     >
                       Rs. {hotel.price.toLocaleString()}
                     </span>
-                    <span
-                      style={{ color: "#4b5563", fontSize: 11, marginLeft: 4 }}
-                    >
+                    <span className="text-[#4b5563] text-[11px] ml-1">
                       /night
                     </span>
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <BedDouble size={11} style={{ color: "#4b5563" }} />
-                    <span style={{ color: "#4b5563", fontSize: 11 }}>
+                  <div className="flex items-center gap-1.5">
+                    <BedDouble size={11} className="text-[#4b5563]" />
+                    <span className="text-[#4b5563] text-[11px]">
                       {hotel.availableRooms} rooms
                     </span>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+                <div className="flex gap-2">
                   <Link
                     href={`/admin/hotels/${hotel._id}/edit`}
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.4rem",
-                      border: "1px solid #2a2a2a",
-                      color: "#9ca3af",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      padding: "0.65rem",
-                      textDecoration: "none",
-                      fontFamily: "'Rethink Sans', sans-serif",
-                      transition: "all 0.15s",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "#c9a96e";
-                      (e.currentTarget as HTMLElement).style.color = "#c9a96e";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "#2a2a2a";
-                      (e.currentTarget as HTMLElement).style.color = "#9ca3af";
-                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 border border-[#2a2a2a] text-[#9ca3af] text-[11px] font-semibold tracking-widest uppercase py-2.5 no-underline hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors"
                   >
                     <Pencil size={11} /> Edit
                   </Link>
                   <button
                     onClick={() => setSelectedHotel(hotel)}
                     disabled={deletingId === hotel._id}
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.4rem",
-                      background: "none",
-                      border: "1px solid #2a2a2a",
-                      color: "#9ca3af",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      padding: "0.65rem",
-                      cursor:
-                        deletingId === hotel._id ? "not-allowed" : "pointer",
-                      opacity: deletingId === hotel._id ? 0.5 : 1,
-                      fontFamily: "'Rethink Sans', sans-serif",
-                      transition: "all 0.15s",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (deletingId !== hotel._id) {
-                        (e.currentTarget as HTMLElement).style.borderColor =
-                          "#f87171";
-                        (e.currentTarget as HTMLElement).style.color =
-                          "#f87171";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "#2a2a2a";
-                      (e.currentTarget as HTMLElement).style.color = "#9ca3af";
-                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-transparent border border-[#2a2a2a] text-[#9ca3af] text-[11px] font-semibold tracking-widest uppercase py-2.5 hover:border-[#f87171] hover:text-[#f87171] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Trash2 size={11} />{" "}
+                    <Trash2 size={11} />
                     {deletingId === hotel._id ? "Deleting..." : "Delete"}
                   </button>
                 </div>
