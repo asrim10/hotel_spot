@@ -2,6 +2,8 @@
 
 import { useAuth } from "@/app/context/AuthContext";
 import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
+import { motion } from "framer-motion";
 import HotelCard from "../_components/HotelCard";
 import HotelDetailSidebar from "../_components/HotelDetailSidebar";
 import PopularHotelCard from "../_components/PopularHotelCard";
@@ -23,299 +25,282 @@ interface Hotel {
 }
 
 interface FavoriteMap {
-  [hotelId: string]: string; // hotelId -> favouriteId
+  [hotelId: string]: string;
 }
+
+const FILTERS = [
+  { id: "recommended", label: "Recommended" },
+  { id: "popular", label: "Popular" },
+  { id: "nearest", label: "Nearest" },
+] as const;
+
+type Filter = (typeof FILTERS)[number]["id"];
 
 export default function DashboardPage() {
   const { user } = useAuth();
-
-  const [activeTab, setActiveTab] = useState<"hotels">("hotels");
-
-  const [activeFilter, setActiveFilter] = useState<
-    "recommended" | "popular" | "nearest"
-  >("recommended");
-
+  const [activeFilter, setActiveFilter] = useState<Filter>("recommended");
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
-
-  // Favorites state
   const [favoriteMap, setFavoriteMap] = useState<FavoriteMap>({});
-  const [favoritesLoading, setFavoritesLoading] = useState(false);
 
-  // Debounce search
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 500);
-
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    return () => clearTimeout(t);
   }, [searchQuery]);
 
-  // Fetch hotels
   useEffect(() => {
     fetchHotels();
   }, [debouncedSearch]);
-
-  // Fetch favorites
   useEffect(() => {
-    if (user) {
-      fetchFavorites();
-    }
+    if (user) fetchFavorites();
   }, [user]);
 
   const fetchHotels = async () => {
     setLoading(true);
     try {
-      const response = await handleGetAllHotels("1", "50", debouncedSearch);
-
-      if (response.success) {
-        setHotels(response.data || []);
-
-        if (response.data && response.data.length > 0) {
-          setSelectedHotel(response.data[0]);
-        }
-      } else {
-        toast.error(response.message || "Failed to fetch hotels");
-      }
-    } catch (error: any) {
-      console.error("Fetch hotels error:", error);
-      toast.error(error.message || "Failed to fetch hotels");
+      const res = await handleGetAllHotels("1", "50", debouncedSearch);
+      if (res.success) {
+        setHotels(res.data || []);
+        if (res.data?.length > 0) setSelectedHotel(res.data[0]);
+      } else toast.error(res.message || "Failed to fetch hotels");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to fetch hotels");
     } finally {
       setLoading(false);
     }
   };
 
   const fetchFavorites = async () => {
-    setFavoritesLoading(true);
     try {
-      const response = await handleGetMyFavourites();
-
-      if (response.success && response.data) {
-        // Create a map of hotelId -> favouriteId for quick lookup
-        const favMap: FavoriteMap = {};
-        response.data.forEach((fav: any) => {
-          favMap[fav.hotelId] = fav._id;
+      const res = await handleGetMyFavourites();
+      if (res.success && res.data) {
+        const map: FavoriteMap = {};
+        res.data.forEach((f: any) => {
+          map[f.hotelId] = f._id;
         });
-        setFavoriteMap(favMap);
+        setFavoriteMap(map);
       }
-    } catch (error: any) {
-      console.error("Fetch favorites error:", error);
-    } finally {
-      setFavoritesLoading(false);
-    }
+    } catch {}
   };
 
   const handleFavoriteChange = (hotelId: string, isFavorited: boolean) => {
-    if (isFavorited) {
-      // Refresh favorites to get the new favouriteId
-      fetchFavorites();
-    } else {
-      // Remove from local state
+    if (isFavorited) fetchFavorites();
+    else
       setFavoriteMap((prev) => {
-        const newMap = { ...prev };
-        delete newMap[hotelId];
-        return newMap;
+        const m = { ...prev };
+        delete m[hotelId];
+        return m;
       });
-    }
   };
 
-  // SAME LOGIC AS ADMIN
   const getImageUrl = (imageUrl?: string) => {
-    if (!imageUrl) {
+    if (!imageUrl)
       return "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800";
-    }
-
-    if (imageUrl.startsWith("http")) {
-      return imageUrl;
-    }
-
+    if (imageUrl.startsWith("http")) return imageUrl;
     return process.env.NEXT_PUBLIC_API_BASE_URL + imageUrl;
   };
 
-  // Featured Hotels
   const featuredHotels = hotels
-    .filter((hotel) => hotel.rating && hotel.rating >= 4.5)
+    .filter((h) => h.rating && h.rating >= 4.5)
     .slice(0, 3);
 
-  // Filter logic
-  const filteredHotels = [...hotels].sort((a, b) => {
-    if (activeFilter === "recommended") {
-      return (b.rating || 0) - (a.rating || 0);
-    }
-
-    if (activeFilter === "popular") {
-      return b.price - a.price;
-    }
-
-    return 0;
-  });
-
-  const popularHotels = filteredHotels.slice(0, 6);
-
-  const tabs = [{ id: "hotels", label: "Hotels" }];
-
-  const filters = [
-    { id: "recommended", label: "Recommended" },
-    { id: "popular", label: "Popular" },
-    { id: "nearest", label: "Nearest" },
-  ];
+  const filteredHotels = [...hotels]
+    .sort((a, b) => {
+      if (activeFilter === "recommended")
+        return (b.rating || 0) - (a.rating || 0);
+      if (activeFilter === "popular") return b.price - a.price;
+      return 0;
+    })
+    .slice(0, 6);
 
   return (
-    <div className="flex-1 bg-gray-900 overflow-y-auto min-h-screen">
-      <div className="max-w-400 mx-auto p-8">
-        <div className="flex gap-8">
-          {/* Main Content */}
-          <div className="flex-1">
-            {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-white mb-2">
-                Hey {user?.fullName || user?.username || "Watson"} !!!
-              </h1>
-              <p className="text-gray-400">
-                Welcome back and explore the world
-              </p>
-            </div>
+    <div className="flex-1 bg-[#0a0a0a] overflow-y-auto min-h-screen text-white">
+      <div className="flex gap-0">
+        {/* ── MAIN CONTENT ── */}
+        <div className="flex-1 px-12 py-12 min-w-0">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-12"
+          >
+            <p className="text-[#c9a96e] text-[10px] tracking-[0.22em] uppercase mb-3">
+              Welcome back
+            </p>
+            <h1
+              className="text-white font-bold uppercase leading-tight m-0"
+              style={{
+                fontFamily: "'Georgia', serif",
+                fontSize: "clamp(28px, 3vw, 44px)",
+              }}
+            >
+              {user?.fullName || user?.username || "Watson"}
+            </h1>
+            <p className="text-[#4b5563] text-sm mt-2">
+              Explore and discover premium stays
+            </p>
+          </motion.div>
 
-            {/* Tabs */}
-            <div className="flex gap-8 mb-6 border-b border-gray-700">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`pb-3 px-2 font-medium transition-all ${
-                    activeTab === tab.id
-                      ? "text-white border-b-2 border-emerald-500"
-                      : "text-gray-400 hover:text-gray-300"
-                  }`}
-                >
-                  {tab.label}
-                </button>
+          {/* Search */}
+          <div className="mb-12">
+            <div className="relative max-w-xl">
+              <Search
+                size={14}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3a3a3a]"
+              />
+              <input
+                type="text"
+                placeholder="Search hotels by name or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#0d0d0d] border border-[#2a2a2a] text-white text-sm px-4 py-3 pl-10 outline-none focus:border-[#c9a96e] transition-colors placeholder:text-[#3a3a3a]"
+              />
+            </div>
+          </div>
+
+          {/* Loading */}
+          {loading ? (
+            <div className="flex flex-col gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-20 bg-[#0d0d0d] border border-[#1a1a1a] animate-pulse"
+                />
               ))}
             </div>
-
-            {/* Search Bar */}
-            <div className="flex gap-4 mb-8">
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  placeholder="Search Hotel..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-12 pr-4 rounded-full border-2 border-gray-700 focus:border-emerald-500 focus:outline-none bg-gray-800 text-white placeholder-gray-500"
-                />
-                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">
-                  🔍
-                </span>
-              </div>
-
-              <button className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-all">
-                <span className="text-white text-xl">☰</span>
-              </button>
+          ) : hotels.length === 0 ? (
+            <div className="py-24 border-t border-[#1a1a1a]">
+              <p className="text-[#2a2a2a] text-[11px] tracking-[0.2em] uppercase mb-2">
+                No results
+              </p>
+              {searchQuery && (
+                <p className="text-[#3a3a3a] text-sm">
+                  Try adjusting your search
+                </p>
+              )}
             </div>
-
-            {/* Loading */}
-            {loading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="text-center">
-                  <div className="w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-gray-400">Loading hotels...</p>
-                </div>
-              </div>
-            ) : hotels.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-gray-400 text-lg">No hotels found</p>
-                {searchQuery && (
-                  <p className="text-gray-500 text-sm mt-2">
-                    Try adjusting your search
-                  </p>
-                )}
-              </div>
-            ) : (
-              <>
-                {/* Featured Hotels */}
-                {featuredHotels.length > 0 && (
-                  <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-white mb-4">
-                      Featured Hotels
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {featuredHotels.map((hotel) => (
-                        <div
-                          key={hotel._id}
-                          onClick={() => setSelectedHotel(hotel)}
-                        >
-                          <HotelCard
-                            id={hotel._id}
-                            name={hotel.hotelName}
-                            location={`${hotel.city}, ${hotel.country}`}
-                            rating={hotel.rating || 0}
-                            image={getImageUrl(hotel.imageUrl)}
-                            price={hotel.price}
-                            isFeatured
-                            isFavorited={!!favoriteMap[hotel._id]}
-                            favouriteId={favoriteMap[hotel._id]}
-                            onFavoriteChange={handleFavoriteChange}
-                          />
-                        </div>
-                      ))}
+          ) : (
+            <>
+              {/* Featured Hotels */}
+              {featuredHotels.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mb-14"
+                >
+                  <div className="flex items-end justify-between mb-6">
+                    <div>
+                      <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2">
+                        Top Rated
+                      </p>
+                      <h2
+                        className="text-white text-2xl font-bold uppercase m-0"
+                        style={{ fontFamily: "'Georgia', serif" }}
+                      >
+                        Featured Hotels
+                      </h2>
                     </div>
                   </div>
-                )}
+                  <div
+                    className="grid gap-px bg-[#1a1a1a]"
+                    style={{
+                      gridTemplateColumns:
+                        "repeat(auto-fill, minmax(260px, 1fr))",
+                    }}
+                  >
+                    {featuredHotels.map((hotel, i) => (
+                      <motion.div
+                        key={hotel._id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="bg-[#0a0a0a] cursor-pointer"
+                        onClick={() => setSelectedHotel(hotel)}
+                      >
+                        <HotelCard
+                          id={hotel._id}
+                          name={hotel.hotelName}
+                          location={`${hotel.city}, ${hotel.country}`}
+                          rating={hotel.rating || 0}
+                          image={getImageUrl(hotel.imageUrl)}
+                          price={hotel.price}
+                          isFeatured
+                          isFavorited={!!favoriteMap[hotel._id]}
+                          favouriteId={favoriteMap[hotel._id]}
+                          onFavoriteChange={handleFavoriteChange}
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
 
-                {/* Filters */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex gap-4">
-                    {filters.map((filter) => (
+              {/* Filter tabs + grid */}
+              <div>
+                <div className="flex items-end justify-between mb-6 border-b border-[#1a1a1a] pb-0">
+                  <div className="flex gap-0">
+                    {FILTERS.map((f) => (
                       <button
-                        key={filter.id}
-                        onClick={() => setActiveFilter(filter.id as any)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                          activeFilter === filter.id
-                            ? "text-white border-b-2 border-emerald-500"
-                            : "text-gray-400 hover:text-gray-300"
+                        key={f.id}
+                        onClick={() => setActiveFilter(f.id)}
+                        className={`text-[10px] tracking-[0.16em] uppercase px-5 py-3.5 border-none bg-transparent cursor-pointer transition-colors border-b-2 ${
+                          activeFilter === f.id
+                            ? "text-[#c9a96e] border-[#c9a96e]"
+                            : "text-[#3a3a3a] border-transparent hover:text-[#6b7280]"
                         }`}
                       >
-                        {filter.label}
+                        {f.label}
                       </button>
                     ))}
                   </div>
-
-                  <button className="text-emerald-500 font-medium flex items-center gap-2 hover:text-emerald-400">
-                    View All <span>→</span>
+                  <button className="text-[#c9a96e] text-[10px] tracking-[0.14em] uppercase bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity mb-0.5">
+                    View All →
                   </button>
                 </div>
 
-                {/* Popular Hotels */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {popularHotels.map((hotel) => (
-                    <div
+                <div
+                  className="grid gap-px bg-[#1a1a1a]"
+                  style={{
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(220px, 1fr))",
+                  }}
+                >
+                  {filteredHotels.map((hotel, i) => (
+                    <motion.div
                       key={hotel._id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                      className="bg-[#0a0a0a] cursor-pointer"
                       onClick={() => setSelectedHotel(hotel)}
                     >
                       <PopularHotelCard
                         id={hotel._id}
                         name={hotel.hotelName}
-                        location={hotel.address}
+                        location={
+                          hotel.address || `${hotel.city}, ${hotel.country}`
+                        }
                         price={hotel.price}
+                        rating={hotel.rating}
                         image={getImageUrl(hotel.imageUrl)}
                         isFavorited={!!favoriteMap[hotel._id]}
                         favouriteId={favoriteMap[hotel._id]}
                         onFavoriteChange={handleFavoriteChange}
                       />
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
+        </div>
 
-          {/* Sidebar */}
-          {selectedHotel && (
+        {/* ── SIDEBAR ── */}
+        {selectedHotel && (
+          <div className="border-l border-[#1a1a1a]">
             <HotelDetailSidebar
               hotel={{
                 id: selectedHotel._id,
@@ -327,8 +312,8 @@ export default function DashboardPage() {
                 location: `${selectedHotel.city}, ${selectedHotel.country}`,
               }}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

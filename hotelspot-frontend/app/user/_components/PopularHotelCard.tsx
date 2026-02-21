@@ -6,6 +6,7 @@ import {
 } from "@/lib/actions/favourite-action";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { Heart, Star } from "lucide-react";
 
 interface PopularHotelCardProps {
   id: string;
@@ -13,6 +14,7 @@ interface PopularHotelCardProps {
   location: string;
   price: number;
   image: string;
+  rating?: number;
   isFavorited?: boolean;
   favouriteId?: string;
   onFavoriteChange?: (hotelId: string, isFavorited: boolean) => void;
@@ -24,6 +26,7 @@ export default function PopularHotelCard({
   location,
   price,
   image,
+  rating,
   isFavorited = false,
   favouriteId,
   onFavoriteChange,
@@ -40,48 +43,34 @@ export default function PopularHotelCard({
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (isProcessing) return;
-
     setIsProcessing(true);
-
     try {
       if (isLiked && currentFavouriteId) {
-        // Remove from favorites
         const result = await handleRemoveFavourite(currentFavouriteId);
-
         if (result.success) {
           setIsLiked(false);
           setCurrentFavouriteId(undefined);
           toast.success("Removed from favorites");
           onFavoriteChange?.(id, false);
-        } else {
-          toast.error(result.message || "Failed to remove from favorites");
-        }
+        } else toast.error(result.message || "Failed to remove from favorites");
       } else {
-        // Add to favorites
         const result = await handleAddFavourite(id);
-
         if (result.success && result.data) {
           setIsLiked(true);
           setCurrentFavouriteId(result.data.favourite._id);
           toast.success("Added to favorites");
           onFavoriteChange?.(id, true);
         } else {
-          if (result.message?.toLowerCase().includes("already")) {
+          if (result.message?.toLowerCase().includes("already"))
             toast.info("Hotel already in favorites");
-          } else {
-            toast.error(result.message || "Failed to add to favorites");
-          }
+          else toast.error(result.message || "Failed to add to favorites");
         }
       }
     } catch (error: any) {
-      console.error("Favorite action error:", error);
-      if (error.message?.toLowerCase().includes("already")) {
+      if (error.message?.toLowerCase().includes("already"))
         toast.info("Hotel already in favorites");
-      } else {
-        toast.error("Something went wrong. Please try again.");
-      }
+      else toast.error("Something went wrong. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -89,52 +78,76 @@ export default function PopularHotelCard({
 
   return (
     <div
-      className="relative bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
+      className="relative bg-[#0d0d0d] border border-[#1a1a1a] overflow-hidden cursor-pointer group hover:border-[#2a2a2a] transition-colors"
       onClick={() => {
         window.location.href = `/user/booking?hotelId=${id}`;
       }}
     >
       {/* Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-44 overflow-hidden bg-[#111]">
         <img
           src={image}
           alt={name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute inset-0 bg-linear-to-t from-gray-900/80 via-gray-900/20 to-transparent" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.2) 50%, transparent 100%)",
+          }}
+        />
 
-        {/* Like Button */}
+        {/* Favorite button */}
         <button
           onClick={handleFavoriteClick}
           disabled={isProcessing}
-          className={`absolute top-3 right-3 w-9 h-9 bg-gray-900/60 backdrop-blur rounded-full flex items-center justify-center hover:bg-gray-900/80 transition-all z-10 ${
-            isProcessing ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`absolute top-3 right-3 w-8 h-8 bg-[#0a0a0a]/80 border border-[#2a2a2a] flex items-center justify-center transition-all z-10 hover:border-[#c9a96e] ${isProcessing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
           aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
         >
-          <span
-            className={`text-lg ${isLiked ? "text-red-500" : "text-white"}`}
-          >
-            {isLiked ? "❤️" : "🤍"}
-          </span>
+          <Heart
+            size={13}
+            className={
+              isLiked ? "fill-[#c9a96e] text-[#c9a96e]" : "text-[#6b7280]"
+            }
+          />
         </button>
+
+        {/* Rating badge */}
+        {rating !== undefined && (
+          <div className="absolute top-3 left-3 bg-[#0a0a0a]/80 border border-[#2a2a2a] px-2 py-1 flex items-center gap-1">
+            <Star size={9} className="text-[#c9a96e] fill-[#c9a96e]" />
+            <span className="text-[#c9a96e] text-[10px] font-bold">
+              {rating.toFixed(1)}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-bold text-lg text-white mb-1 truncate">{name}</h3>
-        <div className="flex items-center gap-1 text-gray-400 text-sm mb-3">
-          <span className="text-emerald-400">📍</span>
-          <span className="truncate">{location}</span>
-        </div>
-
-        <div className="flex items-center justify-between">
+        <p className="text-[#c9a96e] text-[9px] tracking-[0.18em] uppercase mb-1.5 truncate">
+          {location}
+        </p>
+        <h3
+          className="text-white text-sm font-bold uppercase mb-3 truncate leading-snug"
+          style={{ fontFamily: "'Georgia', serif" }}
+        >
+          {name}
+        </h3>
+        <div className="flex items-end justify-between border-t border-[#1a1a1a] pt-3">
           <div>
-            <span className="text-emerald-400 font-bold text-lg">
-              Rs. {price.toFixed(2)}
+            <span
+              className="text-white text-base font-bold"
+              style={{ fontFamily: "'Georgia', serif" }}
+            >
+              Rs. {price.toLocaleString()}
             </span>
-            <span className="text-gray-400 text-sm ml-1">/night</span>
+            <span className="text-[#4b5563] text-[11px] ml-1">/night</span>
           </div>
+          <span className="text-[#c9a96e] text-[9px] tracking-[0.14em] uppercase opacity-0 group-hover:opacity-100 transition-opacity">
+            Book →
+          </span>
         </div>
       </div>
     </div>
