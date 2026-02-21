@@ -5,7 +5,8 @@ import { handleDeleteHotel } from "@/lib/actions/admin/hotel-action";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import DeleteModal from "@/app/_components/DeleteModal";
+import { Star, BedDouble, Pencil, Trash2, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Hotel {
   _id: string;
@@ -20,184 +21,529 @@ interface Hotel {
   imageUrl?: string;
 }
 
-interface HotelCardsProps {
-  hotels: Hotel[];
+function ConfirmModal({
+  hotel,
+  onClose,
+  onConfirm,
+}: {
+  hotel: Hotel;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        onClick={onClose}
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.85)",
+        }}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        style={{
+          position: "relative",
+          background: "#0d0d0d",
+          border: "1px solid #1a1a1a",
+          width: "90%",
+          maxWidth: 420,
+          padding: "2rem",
+          fontFamily: "'Rethink Sans', sans-serif",
+        }}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            background: "none",
+            border: "none",
+            color: "#6b7280",
+            cursor: "pointer",
+            display: "flex",
+          }}
+        >
+          <X size={16} />
+        </button>
+        <p
+          style={{
+            color: "#c9a96e",
+            fontSize: 9,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            margin: "0 0 0.5rem",
+          }}
+        >
+          Confirm Action
+        </p>
+        <h3
+          style={{
+            color: "#fff",
+            fontSize: 18,
+            fontWeight: 700,
+            fontFamily: "'Georgia', serif",
+            textTransform: "uppercase",
+            margin: "0 0 1rem",
+          }}
+        >
+          Delete Hotel
+        </h3>
+        <p
+          style={{
+            color: "#6b7280",
+            fontSize: 13,
+            lineHeight: 1.7,
+            margin: "0 0 2rem",
+          }}
+        >
+          Are you sure you want to delete{" "}
+          <strong style={{ color: "#fff" }}>{hotel.hotelName}</strong>? This
+          action cannot be undone.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.75rem",
+          }}
+        >
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "1px solid #2a2a2a",
+              color: "#6b7280",
+              fontSize: 11,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              padding: "0.65rem 1.5rem",
+              cursor: "pointer",
+              fontFamily: "'Rethink Sans', sans-serif",
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            style={{
+              background: "#7f1d1d",
+              border: "1px solid #7f1d1d",
+              color: "#fff",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              padding: "0.65rem 1.5rem",
+              cursor: "pointer",
+              fontFamily: "'Rethink Sans', sans-serif",
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
 }
 
-export default function HotelCards({ hotels }: HotelCardsProps) {
+export default function HotelCards({ hotels }: { hotels: Hotel[] }) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
-
-  const openDeleteModal = (hotel: Hotel) => {
-    setSelectedHotel(hotel);
-    setModalOpen(true);
-  };
-
-  const closeDeleteModal = () => {
-    setSelectedHotel(null);
-    setModalOpen(false);
-  };
 
   const handleConfirmDelete = async () => {
     if (!selectedHotel) return;
-
     setDeletingId(selectedHotel._id);
     try {
-      const response = await handleDeleteHotel(selectedHotel._id);
-      if (response.success) {
-        toast.success("Hotel deleted successfully");
+      const res = await handleDeleteHotel(selectedHotel._id);
+      if (res.success) {
+        toast.success("Hotel deleted");
         router.refresh();
-      } else {
-        toast.error(response.message || "Failed to delete hotel");
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete hotel");
+      } else toast.error(res.message || "Failed to delete hotel");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to delete hotel");
     } finally {
       setDeletingId(null);
-      closeDeleteModal();
+      setSelectedHotel(null);
     }
   };
 
+  if (!hotels || hotels.length === 0) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "8rem 0",
+          borderTop: "1px solid #1a1a1a",
+          fontFamily: "'Rethink Sans', sans-serif",
+        }}
+      >
+        <p
+          style={{
+            color: "#2a2a2a",
+            fontSize: 11,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            margin: "0 0 2rem",
+          }}
+        >
+          No hotels found
+        </p>
+        <Link
+          href="/admin/hotels/create"
+          style={{
+            background: "#c9a96e",
+            color: "#0a0a0a",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            padding: "0.85rem 2rem",
+            textDecoration: "none",
+          }}
+        >
+          + Create First Hotel
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Hotels</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your hotel listings
-          </p>
-        </div>
+    <div
+      style={{
+        padding: "2.5rem 3rem 4rem",
+        fontFamily: "'Rethink Sans', sans-serif",
+      }}
+    >
+      <p
+        style={{
+          color: "#3a3a3a",
+          fontSize: 9,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          margin: "0 0 1.5rem",
+        }}
+      >
+        {hotels.length} {hotels.length === 1 ? "property" : "properties"}
+      </p>
 
-        {/* Hotels Grid */}
-        {!hotels || hotels.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg">No hotels found</p>
-            <Link
-              href="/admin/hotels/create"
-              className="inline-block mt-4 px-4 py-2 bg-foreground text-background rounded-md text-sm font-semibold hover:opacity-90"
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: 1,
+          borderTop: "1px solid #1a1a1a",
+          borderLeft: "1px solid #1a1a1a",
+        }}
+      >
+        {hotels.map((hotel, i) => (
+          <motion.div
+            key={hotel._id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.04 }}
+            style={{
+              background: "#0d0d0d",
+              borderRight: "1px solid #1a1a1a",
+              borderBottom: "1px solid #1a1a1a",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                height: 180,
+                overflow: "hidden",
+                background: "#111",
+                flexShrink: 0,
+              }}
             >
-              Create your first hotel
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {hotels.map((hotel) => (
-              <div
-                key={hotel._id}
-                className="group bg-card rounded-xl overflow-hidden border border-black/10 dark:border-white/15 hover:border-foreground/30 transition-all duration-300"
-              >
-                {/* Hotel Image */}
-                <div className="relative h-48 bg-muted overflow-hidden">
-                  {hotel.imageUrl ? (
-                    <img
-                      src={
-                        process.env.NEXT_PUBLIC_API_BASE_URL + hotel.imageUrl
-                      }
-                      alt={hotel.hotelName}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        const parent = e.currentTarget.parentElement;
-                        if (parent) {
-                          parent.innerHTML = `
-                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/20">
-                              <span class="text-muted-foreground text-sm">Image Not Found</span>
-                            </div>
-                          `;
-                        }
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/20">
-                      <span className="text-muted-foreground text-sm">
-                        No Image
-                      </span>
-                    </div>
-                  )}
+              {hotel.imageUrl ? (
+                <img
+                  src={process.env.NEXT_PUBLIC_API_BASE_URL + hotel.imageUrl}
+                  alt={hotel.hotelName}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    transition: "transform 0.4s",
+                    display: "block",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.05)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <p
+                    style={{
+                      color: "#2a2a2a",
+                      fontSize: 10,
+                      letterSpacing: "0.2em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    No Image
+                  </p>
                 </div>
+              )}
+              {hotel.rating !== undefined && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 12,
+                    right: 12,
+                    background: "rgba(10,10,10,0.9)",
+                    border: "1px solid #2a2a2a",
+                    padding: "0.3rem 0.6rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                  }}
+                >
+                  <Star
+                    size={10}
+                    style={{ color: "#c9a96e", fill: "#c9a96e" }}
+                  />
+                  <span
+                    style={{ color: "#c9a96e", fontSize: 11, fontWeight: 700 }}
+                  >
+                    {hotel.rating.toFixed(1)}
+                  </span>
+                </div>
+              )}
+            </div>
 
-                {/* Hotel Info */}
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg text-foreground mb-1 truncate">
-                    {hotel.hotelName}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {hotel.city}, {hotel.country}
-                  </p>
-                  <p className="text-xs text-muted-foreground mb-3 truncate">
-                    {hotel.address}
-                  </p>
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <span className="text-xl font-bold text-foreground">
-                        ${hotel.price}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        /night
-                      </span>
-                    </div>
-                    {hotel.rating !== undefined && (
-                      <div className="flex items-center gap-1">
-                        <svg
-                          className="w-4 h-4 text-yellow-500 fill-current"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                        </svg>
-                        <span className="text-sm font-medium text-foreground">
-                          {hotel.rating.toFixed(1)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="mb-4">
-                    <span className="text-xs text-muted-foreground">
-                      {hotel.availableRooms} room
-                      {hotel.availableRooms !== 1 ? "s" : ""} available
+            <div
+              style={{
+                padding: "1.5rem",
+                display: "flex",
+                flexDirection: "column",
+                flex: 1,
+              }}
+            >
+              <p
+                style={{
+                  color: "#c9a96e",
+                  fontSize: 9,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  margin: "0 0 0.4rem",
+                }}
+              >
+                {hotel.city}, {hotel.country}
+              </p>
+              <h3
+                style={{
+                  color: "#fff",
+                  fontSize: 15,
+                  fontWeight: 700,
+                  margin: "0 0 0.4rem",
+                  fontFamily: "'Georgia', serif",
+                  lineHeight: 1.2,
+                  textTransform: "uppercase",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {hotel.hotelName}
+              </h3>
+              <p
+                style={{
+                  color: "#4b5563",
+                  fontSize: 11,
+                  margin: "0 0 0.875rem",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {hotel.address}
+              </p>
+              {hotel.description && (
+                <p
+                  style={{
+                    color: "#4b5563",
+                    fontSize: 11,
+                    lineHeight: 1.7,
+                    margin: "0 0 1rem",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical" as any,
+                    overflow: "hidden",
+                  }}
+                >
+                  {hotel.description}
+                </p>
+              )}
+
+              <div
+                style={{
+                  marginTop: "auto",
+                  paddingTop: "1rem",
+                  borderTop: "1px solid #1a1a1a",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <div>
+                    <span
+                      style={{
+                        color: "#fff",
+                        fontSize: 19,
+                        fontWeight: 700,
+                        fontFamily: "'Georgia', serif",
+                      }}
+                    >
+                      Rs. {hotel.price.toLocaleString()}
+                    </span>
+                    <span
+                      style={{ color: "#4b5563", fontSize: 11, marginLeft: 4 }}
+                    >
+                      /night
                     </span>
                   </div>
-                  {hotel.description && (
-                    <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                      {hotel.description}
-                    </p>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/admin/hotels/${hotel._id}/edit`}
-                      className="flex-1 px-3 py-2 bg-foreground/10 hover:bg-foreground/20 text-foreground rounded-md text-sm font-medium text-center transition-colors"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => openDeleteModal(hotel)}
-                      disabled={deletingId === hotel._id}
-                      className="flex-1 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {deletingId === hotel._id ? "Deleting..." : "Delete"}
-                    </button>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                    }}
+                  >
+                    <BedDouble size={11} style={{ color: "#4b5563" }} />
+                    <span style={{ color: "#4b5563", fontSize: 11 }}>
+                      {hotel.availableRooms} rooms
+                    </span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
 
-        {/* Delete Modal */}
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <Link
+                    href={`/admin/hotels/${hotel._id}/edit`}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.4rem",
+                      border: "1px solid #2a2a2a",
+                      color: "#9ca3af",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      padding: "0.65rem",
+                      textDecoration: "none",
+                      fontFamily: "'Rethink Sans', sans-serif",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor =
+                        "#c9a96e";
+                      (e.currentTarget as HTMLElement).style.color = "#c9a96e";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor =
+                        "#2a2a2a";
+                      (e.currentTarget as HTMLElement).style.color = "#9ca3af";
+                    }}
+                  >
+                    <Pencil size={11} /> Edit
+                  </Link>
+                  <button
+                    onClick={() => setSelectedHotel(hotel)}
+                    disabled={deletingId === hotel._id}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.4rem",
+                      background: "none",
+                      border: "1px solid #2a2a2a",
+                      color: "#9ca3af",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      padding: "0.65rem",
+                      cursor:
+                        deletingId === hotel._id ? "not-allowed" : "pointer",
+                      opacity: deletingId === hotel._id ? 0.5 : 1,
+                      fontFamily: "'Rethink Sans', sans-serif",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (deletingId !== hotel._id) {
+                        (e.currentTarget as HTMLElement).style.borderColor =
+                          "#f87171";
+                        (e.currentTarget as HTMLElement).style.color =
+                          "#f87171";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor =
+                        "#2a2a2a";
+                      (e.currentTarget as HTMLElement).style.color = "#9ca3af";
+                    }}
+                  >
+                    <Trash2 size={11} />{" "}
+                    {deletingId === hotel._id ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <AnimatePresence>
         {selectedHotel && (
-          <DeleteModal
-            isOpen={modalOpen}
-            onClose={closeDeleteModal}
+          <ConfirmModal
+            hotel={selectedHotel}
+            onClose={() => setSelectedHotel(null)}
             onConfirm={handleConfirmDelete}
-            title={`Delete ${selectedHotel.hotelName}?`}
-            description="Are you sure you want to delete this hotel? This action cannot be undone."
           />
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }

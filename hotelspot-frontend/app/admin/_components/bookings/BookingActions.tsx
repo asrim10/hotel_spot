@@ -59,7 +59,7 @@ const ACTION_MESSAGES: Record<string, string> = {
   delete: "Booking deleted",
 };
 
-// ── Dark modal wrapper ──────────────────────────────────────────────────────
+// Dark modal wrapper
 
 function DarkModal({
   open,

@@ -73,7 +73,7 @@ const BookingsIcon = () => (
   </svg>
 );
 
-// ─── Config ───────────────────────────────────────────────────────────────────
+// Config
 
 const ADMIN_LINKS = [
   { href: "/admin", label: "Dashboard", icon: DashboardIcon },
@@ -82,7 +82,7 @@ const ADMIN_LINKS = [
   { href: "/admin/bookings", label: "Bookings", icon: BookingsIcon },
 ];
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
+//  Sidebar
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -113,7 +113,7 @@ export default function AdminSidebar() {
           overflowY: "auto",
         }}
       >
-        {/* ── Logo ── */}
+        {/*  Logo  */}
         <div
           style={{
             padding: "1.75rem 1.5rem",
@@ -167,7 +167,7 @@ export default function AdminSidebar() {
           </div>
         </div>
 
-        {/* ── Nav ── */}
+        {/*  Nav  */}
         <nav style={{ flex: 1, padding: "1.5rem 1rem" }}>
           <p
             style={{
@@ -230,7 +230,7 @@ export default function AdminSidebar() {
           </div>
         </nav>
 
-        {/* ── Footer ── */}
+        {/*  Footer  */}
         <div
           style={{
             padding: "1.25rem 1.5rem",
