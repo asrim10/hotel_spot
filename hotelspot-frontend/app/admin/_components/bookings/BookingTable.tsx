@@ -21,66 +21,61 @@ interface Booking {
   updatedAt?: string;
 }
 
-interface BookingTableProps {
-  bookings: Booking[];
-  isLoading?: boolean;
-  onActionComplete?: () => void;
-}
-
-const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
-  confirmed: { bg: "#0a1f0a", color: "#4ade80" },
-  pending: { bg: "#1f1a0a", color: "#facc15" },
-  cancelled: { bg: "#1f0a0a", color: "#f87171" },
-  checked_in: { bg: "#130a1f", color: "#a78bfa" },
-  checked_out: { bg: "#0a0f1f", color: "#60a5fa" },
-  paid: { bg: "#0a1f0a", color: "#4ade80" },
-  unpaid: { bg: "#1f1a0a", color: "#facc15" },
-  refunded: { bg: "#1f0a0a", color: "#f87171" },
-};
+const STATUS_STYLE: Record<string, { bg: string; dot: string; text: string }> =
+  {
+    confirmed: {
+      bg: "bg-[#0a1f0a]",
+      dot: "bg-[#4ade80]",
+      text: "text-[#4ade80]",
+    },
+    pending: {
+      bg: "bg-[#1f1a0a]",
+      dot: "bg-[#facc15]",
+      text: "text-[#facc15]",
+    },
+    cancelled: {
+      bg: "bg-[#1f0a0a]",
+      dot: "bg-[#f87171]",
+      text: "text-[#f87171]",
+    },
+    checked_in: {
+      bg: "bg-[#130a1f]",
+      dot: "bg-[#a78bfa]",
+      text: "text-[#a78bfa]",
+    },
+    checked_out: {
+      bg: "bg-[#0a0f1f]",
+      dot: "bg-[#60a5fa]",
+      text: "text-[#60a5fa]",
+    },
+    paid: { bg: "bg-[#0a1f0a]", dot: "bg-[#4ade80]", text: "text-[#4ade80]" },
+    unpaid: { bg: "bg-[#1f1a0a]", dot: "bg-[#facc15]", text: "text-[#facc15]" },
+    refunded: {
+      bg: "bg-[#1f0a0a]",
+      dot: "bg-[#f87171]",
+      text: "text-[#f87171]",
+    },
+  };
 
 const StatusPill = ({ status }: { status?: string }) => {
   const key = status?.toLowerCase() ?? "";
-  const s = STATUS_STYLE[key] ?? { bg: "#111", color: "#6b7280" };
+  const s = STATUS_STYLE[key] ?? {
+    bg: "bg-[#111]",
+    dot: "bg-[#6b7280]",
+    text: "text-[#6b7280]",
+  };
   return (
     <span
-      style={{
-        background: s.bg,
-        color: s.color,
-        fontSize: 9,
-        fontWeight: 600,
-        letterSpacing: "0.14em",
-        textTransform: "uppercase",
-        padding: "0.3rem 0.65rem",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "0.4rem",
-        fontFamily: "'Rethink Sans', sans-serif",
-      }}
+      className={`${s.bg} ${s.text} text-[9px] font-semibold tracking-[0.14em] uppercase px-2.5 py-1 inline-flex items-center gap-1.5`}
     >
-      <span
-        style={{
-          width: 5,
-          height: 5,
-          borderRadius: "50%",
-          background: s.color,
-          flexShrink: 0,
-        }}
-      />
+      <span className={`${s.dot} w-1.5 h-1.5 rounded-full shrink-0`} />
       {status?.replace("_", " ") || "N/A"}
     </span>
   );
 };
 
-const sel: React.CSSProperties = {
-  background: "#111",
-  border: "1px solid #2a2a2a",
-  color: "#9ca3af",
-  fontSize: 12,
-  padding: "0.55rem 0.875rem",
-  outline: "none",
-  fontFamily: "'Rethink Sans', sans-serif",
-  cursor: "pointer",
-};
+const selCls =
+  "bg-[#111] border border-[#2a2a2a] text-[#9ca3af] text-xs px-3.5 py-2.5 outline-none focus:border-[#c9a96e] transition-colors cursor-pointer";
 
 const TH_COLS = [
   "Booking ID",
@@ -98,7 +93,11 @@ export function BookingTable({
   bookings,
   isLoading = false,
   onActionComplete,
-}: BookingTableProps) {
+}: {
+  bookings: Booking[];
+  isLoading?: boolean;
+  onActionComplete?: () => void;
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("");
@@ -131,51 +130,26 @@ export function BookingTable({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+      className="flex flex-col gap-4"
     >
-      {/* Controls bar */}
-      <div
-        style={{
-          background: "#0d0d0d",
-          border: "1px solid #1a1a1a",
-          padding: "1.25rem 1.5rem",
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "0.75rem",
-          alignItems: "center",
-        }}
-      >
-        {/* Search */}
-        <div style={{ flex: 1, minWidth: 240, position: "relative" }}>
+      <div className="bg-[#0d0d0d] border border-[#1a1a1a] px-6 py-5 flex flex-wrap gap-3 items-center">
+        <div className="relative flex-1 min-w-60">
           <Search
             size={14}
-            style={{
-              position: "absolute",
-              left: 12,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#3a3a3a",
-            }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#3a3a3a]"
           />
           <input
             type="text"
             placeholder="Search name, email, hotel, ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              ...sel,
-              width: "100%",
-              paddingLeft: 36,
-              boxSizing: "border-box",
-            }}
+            className={`${selCls} w-full pl-9 box-border`}
           />
         </div>
-
-        {/* Filters */}
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          style={sel}
+          className={selCls}
         >
           <option value="">All Status</option>
           <option value={BOOKING_STATUS.PENDING}>Pending</option>
@@ -184,102 +158,51 @@ export function BookingTable({
           <option value="checked_in">Checked In</option>
           <option value="checked_out">Checked Out</option>
         </select>
-
         <select
           value={paymentFilter}
           onChange={(e) => setPaymentFilter(e.target.value)}
-          style={sel}
+          className={selCls}
         >
           <option value="">All Payments</option>
           <option value={PAYMENT_STATUS.PAID}>Paid</option>
           <option value={PAYMENT_STATUS.UNPAID}>Unpaid</option>
           <option value={PAYMENT_STATUS.REFUNDED}>Refunded</option>
         </select>
-
         <select
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value as any)}
-          style={sel}
+          className={selCls}
         >
           <option value="newest">Newest First</option>
           <option value="oldest">Oldest First</option>
         </select>
       </div>
 
-      {/* Count */}
-      <p
-        style={{
-          color: "#3a3a3a",
-          fontSize: 10,
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          margin: 0,
-          fontFamily: "'Rethink Sans', sans-serif",
-        }}
-      >
+      <p className="text-[#3a3a3a] text-[10px] tracking-[0.18em] uppercase m-0">
         Showing {filtered.length} of {bookings.length} bookings
       </p>
 
-      {/* Table */}
-      <div
-        style={{
-          background: "#0d0d0d",
-          border: "1px solid #1a1a1a",
-          overflowX: "auto",
-        }}
-      >
+      <div className="bg-[#0d0d0d] border border-[#1a1a1a] overflow-x-auto">
         {isLoading ? (
-          <div
-            style={{
-              padding: "3rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "1rem",
-            }}
-          >
+          <div className="p-12 flex flex-col gap-4">
             {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  height: 52,
-                  background: "#111",
-                  animation: "pulse 1.5s infinite",
-                }}
-              />
+              <div key={i} className="h-14 bg-[#111] animate-pulse" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ padding: "5rem", textAlign: "center" }}>
-            <p
-              style={{
-                color: "#2a2a2a",
-                fontSize: 11,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                fontFamily: "'Rethink Sans', sans-serif",
-              }}
-            >
+          <div className="py-20 text-center">
+            <p className="text-[#2a2a2a] text-[11px] tracking-[0.2em] uppercase">
               No bookings found
             </p>
           </div>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="w-full border-collapse">
             <thead>
-              <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
+              <tr className="border-b border-[#1a1a1a]">
                 {TH_COLS.map((col) => (
                   <th
                     key={col}
-                    style={{
-                      padding: "1rem 1.25rem",
-                      textAlign: "left",
-                      color: "#3a3a3a",
-                      fontSize: 9,
-                      letterSpacing: "0.18em",
-                      textTransform: "uppercase",
-                      fontWeight: 600,
-                      fontFamily: "'Rethink Sans', sans-serif",
-                      whiteSpace: "nowrap",
-                    }}
+                    className="px-5 py-4 text-left text-[9px] text-[#3a3a3a] tracking-[0.18em] uppercase font-semibold whitespace-nowrap"
                   >
                     {col}
                   </th>
@@ -293,121 +216,48 @@ export function BookingTable({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: idx * 0.03 }}
-                  style={{ borderBottom: "1px solid #111" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "#111")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "transparent")
-                  }
+                  className="border-b border-[#111] hover:bg-[#111] transition-colors"
                 >
-                  {/* ID */}
-                  <td style={{ padding: "1rem 1.25rem" }}>
-                    <code
-                      style={{
-                        background: "#1a1a1a",
-                        color: "#c9a96e",
-                        fontSize: 10,
-                        padding: "0.25rem 0.5rem",
-                        fontFamily: "monospace",
-                      }}
-                    >
+                  <td className="px-5 py-4">
+                    <code className="bg-[#1a1a1a] text-[#c9a96e] text-[10px] px-2 py-1 font-mono">
                       #{booking._id.slice(-8)}
                     </code>
                   </td>
-                  {/* Customer */}
-                  <td style={{ padding: "1rem 1.25rem" }}>
-                    <p
-                      style={{
-                        color: "#fff",
-                        fontSize: 13,
-                        fontWeight: 600,
-                        margin: "0 0 0.2rem",
-                        fontFamily: "'Rethink Sans', sans-serif",
-                      }}
-                    >
+                  <td className="px-5 py-4">
+                    <p className="text-white text-sm font-semibold mb-0.5 m-0">
                       {booking.fullName}
                     </p>
-                    <p
-                      style={{
-                        color: "#4b5563",
-                        fontSize: 11,
-                        margin: 0,
-                        fontFamily: "'Rethink Sans', sans-serif",
-                      }}
-                    >
+                    <p className="text-[#4b5563] text-xs m-0">
                       {booking.email}
                     </p>
                   </td>
-                  {/* Hotel */}
-                  <td
-                    style={{
-                      padding: "1rem 1.25rem",
-                      color: "#9ca3af",
-                      fontSize: 12,
-                      fontFamily: "'Rethink Sans', sans-serif",
-                    }}
-                  >
+                  <td className="px-5 py-4 text-[#9ca3af] text-xs">
                     {booking.hotelName || booking.hotelId.slice(-8)}
                   </td>
-                  {/* Dates */}
-                  <td style={{ padding: "1rem 1.25rem" }}>
-                    <p
-                      style={{
-                        color: "#9ca3af",
-                        fontSize: 12,
-                        margin: "0 0 0.2rem",
-                        fontFamily: "'Rethink Sans', sans-serif",
-                      }}
-                    >
+                  <td className="px-5 py-4">
+                    <p className="text-[#9ca3af] text-xs mb-0.5 m-0">
                       {formatDate(booking.checkInDate)}
                     </p>
-                    <p
-                      style={{
-                        color: "#3a3a3a",
-                        fontSize: 11,
-                        margin: 0,
-                        fontFamily: "'Rethink Sans', sans-serif",
-                      }}
-                    >
+                    <p className="text-[#3a3a3a] text-[11px] m-0">
                       → {formatDate(booking.checkOutDate)}
                     </p>
                   </td>
-                  {/* Amount */}
                   <td
-                    style={{
-                      padding: "1rem 1.25rem",
-                      color: "#c9a96e",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      fontFamily: "'Georgia', serif",
-                      whiteSpace: "nowrap",
-                    }}
+                    className="px-5 py-4 text-[#c9a96e] text-sm font-bold whitespace-nowrap"
+                    style={{ fontFamily: "'Georgia', serif" }}
                   >
                     Rs. {booking.totalPrice.toLocaleString()}
                   </td>
-                  {/* Booking status */}
-                  <td style={{ padding: "1rem 1.25rem" }}>
+                  <td className="px-5 py-4">
                     <StatusPill status={booking.status} />
                   </td>
-                  {/* Payment */}
-                  <td style={{ padding: "1rem 1.25rem" }}>
+                  <td className="px-5 py-4">
                     <StatusPill status={booking.paymentStatus} />
                   </td>
-                  {/* Created */}
-                  <td
-                    style={{
-                      padding: "1rem 1.25rem",
-                      color: "#4b5563",
-                      fontSize: 11,
-                      fontFamily: "'Rethink Sans', sans-serif",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <td className="px-5 py-4 text-[#4b5563] text-xs whitespace-nowrap">
                     {formatDate(booking.createdAt)}
                   </td>
-                  {/* Actions */}
-                  <td style={{ padding: "1rem 1.25rem" }}>
+                  <td className="px-5 py-4">
                     <BookingActions
                       booking={booking}
                       onActionComplete={onActionComplete}

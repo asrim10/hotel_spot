@@ -39,6 +39,7 @@ interface Booking {
   totalPrice: number;
   status: string;
   paymentStatus?: string;
+  paymentMethod?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -59,8 +60,6 @@ const ACTION_MESSAGES: Record<string, string> = {
   delete: "Booking deleted",
 };
 
-// Dark modal wrapper
-
 function DarkModal({
   open,
   onClose,
@@ -74,104 +73,50 @@ function DarkModal({
 }) {
   if (!open) return null;
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        onClick={onClose}
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(0,0,0,0.8)",
-        }}
-      />
+    <div className="fixed inset-0 z-1000 flex items-center justify-center">
+      <div onClick={onClose} className="absolute inset-0 bg-black/80" />
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.96 }}
-        style={{
-          position: "relative",
-          background: "#0d0d0d",
-          border: "1px solid #1a1a1a",
-          width: "90%",
-          maxWidth: 640,
-          maxHeight: "90vh",
-          overflowY: "auto",
-          fontFamily: "'Rethink Sans', sans-serif",
-        }}
+        className="relative bg-[#0d0d0d] border border-[#1a1a1a] w-[90%] max-w-2xl max-h-[90vh] overflow-y-auto"
       >
-        {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "1.5rem 2rem",
-            borderBottom: "1px solid #1a1a1a",
-          }}
-        >
+        <div className="flex items-center justify-between px-8 py-5 border-b border-[#1a1a1a]">
           <div>
-            <p
-              style={{
-                color: "#c9a96e",
-                fontSize: 9,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                margin: "0 0 0.3rem",
-              }}
-            >
+            <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-1">
               Admin
             </p>
             <h2
-              style={{
-                color: "#fff",
-                fontSize: 18,
-                fontWeight: 700,
-                margin: 0,
-                fontFamily: "'Georgia', serif",
-                textTransform: "uppercase",
-              }}
+              className="text-white text-lg font-bold uppercase m-0"
+              style={{ fontFamily: "'Georgia', serif" }}
             >
               {title}
             </h2>
           </div>
           <button
             onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#6b7280",
-              cursor: "pointer",
-              display: "flex",
-            }}
+            className="text-[#6b7280] hover:text-white transition-colors bg-transparent border-none cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
-        <div style={{ padding: "2rem" }}>{children}</div>
+        <div className="p-8">{children}</div>
       </motion.div>
     </div>
   );
 }
 
-// ── Icon button ─────────────────────────────────────────────────────────────
-
 function IconBtn({
   onClick,
   title,
-  color,
+  iconColor,
+  hoverBorderColor,
   children,
 }: {
   onClick: () => void;
   title: string;
-  color: string;
+  iconColor: string;
+  hoverBorderColor: string;
   children: React.ReactNode;
 }) {
   return (
@@ -180,44 +125,13 @@ function IconBtn({
       whileTap={{ scale: 0.9 }}
       onClick={onClick}
       title={title}
-      style={{
-        background: "none",
-        border: "1px solid #1a1a1a",
-        color,
-        padding: "0.4rem",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        transition: "border-color 0.15s",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = color)}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#1a1a1a")}
+      className={`border border-[#1a1a1a] p-1.5 flex items-center justify-center cursor-pointer bg-transparent transition-colors ${hoverBorderColor}`}
+      style={{ color: iconColor }}
     >
       {children}
     </motion.button>
   );
 }
-
-const infoLabel: React.CSSProperties = {
-  color: "#c9a96e",
-  fontSize: 9,
-  letterSpacing: "0.18em",
-  textTransform: "uppercase",
-  margin: "0 0 0.4rem",
-  display: "block",
-};
-const infoValue: React.CSSProperties = {
-  color: "#fff",
-  fontSize: 14,
-  fontWeight: 600,
-  margin: 0,
-};
-const infoSub: React.CSSProperties = {
-  color: "#6b7280",
-  fontSize: 12,
-  margin: 0,
-};
 
 export function BookingActions({
   booking,
@@ -283,37 +197,34 @@ export function BookingActions({
     }
   };
 
-  const btnStyle: React.CSSProperties = {
-    background: "#111",
-    border: "1px solid #2a2a2a",
-    color: "#9ca3af",
-    fontSize: 11,
-    letterSpacing: "0.1em",
-    textTransform: "uppercase",
-    padding: "0.6rem 1.25rem",
-    cursor: "pointer",
-    fontFamily: "'Rethink Sans', sans-serif",
-  };
-  const selStyle: React.CSSProperties = {
-    width: "100%",
-    background: "#111",
-    border: "1px solid #2a2a2a",
-    color: "#fff",
-    fontSize: 13,
-    padding: "0.75rem 1rem",
-    outline: "none",
-    fontFamily: "'Rethink Sans', sans-serif",
-    cursor: "pointer",
-    marginTop: "0.5rem",
-  };
+  const actionTitle =
+    confirmAction === "delete"
+      ? "Delete Booking"
+      : confirmAction === "confirm"
+        ? "Confirm Booking"
+        : confirmAction === "cancel"
+          ? "Cancel Booking"
+          : confirmAction === "checkin"
+            ? "Check In"
+            : "Check Out";
+
+  const infoLabelCls =
+    "block text-[#c9a96e] text-[9px] tracking-[0.18em] uppercase mb-1.5";
+  const infoValueCls = "text-white text-sm font-semibold m-0";
+  const infoSubCls = "text-[#6b7280] text-xs m-0";
+  const cancelBtnCls =
+    "border border-[#2a2a2a] bg-[#111] text-[#9ca3af] text-[11px] tracking-[0.1em] uppercase px-5 py-2.5 cursor-pointer hover:border-[#3a3a3a] transition-colors bg-transparent";
+  const selCls =
+    "w-full bg-[#111] border border-[#2a2a2a] text-white text-sm px-4 py-3 outline-none focus:border-[#c9a96e] transition-colors cursor-pointer mt-2";
 
   return (
     <>
-      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+      <div className="flex gap-1.5 flex-wrap">
         <IconBtn
           onClick={() => setShowDetails(true)}
           title="View"
-          color="#60a5fa"
+          iconColor="#60a5fa"
+          hoverBorderColor="hover:border-[#60a5fa]"
         >
           <Eye size={13} />
         </IconBtn>
@@ -321,7 +232,8 @@ export function BookingActions({
           <IconBtn
             onClick={() => setConfirmAction("confirm")}
             title="Confirm"
-            color="#4ade80"
+            iconColor="#4ade80"
+            hoverBorderColor="hover:border-[#4ade80]"
           >
             <CheckCircle size={13} />
           </IconBtn>
@@ -330,7 +242,8 @@ export function BookingActions({
           <IconBtn
             onClick={() => setConfirmAction("cancel")}
             title="Cancel"
-            color="#f87171"
+            iconColor="#f87171"
+            hoverBorderColor="hover:border-[#f87171]"
           >
             <XCircle size={13} />
           </IconBtn>
@@ -339,7 +252,8 @@ export function BookingActions({
           <IconBtn
             onClick={() => setConfirmAction("checkin")}
             title="Check In"
-            color="#a78bfa"
+            iconColor="#a78bfa"
+            hoverBorderColor="hover:border-[#a78bfa]"
           >
             <LogIn size={13} />
           </IconBtn>
@@ -348,7 +262,8 @@ export function BookingActions({
           <IconBtn
             onClick={() => setConfirmAction("checkout")}
             title="Check Out"
-            color="#60a5fa"
+            iconColor="#60a5fa"
+            hoverBorderColor="hover:border-[#60a5fa]"
           >
             <LogOut size={13} />
           </IconBtn>
@@ -356,20 +271,21 @@ export function BookingActions({
         <IconBtn
           onClick={() => setShowPayment(true)}
           title="Payment"
-          color="#c9a96e"
+          iconColor="#c9a96e"
+          hoverBorderColor="hover:border-[#c9a96e]"
         >
           <CreditCard size={13} />
         </IconBtn>
         <IconBtn
           onClick={() => setConfirmAction("delete")}
           title="Delete"
-          color="#f87171"
+          iconColor="#f87171"
+          hoverBorderColor="hover:border-[#f87171]"
         >
           <Trash2 size={13} />
         </IconBtn>
       </div>
 
-      {/* Details modal */}
       <AnimatePresence>
         {showDetails && (
           <DarkModal
@@ -377,141 +293,101 @@ export function BookingActions({
             onClose={() => setShowDetails(false)}
             title="Booking Details"
           >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1.5rem",
-              }}
-            >
-              {/* ID */}
+            <div className="flex flex-col gap-6">
               <div>
-                <span style={infoLabel}>Booking ID</span>
-                <code
-                  style={{
-                    ...infoValue,
-                    color: "#c9a96e",
-                    fontFamily: "monospace",
-                    fontSize: 13,
-                  }}
-                >
+                <span className={infoLabelCls}>Booking ID</span>
+                <code className="text-[#c9a96e] text-sm font-mono">
                   #{booking._id}
                 </code>
               </div>
-              {/* Customer */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1.5rem",
-                }}
-              >
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <span style={infoLabel}>Customer</span>
-                  <p style={infoValue}>{booking.fullName}</p>
+                  <span className={infoLabelCls}>Customer</span>
+                  <p className={infoValueCls}>{booking.fullName}</p>
                 </div>
                 <div>
-                  <span style={infoLabel}>Email</span>
-                  <p style={infoSub}>{booking.email}</p>
+                  <span className={infoLabelCls}>Email</span>
+                  <p className={infoSubCls}>{booking.email}</p>
                 </div>
               </div>
-              {/* Hotel */}
-              <div>
-                <span style={infoLabel}>Hotel</span>
-                <p style={infoValue}>{booking.hotelName || "N/A"}</p>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <span className={infoLabelCls}>Hotel</span>
+                  {booking.hotelName ? (
+                    <p className={infoValueCls}>{booking.hotelName}</p>
+                  ) : (
+                    <div>
+                      <p className="text-[#6b7280] text-xs m-0 mb-0.5">
+                        ID (name not joined)
+                      </p>
+                      <code className="text-[#3a3a3a] text-[10px] font-mono">
+                        {booking.hotelId}
+                      </code>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <span className={infoLabelCls}>Payment Method</span>
+                  <p
+                    className={infoValueCls}
+                    style={{ textTransform: "capitalize" }}
+                  >
+                    {booking.paymentMethod || "N/A"}
+                  </p>
+                </div>
               </div>
-              {/* Dates */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
+              <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <span style={infoLabel}>Check In</span>
-                  <p style={infoValue}>{formatDate(booking.checkInDate)}</p>
+                  <span className={infoLabelCls}>Check In</span>
+                  <p className={infoValueCls}>
+                    {formatDate(booking.checkInDate)}
+                  </p>
                 </div>
                 <div>
-                  <span style={infoLabel}>Check Out</span>
-                  <p style={infoValue}>{formatDate(booking.checkOutDate)}</p>
+                  <span className={infoLabelCls}>Check Out</span>
+                  <p className={infoValueCls}>
+                    {formatDate(booking.checkOutDate)}
+                  </p>
                 </div>
                 <div>
-                  <span style={infoLabel}>Nights</span>
-                  <p style={infoValue}>
+                  <span className={infoLabelCls}>Nights</span>
+                  <p className={infoValueCls}>
                     {calculateDays(booking.checkInDate, booking.checkOutDate)}
                   </p>
                 </div>
               </div>
-              {/* Price */}
-              <div
-                style={{
-                  background: "#111",
-                  border: "1px solid #1a1a1a",
-                  padding: "1.25rem 1.5rem",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={infoLabel}>Total Price</span>
+              <div className="bg-[#111] border border-[#1a1a1a] px-6 py-5 flex items-center justify-between">
+                <span className={infoLabelCls}>Total Price</span>
                 <span
-                  style={{
-                    color: "#c9a96e",
-                    fontSize: 24,
-                    fontWeight: 700,
-                    fontFamily: "'Georgia', serif",
-                  }}
+                  className="text-[#c9a96e] text-2xl font-bold"
+                  style={{ fontFamily: "'Georgia', serif" }}
                 >
                   Rs. {booking.totalPrice.toLocaleString()}
                 </span>
               </div>
-              {/* Status */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span style={infoLabel}>Booking Status</span>
-                  <span
-                    style={{
-                      color: "#fff",
-                      fontSize: 12,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.1em",
-                    }}
-                  >
+                  <span className={infoLabelCls}>Booking Status</span>
+                  <span className="text-white text-xs uppercase tracking-widest">
                     {booking.status?.replace("_", " ")}
                   </span>
                 </div>
                 <div>
-                  <span style={infoLabel}>Payment Status</span>
-                  <span
-                    style={{
-                      color: "#fff",
-                      fontSize: 12,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.1em",
-                    }}
-                  >
+                  <span className={infoLabelCls}>Payment Status</span>
+                  <span className="text-white text-xs uppercase tracking-widest">
                     {booking.paymentStatus || "N/A"}
                   </span>
                 </div>
               </div>
-              {/* Created */}
               <div>
-                <span style={infoLabel}>Created</span>
-                <p style={infoSub}>{formatDate(booking.createdAt)}</p>
+                <span className={infoLabelCls}>Created</span>
+                <p className={infoSubCls}>{formatDate(booking.createdAt)}</p>
               </div>
             </div>
           </DarkModal>
         )}
       </AnimatePresence>
 
-      {/* Payment modal */}
       <AnimatePresence>
         {showPayment && (
           <DarkModal
@@ -519,19 +395,13 @@ export function BookingActions({
             onClose={() => setShowPayment(false)}
             title="Update Payment"
           >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1.5rem",
-              }}
-            >
+            <div className="flex flex-col gap-6">
               <div>
-                <span style={infoLabel}>Payment Status</span>
+                <span className={infoLabelCls}>Payment Status</span>
                 <select
                   value={paymentStatus}
                   onChange={(e) => setPaymentStatus(e.target.value)}
-                  style={selStyle}
+                  className={selCls}
                 >
                   <option value="">Select status</option>
                   <option value={PAYMENT_STATUS.UNPAID}>Unpaid</option>
@@ -539,27 +409,17 @@ export function BookingActions({
                   <option value={PAYMENT_STATUS.REFUNDED}>Refunded</option>
                 </select>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "0.75rem",
-                }}
-              >
-                <button onClick={() => setShowPayment(false)} style={btnStyle}>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowPayment(false)}
+                  className={cancelBtnCls}
+                >
                   Cancel
                 </button>
                 <button
                   onClick={handlePaymentUpdate}
                   disabled={isLoading}
-                  style={{
-                    ...btnStyle,
-                    background: "#c9a96e",
-                    color: "#0a0a0a",
-                    fontWeight: 700,
-                    borderColor: "#c9a96e",
-                    opacity: isLoading ? 0.6 : 1,
-                  }}
+                  className="bg-[#c9a96e] border border-[#c9a96e] text-[#0a0a0a] text-[11px] font-bold tracking-widest uppercase px-5 py-2.5 cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {isLoading ? "Updating..." : "Update"}
                 </button>
@@ -569,66 +429,34 @@ export function BookingActions({
         )}
       </AnimatePresence>
 
-      {/* Confirm action modal */}
       <AnimatePresence>
         {confirmAction && (
           <DarkModal
             open={!!confirmAction}
             onClose={() => setConfirmAction(null)}
-            title={
-              confirmAction === "delete"
-                ? "Delete Booking"
-                : confirmAction === "confirm"
-                  ? "Confirm Booking"
-                  : confirmAction === "cancel"
-                    ? "Cancel Booking"
-                    : confirmAction === "checkin"
-                      ? "Check In"
-                      : "Check Out"
-            }
+            title={actionTitle}
           >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1.5rem",
-              }}
-            >
-              <p
-                style={{
-                  color: "#9ca3af",
-                  fontSize: 14,
-                  margin: 0,
-                  lineHeight: 1.7,
-                }}
-              >
+            <div className="flex flex-col gap-6">
+              <p className="text-[#9ca3af] text-sm leading-relaxed m-0">
                 {confirmAction === "delete"
                   ? "This action cannot be undone. The booking will be permanently deleted."
                   : `Are you sure you want to ${confirmAction === "confirm" ? "confirm" : confirmAction === "cancel" ? "cancel" : confirmAction === "checkin" ? "check in" : "check out"} this booking?`}
               </p>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "0.75rem",
-                }}
-              >
-                <button onClick={() => setConfirmAction(null)} style={btnStyle}>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setConfirmAction(null)}
+                  className={cancelBtnCls}
+                >
                   Cancel
                 </button>
                 <button
                   onClick={handleAction}
                   disabled={isLoading}
-                  style={{
-                    ...btnStyle,
-                    background:
-                      confirmAction === "delete" ? "#7f1d1d" : "#c9a96e",
-                    color: confirmAction === "delete" ? "#fff" : "#0a0a0a",
-                    fontWeight: 700,
-                    borderColor:
-                      confirmAction === "delete" ? "#7f1d1d" : "#c9a96e",
-                    opacity: isLoading ? 0.6 : 1,
-                  }}
+                  className={`text-[11px] font-bold tracking-widest uppercase px-5 py-2.5 cursor-pointer transition-opacity disabled:opacity-50 border ${
+                    confirmAction === "delete"
+                      ? "bg-[#7f1d1d] border-[#7f1d1d] text-white hover:bg-red-900"
+                      : "bg-[#c9a96e] border-[#c9a96e] text-[#0a0a0a] hover:opacity-90"
+                  }`}
                 >
                   {isLoading ? "Processing..." : "Confirm"}
                 </button>

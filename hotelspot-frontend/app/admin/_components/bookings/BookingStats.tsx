@@ -23,98 +23,74 @@ interface BookingStatsProps {
 }
 
 const CARDS = [
-  { key: "totalBookings", label: "Total", Icon: BookOpen, accent: "#c9a96e" },
+  {
+    key: "totalBookings",
+    label: "Total",
+    Icon: BookOpen,
+    color: "text-[#c9a96e]",
+    bar: "bg-[#c9a96e]",
+  },
   {
     key: "confirmedBookings",
     label: "Confirmed",
     Icon: CheckCircle,
-    accent: "#4ade80",
+    color: "text-[#4ade80]",
+    bar: "bg-[#4ade80]",
   },
-  { key: "pendingBookings", label: "Pending", Icon: Clock, accent: "#facc15" },
+  {
+    key: "pendingBookings",
+    label: "Pending",
+    Icon: Clock,
+    color: "text-[#facc15]",
+    bar: "bg-[#facc15]",
+  },
   {
     key: "cancelledBookings",
     label: "Cancelled",
     Icon: XCircle,
-    accent: "#f87171",
+    color: "text-[#f87171]",
+    bar: "bg-[#f87171]",
   },
   {
     key: "checkedInBookings",
     label: "Checked In",
     Icon: LogIn,
-    accent: "#a78bfa",
+    color: "text-[#a78bfa]",
+    bar: "bg-[#a78bfa]",
   },
   {
     key: "checkedOutBookings",
     label: "Checked Out",
     Icon: LogOut,
-    accent: "#60a5fa",
+    color: "text-[#60a5fa]",
+    bar: "bg-[#60a5fa]",
   },
 ] as const;
 
 export function BookingStats({ stats, isLoading }: BookingStatsProps) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(6, 1fr)",
-        borderTop: "1px solid #1a1a1a",
-        borderLeft: "1px solid #1a1a1a",
-      }}
-    >
-      {CARDS.map(({ key, label, Icon, accent }, i) => (
+    <div className="grid grid-cols-6 border-t border-l border-[#1a1a1a]">
+      {CARDS.map(({ key, label, Icon, color, bar }, i) => (
         <motion.div
           key={label}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.06 }}
-          style={{
-            background: "#0d0d0d",
-            borderRight: "1px solid #1a1a1a",
-            borderBottom: "1px solid #1a1a1a",
-            padding: "1.75rem 1.5rem",
-          }}
+          className="bg-[#0d0d0d] border-r border-b border-[#1a1a1a] p-6"
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "1.25rem",
-            }}
-          >
-            <p
-              style={{
-                color: "#3a3a3a",
-                fontSize: 9,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                margin: 0,
-                fontFamily: "'Rethink Sans', sans-serif",
-              }}
-            >
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-[#3a3a3a] text-[9px] tracking-[0.2em] uppercase m-0">
               {label}
             </p>
-            <Icon size={13} style={{ color: accent, opacity: 0.65 }} />
+            <Icon size={13} className={`${color} opacity-65`} />
           </div>
           <p
-            style={{
-              color: "#fff",
-              fontSize: 34,
-              fontWeight: 700,
-              margin: "0 0 1rem",
-              fontFamily: "'Georgia', serif",
-              lineHeight: 1,
-            }}
+            className="text-white text-[34px] font-bold mb-4 leading-none m-0"
+            style={{ fontFamily: "'Georgia', serif" }}
           >
-            {isLoading ? (
-              <span style={{ color: "#2a2a2a" }}>—</span>
-            ) : (
-              stats[key]
-            )}
+            {isLoading ? <span className="text-[#2a2a2a]">—</span> : stats[key]}
           </p>
-          <div
-            style={{ width: 20, height: 2, background: accent, opacity: 0.5 }}
-          />
+          <div className={`w-5 h-0.5 ${bar} opacity-50`} />
         </motion.div>
       ))}
     </div>
@@ -128,6 +104,7 @@ export const BOOKING_STATUS = {
   CHECKED_IN: "checked_in",
   CHECKED_OUT: "checked_out",
 } as const;
+
 export const PAYMENT_STATUS = {
   PAID: "paid",
   UNPAID: "unpaid",

@@ -20,7 +20,6 @@ const DashboardIcon = () => (
     <rect x="3" y="14" width="7" height="7" />
   </svg>
 );
-
 const UsersIcon = () => (
   <svg
     width="15"
@@ -38,7 +37,6 @@ const UsersIcon = () => (
     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
   </svg>
 );
-
 const HotelsIcon = () => (
   <svg
     width="15"
@@ -54,7 +52,6 @@ const HotelsIcon = () => (
     <path d="M9 21V12h6v9" />
   </svg>
 );
-
 const BookingsIcon = () => (
   <svg
     width="15"
@@ -73,8 +70,6 @@ const BookingsIcon = () => (
   </svg>
 );
 
-// Config
-
 const ADMIN_LINKS = [
   { href: "/admin", label: "Dashboard", icon: DashboardIcon },
   { href: "/admin/users", label: "Users", icon: UsersIcon },
@@ -82,174 +77,57 @@ const ADMIN_LINKS = [
   { href: "/admin/bookings", label: "Bookings", icon: BookingsIcon },
 ];
 
-//  Sidebar
-
 export default function AdminSidebar() {
   const pathname = usePathname();
-
   const isActive = (href: string) =>
     href === "/admin" ? pathname === href : pathname?.startsWith(href);
 
   return (
-    <>
-      {/* Rethink Sans font */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Rethink+Sans:ital,wght@0,400..800;1,400..800&display=swap');
-        .admin-sidebar * { font-family: 'Rethink Sans', sans-serif; }
-      `}</style>
-
-      <aside
-        className="admin-sidebar"
-        style={{
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          width: 240,
-          background: "#0a0a0a",
-          borderRight: "1px solid #1a1a1a",
-          display: "flex",
-          flexDirection: "column",
-          flexShrink: 0,
-          overflowY: "auto",
-        }}
-      >
-        {/*  Logo  */}
-        <div
-          style={{
-            padding: "1.75rem 1.5rem",
-            borderBottom: "1px solid #1a1a1a",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.875rem",
-          }}
-        >
-          {/* Monogram */}
-          <div
-            style={{
-              width: 34,
-              height: 34,
-              background: "#c9a96e",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#0a0a0a",
-              fontSize: 14,
-              fontWeight: 800,
-              letterSpacing: "0.05em",
-              flexShrink: 0,
-            }}
-          >
-            A
-          </div>
-          <div>
-            <p
-              style={{
-                color: "#fff",
-                fontSize: 13,
-                fontWeight: 700,
-                margin: 0,
-                letterSpacing: "0.04em",
-              }}
-            >
-              Admin Panel
-            </p>
-            <p
-              style={{
-                color: "#c9a96e",
-                fontSize: 9,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                margin: 0,
-              }}
-            >
-              Control Center
-            </p>
-          </div>
+    <aside className="sticky top-0 h-screen w-60 bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col flex-shrink-0 overflow-y-auto">
+      <div className="px-6 py-7 border-b border-[#1a1a1a] flex items-center gap-3.5">
+        <div className="w-8.5 h-8.5 bg-[#c9a96e] flex items-center justify-center text-[#0a0a0a] text-sm font-extrabold tracking-wide flex-shrink-0">
+          A
         </div>
-
-        {/*  Nav  */}
-        <nav style={{ flex: 1, padding: "1.5rem 1rem" }}>
-          <p
-            style={{
-              color: "#3a3a3a",
-              fontSize: 9,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              margin: "0 0 0.75rem 0.5rem",
-            }}
-          >
-            Navigation
+        <div>
+          <p className="text-white text-[13px] font-bold tracking-[0.04em] m-0">
+            Admin Panel
           </p>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {ADMIN_LINKS.map((link) => {
-              const active = isActive(link.href);
-              const Icon = link.icon;
-
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    padding: "0.65rem 0.75rem",
-                    borderRadius: 2,
-                    textDecoration: "none",
-                    background: active ? "#161612" : "transparent",
-                    borderLeft: active
-                      ? "2px solid #c9a96e"
-                      : "2px solid transparent",
-                    color: active ? "#c9a96e" : "#6b7280",
-                    fontSize: 13,
-                    fontWeight: active ? 600 : 400,
-                    letterSpacing: "0.02em",
-                    transition: "all 0.15s",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      (e.currentTarget as HTMLElement).style.color = "#fff";
-                      (e.currentTarget as HTMLElement).style.background =
-                        "#111";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      (e.currentTarget as HTMLElement).style.color = "#6b7280";
-                      (e.currentTarget as HTMLElement).style.background =
-                        "transparent";
-                    }
-                  }}
-                >
-                  <Icon />
-                  <span>{link.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-
-        {/*  Footer  */}
-        <div
-          style={{
-            padding: "1.25rem 1.5rem",
-            borderTop: "1px solid #1a1a1a",
-          }}
-        >
-          <p
-            style={{
-              color: "#2a2a2a",
-              fontSize: 10,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              margin: 0,
-            }}
-          >
-            Admin v1.0
+          <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase m-0">
+            Control Center
           </p>
         </div>
-      </aside>
-    </>
+      </div>
+
+      <nav className="flex-1 px-4 py-6">
+        <p className="text-[#3a3a3a] text-[9px] tracking-[0.2em] uppercase mb-3 ml-2">
+          Navigation
+        </p>
+        <div className="flex flex-col gap-0.5">
+          {ADMIN_LINKS.map(({ href, label, icon: Icon }) => {
+            const active = isActive(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center gap-3 px-3 py-2.5 text-[13px] tracking-[0.02em] transition-all border-l-2 no-underline group ${
+                  active
+                    ? "bg-[#161612] border-[#c9a96e] text-[#c9a96e] font-semibold"
+                    : "border-transparent text-[#6b7280] font-normal hover:bg-[#111] hover:text-white hover:border-transparent"
+                }`}
+              >
+                <Icon />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      <div className="px-6 py-5 border-t border-[#1a1a1a]">
+        <p className="text-[#2a2a2a] text-[10px] tracking-[0.12em] uppercase m-0">
+          Admin v1.0
+        </p>
+      </div>
+    </aside>
   );
 }

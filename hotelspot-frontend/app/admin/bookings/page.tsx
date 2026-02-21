@@ -79,132 +79,64 @@ export default function BookingsPage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0a0a0a",
-        color: "#fff",
-        fontFamily: "'Rethink Sans', sans-serif",
-      }}
-    >
-      {/* ── Page header ── */}
-      <div
-        style={{
-          borderBottom: "1px solid #1a1a1a",
-          padding: "3rem 3rem 2.5rem",
-        }}
-      >
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <div className="border-b border-[#1a1a1a] px-12 py-12">
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-          }}
+          className="flex items-end justify-between"
         >
           <div>
-            <p
-              style={{
-                color: "#c9a96e",
-                fontSize: 10,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                margin: "0 0 0.75rem",
-              }}
-            >
+            <p className="text-[#c9a96e] text-[10px] tracking-[0.22em] uppercase mb-3">
               Admin Panel
             </p>
             <h1
-              style={{
-                color: "#fff",
-                fontSize: "clamp(28px, 4vw, 52px)",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                margin: 0,
-                lineHeight: 1.05,
-                fontFamily: "'Georgia', serif",
-              }}
+              className="text-white font-bold uppercase leading-tight m-0 text-5xl"
+              style={{ fontFamily: "'Georgia', serif" }}
             >
               Bookings
             </h1>
           </div>
-
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleRefresh}
             disabled={isRefreshing}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              background: "none",
-              border: "1px solid #2a2a2a",
-              color: "#6b7280",
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              padding: "0.75rem 1.5rem",
-              cursor: isRefreshing ? "not-allowed" : "pointer",
-              fontFamily: "'Rethink Sans', sans-serif",
-              opacity: isRefreshing ? 0.5 : 1,
-            }}
+            className={`flex items-center gap-2 bg-transparent border border-[#2a2a2a] text-[#6b7280] text-[11px] tracking-[0.14em] uppercase px-6 py-3 transition-colors hover:border-[#3a3a3a] hover:text-[#9ca3af] ${isRefreshing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
           >
             <RefreshCw
               size={13}
-              style={{
-                animation: isRefreshing ? "spin 1s linear infinite" : "none",
-              }}
+              className={isRefreshing ? "animate-spin" : ""}
             />
             {isRefreshing ? "Refreshing..." : "Refresh"}
           </motion.button>
         </motion.div>
       </div>
 
-      {/* ── Stats ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
       >
-        <div style={{ padding: "2.5rem 3rem 0" }}>
-          <p
-            style={{
-              color: "#3a3a3a",
-              fontSize: 9,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              margin: "0 0 1rem",
-            }}
-          >
+        <div className="px-12 pt-10">
+          <p className="text-[#3a3a3a] text-[9px] tracking-[0.2em] uppercase mb-4">
             Overview
           </p>
         </div>
-        <div style={{ padding: "0 3rem 2.5rem" }}>
+        <div className="px-12 pb-10">
           <BookingStats stats={stats} isLoading={isLoading} />
         </div>
       </motion.div>
 
-      {/* ── Divider ── */}
-      <div style={{ borderTop: "1px solid #1a1a1a", margin: "0 3rem" }} />
+      <div className="border-t border-[#1a1a1a] mx-12" />
 
-      {/* ── Table ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        style={{ padding: "2.5rem 3rem 4rem" }}
+        className="px-12 py-10 pb-16"
       >
-        <p
-          style={{
-            color: "#3a3a3a",
-            fontSize: 9,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            margin: "0 0 1.5rem",
-          }}
-        >
+        <p className="text-[#3a3a3a] text-[9px] tracking-[0.2em] uppercase mb-6">
           All Bookings
         </p>
         <BookingTable
@@ -213,8 +145,6 @@ export default function BookingsPage() {
           onActionComplete={() => fetchData(false)}
         />
       </motion.div>
-
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
