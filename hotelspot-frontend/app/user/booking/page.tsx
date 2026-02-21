@@ -4,14 +4,59 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getHotelById } from "../../../lib/api/hotel";
 import { createBooking } from "../../../lib/api/booking";
-import { Heart, MapPin, Star, Waves } from "lucide-react";
+import { Heart, MapPin, Star, Waves, ChevronLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "@/app/context/AuthContext";
 
-export default function HotelPage() {
+const inputCls =
+  "w-full bg-[#0d0d0d] border border-[#2a2a2a] text-white text-sm px-4 py-3 outline-none focus:border-[#c9a96e] transition-colors placeholder:text-[#3a3a3a]";
+const labelCls =
+  "block text-[#c9a96e] text-[9px] tracking-[0.18em] uppercase mb-2";
+
+function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="mb-6">
+      <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2">
+        {eyebrow}
+      </p>
+      <h3
+        className="text-white text-2xl font-bold uppercase m-0"
+        style={{ fontFamily: "'Georgia', serif" }}
+      >
+        {title}
+      </h3>
+    </div>
+  );
+}
+
+const MOCK_REVIEWS = [
+  {
+    name: "Emily R.",
+    text: "Absolutely breathtaking! The views were stunning and the service was impeccable. Can't wait to come back!",
+  },
+  {
+    name: "John D.",
+    text: "Great location and fantastic amenities. The pool area was a highlight. Room was clean and comfortable.",
+  },
+];
+
+const ROOM_OPTIONS = [
+  { name: "Deluxe King Room", desc: "1 King Bed, City View", price: 250 },
+  {
+    name: "Ocean View Suite",
+    desc: "1 King Bed, 1 Sofa Bed, Ocean View",
+    price: 450,
+  },
+];
+
+export default function HotelBookingPage() {
   const searchParams = useSearchParams();
   const hotelId = searchParams?.get("hotelId") || "";
+  const router = useRouter();
+  const { user } = useAuth();
 
+  const [hotel, setHotel] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
@@ -21,16 +66,10 @@ export default function HotelPage() {
   const [taxes, setTaxes] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [hotel, setHotel] = useState<any | null>(null);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const { user } = useAuth();
 
   useEffect(() => {
     if (!hotelId) return;
-
     setLoading(true);
-
     getHotelById(hotelId)
       .then((res: any) => {
         if (res?.success) setHotel(res.data);
@@ -54,472 +93,399 @@ export default function HotelPage() {
       setTaxes(0);
       return;
     }
-
-    const d1 = new Date(checkIn);
-    const d2 = new Date(checkOut);
     const diff = Math.ceil(
-      (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24),
+      (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000,
     );
-    const validNights = diff > 0 ? diff : 0;
-    setNights(validNights);
-
-    const pricePerNight = hotel?.price || 0;
-    const subtotal = validNights * pricePerNight;
-    const calcTaxes = Math.round(subtotal * 0.12); // 12% taxes as example
-    setTaxes(calcTaxes);
-    setTotalPrice(subtotal + calcTaxes);
+    const n = diff > 0 ? diff : 0;
+    setNights(n);
+    const sub = n * (hotel?.price || 0);
+    const t = Math.round(sub * 0.12);
+    setTaxes(t);
+    setTotalPrice(sub + t);
   }, [checkIn, checkOut, hotel]);
 
   const todayString = () => {
     const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
 
-  const nextDateString = (dateStr: string, add = 1) => {
-    const d = new Date(dateStr);
+  const nextDate = (s: string, add = 1) => {
+    const d = new Date(s);
     d.setDate(d.getDate() + add);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
 
-  const handleCheckInChange = (value: string) => {
-    const today = todayString();
-    if (value < today) {
+  const handleCheckIn = (v: string) => {
+    if (v < todayString()) {
       toast.error("Cannot select past dates for check-in");
       return;
     }
-    setCheckIn(value);
-    // If check-out is before or equal to new check-in, clear it
-    if (checkOut && new Date(checkOut) <= new Date(value)) {
-      setCheckOut("");
-    }
+    setCheckIn(v);
+    if (checkOut && new Date(checkOut) <= new Date(v)) setCheckOut("");
   };
 
-  const handleCheckOutChange = (value: string) => {
-    const today = todayString();
-    if (value < today) {
-      toast.error("Cannot select past dates for check-out");
+  const handleCheckOut = (v: string) => {
+    if (v < todayString()) {
+      toast.error("Cannot select past dates");
       return;
     }
-    if (checkIn && new Date(value) <= new Date(checkIn)) {
+    if (checkIn && new Date(v) <= new Date(checkIn)) {
       toast.error("Check-out must be after check-in");
       return;
     }
-    setCheckOut(value);
+    setCheckOut(v);
   };
 
-  const getImageUrl = (
-    imageUrl?: string,
-    fallback = "/api/placeholder/800/450",
-  ) => {
-    if (!imageUrl) return fallback;
-    if (imageUrl.startsWith("http")) return imageUrl;
-    return (process.env.NEXT_PUBLIC_API_BASE_URL || "") + imageUrl;
+  const getImageUrl = (url?: string) => {
+    if (!url) return "/api/placeholder/800/450";
+    if (url.startsWith("http")) return url;
+    return (process.env.NEXT_PUBLIC_API_BASE_URL || "") + url;
   };
+
+  const handleBook = async () => {
+    if (!hotel) return toast.error("No hotel selected");
+    if (!checkIn || !checkOut)
+      return toast.error("Please select check-in and check-out dates");
+    if (!fullName || !email)
+      return toast.error("Please provide your name and email");
+    try {
+      setSubmitting(true);
+      const res = await createBooking({
+        hotelId: hotel._id || hotel.id || hotelId,
+        fullName,
+        email,
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
+        totalPrice,
+        paymentMethod: "cash",
+      });
+      if (res?.success) {
+        toast.success("Booking created successfully");
+        router.push("/user/booking/history");
+      } else toast.error(res?.message || "Booking failed");
+    } catch (e: any) {
+      toast.error(e.message || "Booking failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const location = hotel
+    ? [hotel.address, hotel.city, hotel.country].filter(Boolean).join(", ")
+    : "";
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Hotelspot</h1>
+    <div
+      className="min-h-screen bg-[#0a0a0a] text-white"
+      style={{ fontFamily: "'Georgia', serif" }}
+    >
+      {/* TOP NAV */}
+      <div className="border-b border-[#1a1a1a] px-12 py-4 flex items-center justify-between">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-[#6b7280] text-[10px] tracking-[0.16em] uppercase bg-transparent border-none cursor-pointer hover:text-[#c9a96e] transition-colors"
+        >
+          <ChevronLeft size={14} /> Back
+        </button>
+        <p className="text-[#c9a96e] text-[10px] tracking-[0.22em] uppercase m-0">
+          Hotelspot
+        </p>
+        <Heart
+          size={16}
+          className="text-[#3a3a3a] cursor-pointer hover:text-[#c9a96e] transition-colors"
+        />
+      </div>
 
-          <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-gray-700 rounded-full">
-              <Heart className="w-5 h-5" />
-            </button>
-            <button className="w-10 h-10 bg-gray-700 rounded-full"></button>
+      {loading && (
+        <div className="flex items-center justify-center py-32">
+          <div className="flex flex-col gap-3">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="h-6 w-64 bg-[#0d0d0d] border border-[#1a1a1a] animate-pulse"
+              />
+            ))}
           </div>
         </div>
-      </header>
+      )}
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {loading && <div className="text-gray-300">Loading...</div>}
+      {!loading && !hotel && (
+        <div className="flex items-center justify-center py-32 text-[#4b5563] text-sm">
+          Hotel not found.
+        </div>
+      )}
 
-        {!loading && !hotel && (
-          <div className="text-red-400">Hotel not found.</div>
-        )}
-
-        {!loading && hotel && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2">
-              {/* Image Gallery */}
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="col-span-2 relative aspect-[16/9] rounded-2xl overflow-hidden">
-                  <img
-                    src={getImageUrl(
-                      hotel.imageUrl,
-                      "/api/placeholder/800/450",
-                    )}
-                    alt={hotel.hotelName || hotel.name || "Hotel image"}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                <div className="relative aspect-square rounded-2xl overflow-hidden">
-                  <img
-                    src={getImageUrl(
-                      hotel.imageUrl,
-                      "/api/placeholder/400/400",
-                    )}
-                    alt={hotel.hotelName || hotel.name || "Hotel image"}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                <div className="relative aspect-square rounded-2xl overflow-hidden">
-                  <img
-                    src={getImageUrl(
-                      hotel.imageUrl,
-                      "/api/placeholder/400/400",
-                    )}
-                    alt={hotel.hotelName || hotel.name || "Hotel image"}
-                    className="w-full h-full object-cover"
-                  />
-
-                  <button className="absolute bottom-4 right-4 bg-gray-800/80 text-gray-100 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 flex items-center gap-2">
-                    <span className="w-5 h-5 grid grid-cols-2 gap-0.5">
-                      <span className="bg-gray-200 rounded-sm"></span>
-                      <span className="bg-gray-200 rounded-sm"></span>
-                      <span className="bg-gray-200 rounded-sm"></span>
-                      <span className="bg-gray-200 rounded-sm"></span>
+      {!loading && hotel && (
+        <div className="grid" style={{ gridTemplateColumns: "1fr 380px" }}>
+          {/* ── LEFT / MAIN ── */}
+          <div className="border-r border-[#1a1a1a] px-12 py-12">
+            {/* HERO */}
+            <div className="mb-3">
+              <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2">
+                {location}
+              </p>
+              <h1
+                className="text-white font-bold uppercase leading-tight m-0"
+                style={{ fontSize: "clamp(28px, 3vw, 48px)" }}
+              >
+                {hotel.hotelName || hotel.name}
+              </h1>
+              <div className="flex items-center gap-4 mt-3">
+                {hotel.rating && (
+                  <div className="flex items-center gap-1.5">
+                    <Star size={13} className="text-[#c9a96e] fill-[#c9a96e]" />
+                    <span className="text-[#c9a96e] text-sm font-bold">
+                      {hotel.rating}
                     </span>
-                    Show all photos
-                  </button>
-                </div>
-              </div>
-
-              {/* Hotel Info */}
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold mb-3 text-gray-100">
-                  {hotel.hotelName || hotel.name}
-                </h2>
-
-                <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium text-gray-100">
-                      {hotel.rating ?? "-"}
-                    </span>
-                    <span>({hotel.reviewsCount ?? "-"} reviews)</span>
+                    {hotel.reviewsCount && (
+                      <span className="text-[#4b5563] text-xs">
+                        ({hotel.reviewsCount} reviews)
+                      </span>
+                    )}
                   </div>
-
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    <span>
-                      {hotel.address
-                        ? `${hotel.address}${
-                            hotel.city ? ", " + hotel.city : ""
-                          }${hotel.country ? ", " + hotel.country : ""}`
-                        : (hotel.location ?? "")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* About */}
-              <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4 text-gray-100">
-                  About this hotel
-                </h3>
-                <p className="text-gray-300 leading-relaxed">
-                  {hotel.description || "No description available."}
-                </p>
-              </div>
-
-              {/* Amenities */}
-              <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4 text-gray-100">
-                  Amenities
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {(
-                    hotel.amenities || [
-                      "Swimming Pool",
-                      "Free Wi-Fi",
-                      "Free Parking",
-                    ]
-                  ).map((a: string, i: number) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 text-gray-300"
-                    >
-                      <Waves className="w-5 h-5 text-emerald-400" />
-                      <span>{a}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Room Options */}
-              <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4">Room Options</h3>
-
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border border-gray-700 rounded-xl hover:border-gray-600 bg-gray-800">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src="/api/placeholder/80/80"
-                        alt="Deluxe King Room"
-                        className="w-20 h-20 rounded-lg object-cover"
-                      />
-                      <div>
-                        <h4 className="font-semibold mb-1">Deluxe King Room</h4>
-                        <p className="text-sm text-gray-300">
-                          1 King Bed, City View
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-left sm:text-right">
-                      <p className="text-xl font-bold mb-2">
-                        $250{" "}
-                        <span className="text-sm font-normal text-gray-400">
-                          /night
-                        </span>
-                      </p>
-
-                      <button className="px-6 py-2 border-2 border-emerald-600 text-emerald-400 rounded-lg font-medium hover:bg-emerald-600 hover:text-white transition">
-                        Select
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border border-gray-700 rounded-xl hover:border-gray-600 bg-gray-800">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src="/api/placeholder/80/80"
-                        alt="Ocean View Suite"
-                        className="w-20 h-20 rounded-lg object-cover"
-                      />
-                      <div>
-                        <h4 className="font-semibold mb-1">Ocean View Suite</h4>
-                        <p className="text-sm text-gray-300">
-                          1 King Bed, 1 Sofa Bed, Ocean View
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-left sm:text-right">
-                      <p className="text-xl font-bold mb-2">
-                        $450{" "}
-                        <span className="text-sm font-normal text-gray-400">
-                          /night
-                        </span>
-                      </p>
-
-                      <button className="px-6 py-2 border-2 border-emerald-600 text-emerald-400 rounded-lg font-medium hover:bg-emerald-600 hover:text-white transition">
-                        Select
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Location */}
-              <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4">Location</h3>
-                <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-gray-800 border border-gray-700">
-                  <img
-                    src="/api/placeholder/800/450"
-                    alt="Map location"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-
-              {/* Guest Reviews */}
-              <div>
-                <h3 className="text-xl font-bold mb-4">Guest Reviews</h3>
-
-                <div className="space-y-4">
-                  <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold">Emily R.</span>
-                      <div className="flex gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    <p className="text-gray-300 text-sm">
-                      "Absolutely breathtaking! The views were stunning and the
-                      service was impeccable. Can't wait to come back!"
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-gray-800 rounded-xl border border-gray-700">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold">John D.</span>
-                      <div className="flex gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    <p className="text-gray-300 text-sm">
-                      "Great location and fantastic amenities. The pool area was
-                      a highlight. Room was clean and comfortable."
-                    </p>
-                  </div>
-
-                  <button className="text-emerald-400 font-medium hover:underline">
-                    Show all {hotel.reviewsCount ?? "reviews"}
-                  </button>
+                )}
+                <div className="flex items-center gap-1.5 text-[#4b5563] text-xs">
+                  <MapPin size={11} className="text-[#c9a96e]" />
+                  {location}
                 </div>
               </div>
             </div>
 
-            {/* Booking Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-8 bg-gray-800 rounded-2xl border border-gray-700 p-6 shadow-sm">
-                <h3 className="text-lg font-bold mb-6 text-gray-100">
-                  Reserve your stay
-                </h3>
-
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Check-in
-                    </label>
-                    <input
-                      type="date"
-                      value={checkIn}
-                      min={todayString()}
-                      onChange={(e) => handleCheckInChange(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Check-out
-                    </label>
-                    <input
-                      type="date"
-                      value={checkOut}
-                      min={checkIn ? nextDateString(checkIn) : todayString()}
-                      onChange={(e) => handleCheckOutChange(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Guests
-                    </label>
-                    <select
-                      value={guests}
-                      onChange={(e) => setGuests(Number(e.target.value))}
-                      className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    >
-                      {[1, 2, 3, 4, 5, 6].map((num) => (
-                        <option key={num} value={num}>
-                          {num} {num === 1 ? "guest" : "guests"}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-2 mb-6 pb-6 border-b border-gray-700">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-300">
-                      ${hotel?.price ?? 0} × {nights} nights
-                    </span>
-                    <span className="font-medium text-gray-100">
-                      ${(hotel?.price || 0) * nights}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-300">Taxes & fees</span>
-                    <span className="font-medium text-gray-100">${taxes}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mb-6">
-                  <span className="font-bold text-lg text-gray-100">Total</span>
-                  <span className="font-bold text-xl text-gray-100">
-                    ${totalPrice}
-                  </span>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <input
-                    placeholder="Full name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-gray-100"
-                  />
-                  <input
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-gray-100"
-                  />
-                </div>
-
-                <button
-                  disabled={submitting || nights <= 0}
-                  onClick={async () => {
-                    if (!hotel) return toast.error("No hotel selected");
-                    if (!checkIn || !checkOut)
-                      return toast.error(
-                        "Please select check-in and check-out dates",
-                      );
-                    if (!fullName || !email)
-                      return toast.error("Please provide your name and email");
-
-                    const payload = {
-                      hotelId: hotel._id || hotel.id || hotelId,
-                      fullName,
-                      email,
-                      checkInDate: checkIn,
-                      checkOutDate: checkOut,
-                      totalPrice: totalPrice,
-                      paymentMethod: "cash",
-                    };
-
-                    try {
-                      setSubmitting(true);
-                      const res = await createBooking(payload);
-                      if (res?.success) {
-                        toast.success("Booking created successfully");
-                        router.push("/user/booking/history");
-                      } else {
-                        toast.error(res?.message || "Booking failed");
-                      }
-                    } catch (err: any) {
-                      toast.error(err.message || "Booking failed");
-                    } finally {
-                      setSubmitting(false);
-                    }
-                  }}
-                  className="w-full bg-emerald-600 text-white py-4 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-60"
-                >
-                  {submitting ? "Booking..." : "Reserve Now"}
+            {/* IMAGE GALLERY */}
+            <div
+              className="grid gap-px bg-[#1a1a1a] mb-14"
+              style={{
+                gridTemplateColumns: "2fr 1fr 1fr",
+                gridTemplateRows: "280px",
+              }}
+            >
+              <div className="overflow-hidden bg-[#111]">
+                <img
+                  src={getImageUrl(hotel.imageUrl)}
+                  alt={hotel.hotelName}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="overflow-hidden bg-[#111]">
+                <img
+                  src={getImageUrl(hotel.imageUrl)}
+                  alt={hotel.hotelName}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="relative overflow-hidden bg-[#111]">
+                <img
+                  src={getImageUrl(hotel.imageUrl)}
+                  alt={hotel.hotelName}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                />
+                <button className="absolute bottom-4 right-4 bg-[#0a0a0a]/90 border border-[#2a2a2a] text-[#9ca3af] text-[10px] tracking-[0.14em] uppercase px-4 py-2 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors cursor-pointer">
+                  All Photos
                 </button>
               </div>
             </div>
+
+            {/* ABOUT */}
+            <div className="border-b border-[#1a1a1a] pb-12 mb-12">
+              <SectionTitle eyebrow="Overview" title="About This Hotel" />
+              <p className="text-[#6b7280] text-sm leading-relaxed">
+                {hotel.description || "No description available."}
+              </p>
+            </div>
+
+            {/* AMENITIES */}
+            <div className="border-b border-[#1a1a1a] pb-12 mb-12">
+              <SectionTitle eyebrow="Facilities" title="Amenities" />
+              <div className="grid grid-cols-2 gap-3">
+                {(
+                  hotel.amenities || [
+                    "Swimming Pool",
+                    "Free Wi-Fi",
+                    "Free Parking",
+                    "Restaurant",
+                    "Gym",
+                    "Spa",
+                  ]
+                ).map((a: string, i: number) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 text-[#6b7280] text-sm"
+                  >
+                    <Waves size={13} className="text-[#c9a96e] shrink-0" />
+                    {a}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* LOCATION */}
+            <div className="border-b border-[#1a1a1a] pb-12 mb-12">
+              <SectionTitle eyebrow="Where We Are" title="Location" />
+              <div className="h-52 bg-[#0d0d0d] border border-[#1a1a1a] flex items-center justify-center relative overflow-hidden">
+                <div
+                  className="absolute inset-0 opacity-10"
+                  style={{
+                    backgroundImage:
+                      "repeating-linear-gradient(0deg,#c9a96e,#c9a96e 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,#c9a96e,#c9a96e 1px,transparent 1px,transparent 40px)",
+                  }}
+                />
+                <div className="relative flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 border border-[#c9a96e]/40 rounded-full flex items-center justify-center">
+                    <div className="w-3 h-3 bg-[#c9a96e] rounded-full" />
+                  </div>
+                  <p className="text-[#3a3a3a] text-[9px] tracking-[0.2em] uppercase">
+                    {location}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* REVIEWS */}
+            <div>
+              <SectionTitle eyebrow="What Guests Say" title="Guest Reviews" />
+              <div className="flex flex-col gap-px bg-[#1a1a1a]">
+                {MOCK_REVIEWS.map((r, i) => (
+                  <div key={i} className="bg-[#0d0d0d] p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 bg-[#1a1a1a] border border-[#2a2a2a] rounded-full flex items-center justify-center text-[#c9a96e] text-xs font-bold">
+                        {r.name[0]}
+                      </div>
+                      <span className="text-white text-sm font-bold">
+                        {r.name}
+                      </span>
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, j) => (
+                          <Star
+                            key={j}
+                            size={10}
+                            className="text-[#c9a96e] fill-[#c9a96e]"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-[#6b7280] text-sm leading-relaxed m-0">
+                      {r.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <button className="text-[#c9a96e] text-[10px] tracking-[0.16em] uppercase mt-5 bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity">
+                Show all {hotel.reviewsCount ?? ""} reviews →
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* ── RIGHT / BOOKING SIDEBAR ── */}
+          <div className="sticky top-0 h-screen overflow-y-auto bg-[#0d0d0d] border-l border-[#1a1a1a] flex flex-col">
+            <div className="p-8 border-b border-[#1a1a1a]">
+              <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2">
+                Starting from
+              </p>
+              <p className="text-white text-3xl font-bold m-0">
+                Rs. {(hotel.price || 0).toLocaleString()}
+                <span className="text-[#4b5563] text-sm font-normal">
+                  /night
+                </span>
+              </p>
+            </div>
+
+            <div className="p-8 flex flex-col gap-5 flex-1">
+              <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase">
+                Reserve Your Stay
+              </p>
+
+              <div>
+                <label className={labelCls}>Check-in</label>
+                <input
+                  type="date"
+                  value={checkIn}
+                  min={todayString()}
+                  onChange={(e) => handleCheckIn(e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Check-out</label>
+                <input
+                  type="date"
+                  value={checkOut}
+                  min={checkIn ? nextDate(checkIn) : todayString()}
+                  onChange={(e) => handleCheckOut(e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Guests</label>
+                <select
+                  value={guests}
+                  onChange={(e) => setGuests(Number(e.target.value))}
+                  className={inputCls}
+                >
+                  {[1, 2, 3, 4, 5, 6].map((n) => (
+                    <option key={n} value={n}>
+                      {n} {n === 1 ? "guest" : "guests"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Price breakdown */}
+              {nights > 0 && (
+                <div className="border-t border-b border-[#1a1a1a] py-5 flex flex-col gap-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[#4b5563]">
+                      Rs. {(hotel.price || 0).toLocaleString()} × {nights}{" "}
+                      nights
+                    </span>
+                    <span className="text-white">
+                      Rs. {((hotel.price || 0) * nights).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[#4b5563]">Taxes & fees (12%)</span>
+                    <span className="text-white">
+                      Rs. {taxes.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-bold mt-2">
+                    <span className="text-white">Total</span>
+                    <span className="text-[#c9a96e] text-lg">
+                      Rs. {totalPrice.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className={labelCls}>Full Name</label>
+                <input
+                  placeholder="Your full name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Email</label>
+                <input
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+
+              <button
+                disabled={submitting || nights <= 0}
+                onClick={handleBook}
+                className="w-full bg-[#c9a96e] text-[#0a0a0a] text-[11px] font-bold tracking-[0.18em] uppercase py-4 hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed border-none cursor-pointer mt-auto"
+              >
+                {submitting ? "Booking..." : "Reserve Now"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

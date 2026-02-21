@@ -9,43 +9,39 @@ import BookingHeader from "../_components/BookingHeader";
 import SearchFilterBar from "../_components/SearchFilter";
 import BookingTabs from "../_components/BookingTabs";
 import BookingCard from "../_components/BookingCard";
-import EmptyState from "../_components/EmptyState";
 import BookingSummaryStats from "../_components/BookingSummary";
 import { getLocationString } from "@/app/BookingUtils";
 
 export default function BookingHistoryPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [hotelCache, setHotelCache] = useState<Record<string, any>>({});
   const [reviewBooking, setReviewBooking] = useState<any | null>(null);
-  const { user } = useAuth();
 
   const getHotelData = (booking: any) =>
     booking.hotel || hotelCache[booking.hotelId] || {};
 
   const filterBookings = () => {
     let filtered = bookings;
-
-    if (activeTab !== "all") {
+    if (activeTab !== "all")
       filtered = filtered.filter((b) => b.status === activeTab);
-    }
-
     if (searchQuery) {
-      filtered = filtered.filter((booking) => {
-        const hotelData = getHotelData(booking);
-        const hotelName = hotelData?.hotelName || booking.hotelName || "";
-        const location = getLocationString(hotelData);
-        const id = booking._id || booking.id || "";
+      filtered = filtered.filter((b) => {
+        const h = getHotelData(b);
+        const name = h?.hotelName || b.hotelName || "";
+        const loc = getLocationString(h);
+        const id = b._id || b.id || "";
+        const q = searchQuery.toLowerCase();
         return (
-          hotelName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          id.toLowerCase().includes(searchQuery.toLowerCase())
+          name.toLowerCase().includes(q) ||
+          loc.toLowerCase().includes(q) ||
+          id.toLowerCase().includes(q)
         );
       });
     }
-
     return filtered;
   };
 
@@ -58,8 +54,8 @@ export default function BookingHistoryPage() {
         else if (Array.isArray(res)) setBookings(res);
         else setBookings([]);
       })
-      .catch((err: any) => {
-        toast.error(err.message || "Failed to load bookings");
+      .catch((e: any) => {
+        toast.error(e.message || "Failed to load bookings");
         setBookings([]);
       })
       .finally(() => setLoading(false));
@@ -67,68 +63,67 @@ export default function BookingHistoryPage() {
 
   useEffect(() => {
     if (!bookings.length) return;
-    bookings.forEach((booking) => {
-      if (!booking.hotel && booking.hotelId && !hotelCache[booking.hotelId]) {
-        getHotelById(booking.hotelId)
+    bookings.forEach((b) => {
+      if (!b.hotel && b.hotelId && !hotelCache[b.hotelId]) {
+        getHotelById(b.hotelId)
           .then((res: any) => {
-            const hotelData = res?.success ? res.data : res;
-            if (hotelData) {
-              setHotelCache((prev) => ({
-                ...prev,
-                [booking.hotelId]: hotelData,
-              }));
-            }
+            const data = res?.success ? res.data : res;
+            if (data) setHotelCache((prev) => ({ ...prev, [b.hotelId]: data }));
           })
-          .catch((err: any) =>
-            console.error(`Failed to fetch hotel ${booking.hotelId}:`, err),
-          );
+          .catch(() => {});
       }
     });
   }, [bookings]);
 
-  const handleReviewSubmit = (
-    bookingId: string,
-    rating: number,
-    review: string,
-  ) => {
-    // TODO: call your review API here
-    console.log("Review submitted:", { bookingId, rating, review });
-    toast.success("Review submitted successfully!");
-    // Optimistically update local rating
-    setBookings((prev) =>
-      prev.map((b) => ((b._id || b.id) === bookingId ? { ...b, rating } : b)),
-    );
-  };
-
-  const filteredBookings = filterBookings();
+  const filtered = filterBookings();
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       <BookingHeader />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="px-12 py-10">
         <SearchFilterBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
         />
-
         <BookingTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
         {loading ? (
-          <div className="text-center py-20 text-gray-400">
-            Loading bookings...
-          </div>
-        ) : filteredBookings.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="space-y-4">
-            {filteredBookings.map((booking) => (
-              <BookingCard
-                key={booking._id || booking.id}
-                booking={booking}
-                hotelData={getHotelData(booking)}
-                onReview={setReviewBooking}
+          <div className="flex flex-col gap-3">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="h-50 bg-[#0d0d0d] border border-[#1a1a1a] animate-pulse"
               />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-24 border-t border-[#1a1a1a]">
+            <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-3">
+              No Results
+            </p>
+            <h2
+              className="text-white text-3xl font-bold uppercase mb-3"
+              style={{ fontFamily: "'Georgia', serif" }}
+            >
+              {searchQuery ? "No Bookings Found" : "No Bookings Yet"}
+            </h2>
+            <p className="text-[#4b5563] text-sm">
+              {searchQuery
+                ? "Try adjusting your search terms."
+                : "Your booking history will appear here."}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-px bg-[#1a1a1a]">
+            {filtered.map((booking) => (
+              <div key={booking._id || booking.id} className="bg-[#0a0a0a]">
+                <BookingCard
+                  booking={booking}
+                  hotelData={getHotelData(booking)}
+                  onReview={setReviewBooking}
+                />
+              </div>
             ))}
           </div>
         )}

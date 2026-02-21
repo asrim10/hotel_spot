@@ -5,45 +5,57 @@ interface BookingSummaryStatsProps {
 export default function BookingSummaryStats({
   bookings,
 }: BookingSummaryStatsProps) {
-  // Normalize status for comparison
-  const normalize = (s: string) => (s || "").toLowerCase().trim();
-
+  const norm = (s: string) => (s || "").toLowerCase().trim();
   const isCompleted = (b: any) =>
     ["completed", "complete", "done", "checked_out", "checkedout"].includes(
-      normalize(b.status),
+      norm(b.status),
     );
-
   const isUpcoming = (b: any) =>
     ["upcoming", "confirmed", "booked", "pending", "active"].includes(
-      normalize(b.status),
+      norm(b.status),
     );
 
-  const completedBookings = bookings.filter(isCompleted);
-  const upcomingBookings = bookings.filter(isUpcoming);
-
-  const totalSpent = completedBookings.reduce(
-    (sum, b) => sum + (b.totalAmount || b.totalPrice || 0),
+  const completed = bookings.filter(isCompleted);
+  const upcoming = bookings.filter(isUpcoming);
+  const totalSpent = completed.reduce(
+    (s, b) => s + (b.totalAmount || b.totalPrice || 0),
     0,
   );
 
   const stats = [
-    { value: bookings.length, label: "Total Bookings" },
-    { value: upcomingBookings.length, label: "Upcoming Trips" },
-    { value: completedBookings.length, label: "Completed Stays" },
-    { value: `Rs.${totalSpent.toLocaleString()}`, label: "Total Spent" },
+    { value: bookings.length, label: "Total Bookings", accent: "#c9a96e" },
+    { value: upcoming.length, label: "Upcoming Trips", accent: "#60a5fa" },
+    { value: completed.length, label: "Completed Stays", accent: "#4ade80" },
+    {
+      value: `Rs. ${totalSpent.toLocaleString()}`,
+      label: "Total Spent",
+      accent: "#c9a96e",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
-      {stats.map((stat) => (
+    <div
+      className="grid border-t border-l border-[#1a1a1a] mt-16"
+      style={{ gridTemplateColumns: "repeat(4,1fr)" }}
+    >
+      {stats.map((s) => (
         <div
-          key={stat.label}
-          className="bg-gray-800 rounded-xl border border-gray-700 p-6"
+          key={s.label}
+          className="bg-[#0d0d0d] border-r border-b border-[#1a1a1a] p-8"
         >
-          <div className="text-3xl font-bold mb-2 text-gray-100">
-            {stat.value}
-          </div>
-          <div className="text-gray-300 text-sm">{stat.label}</div>
+          <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-4">
+            {s.label}
+          </p>
+          <p
+            className="text-white text-[36px] font-bold leading-none m-0"
+            style={{ fontFamily: "'Georgia', serif" }}
+          >
+            {s.value}
+          </p>
+          <div
+            className="w-5 h-0.5 mt-4"
+            style={{ background: s.accent, opacity: 0.5 }}
+          />
         </div>
       ))}
     </div>

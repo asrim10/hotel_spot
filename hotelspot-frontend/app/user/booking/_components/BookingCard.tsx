@@ -23,144 +23,171 @@ interface BookingCardProps {
   onReview: (booking: any) => void;
 }
 
+const STATUS_STYLES: Record<string, string> = {
+  upcoming: "bg-[#0d1f3c] text-[#60a5fa] border border-[#1e3a5f]",
+  confirmed: "bg-[#0d1f3c] text-[#60a5fa] border border-[#1e3a5f]",
+  completed: "bg-[#0d2818] text-[#4ade80] border border-[#1a4a2e]",
+  cancelled: "bg-[#2d0d0d] text-[#f87171] border border-[#4a1a1a]",
+  pending: "bg-[#1f1a0d] text-[#facc15] border border-[#3a3010]",
+};
+
+function statusStyle(status: string) {
+  return (
+    STATUS_STYLES[(status || "").toLowerCase().trim()] ||
+    "bg-[#1a1a1a] text-[#6b7280] border border-[#2a2a2a]"
+  );
+}
+
+function InfoCell({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="text-[#3a3a3a] text-[9px] tracking-[0.18em] uppercase">
+        {label}
+      </p>
+      <div className="flex items-center gap-2">
+        <span className="text-[#c9a96e]">{icon}</span>
+        <span className="text-white text-sm font-semibold">{value}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function BookingCard({
   booking,
   hotelData,
   onReview,
 }: BookingCardProps) {
   const router = useRouter();
+  const hotelReviewId = hotelData?._id || booking.hotelId || booking.hotel?._id;
 
   return (
-    <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="flex flex-col lg:flex-row">
-        <div className="lg:w-80 h-48 lg:h-auto shrink-0">
+    <div className="border border-[#1a1a1a] bg-[#0d0d0d] hover:border-[#2a2a2a] transition-colors">
+      <div className="grid" style={{ gridTemplateColumns: "240px 1fr" }}>
+        {/* Image */}
+        <div className="relative overflow-hidden bg-[#111] h-full min-h-50">
           <img
             src={getImageUrl(hotelData?.imageUrl || booking.image)}
-            alt={hotelData?.hotelName || booking.hotelName}
+            alt={hotelData?.hotelName || booking.hotelName || "Hotel"}
             className="w-full h-full object-cover"
           />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(13,13,13,0.6) 0%, transparent 60%)",
+            }}
+          />
+          <div className="absolute bottom-3 left-3">
+            <span
+              className={`text-[10px] px-2 py-1 font-bold tracking-widest uppercase ${statusStyle(booking.status)}`}
+            >
+              {getStatusText(booking.status)}
+            </span>
+          </div>
         </div>
 
-        <div className="flex-1 p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-xl font-bold text-gray-100">
+        {/* Content */}
+        <div className="flex flex-col justify-between p-7">
+          {/* Top */}
+          <div>
+            <div className="flex items-start justify-between mb-1">
+              <div>
+                <p className="text-[#c9a96e] text-[9px] tracking-[0.18em] uppercase mb-1">
+                  {getLocationString(hotelData)}
+                </p>
+                <h3
+                  className="text-white text-xl font-bold uppercase leading-snug"
+                  style={{ fontFamily: "'Georgia', serif" }}
+                >
                   {hotelData?.hotelName || booking.hotelName || "Hotel"}
                 </h3>
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}
-                >
-                  {getStatusText(booking.status)}
-                </span>
               </div>
-              <div className="flex items-center text-gray-300 text-sm mb-1">
-                <MapPin className="w-4 h-4 mr-1 text-gray-300" />
-                {getLocationString(hotelData)}
-              </div>
-              <div className="text-sm text-gray-400">
-                Booking ID: {booking._id || booking.id} • Confirmation:{" "}
-                {booking.confirmation || booking.confirmationCode || "-"}
-              </div>
+              {booking.rating && (
+                <div className="flex items-center gap-1.5 bg-[#161206] border border-[#c9a96e33] px-3 py-1.5">
+                  <Star size={11} className="text-[#c9a96e] fill-[#c9a96e]" />
+                  <span className="text-[#c9a96e] text-xs font-bold">
+                    {booking.rating}.0
+                  </span>
+                </div>
+              )}
             </div>
-            {booking.rating && (
-              <div className="flex items-center gap-1 bg-yellow-700 px-3 py-1 rounded-lg">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold text-yellow-100">
-                  {booking.rating}.0
-                </span>
-              </div>
-            )}
+            <p className="text-[#3a3a3a] text-[10px] font-mono mt-1">
+              ID: {(booking._id || booking.id || "").slice(-12).toUpperCase()}{" "}
+              &nbsp;·&nbsp;{" "}
+              {booking.confirmation || booking.confirmationCode || "—"}
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 pb-4 border-b border-gray-700">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-emerald-300" />
-              </div>
-              <div>
-                <div className="text-xs text-gray-400">Check-in</div>
-                <div className="font-semibold text-gray-100">
-                  {formatDate(booking.checkInDate)}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-emerald-300" />
-              </div>
-              <div>
-                <div className="text-xs text-gray-400">Check-out</div>
-                <div className="font-semibold text-gray-100">
-                  {formatDate(booking.checkOutDate)}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center">
-                <Users className="w-5 h-5 text-emerald-300" />
-              </div>
-              <div>
-                <div className="text-xs text-gray-400">Guests</div>
-                <div className="font-semibold text-gray-100">
-                  {booking.guests || 1}{" "}
-                  {(booking.guests || 1) === 1 ? "Guest" : "Guests"}
-                </div>
-              </div>
-            </div>
+          {/* Dates + Guests */}
+          <div className="grid grid-cols-3 border-t border-b border-[#1a1a1a] py-5 my-5 gap-4">
+            <InfoCell
+              icon={<Calendar size={13} />}
+              label="Check-in"
+              value={formatDate(booking.checkInDate)}
+            />
+            <InfoCell
+              icon={<Calendar size={13} />}
+              label="Check-out"
+              value={formatDate(booking.checkOutDate)}
+            />
+            <InfoCell
+              icon={<Users size={13} />}
+              label="Guests"
+              value={`${booking.guests || 1} ${(booking.guests || 1) === 1 ? "Guest" : "Guests"}`}
+            />
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {/* Bottom */}
+          <div className="flex items-end justify-between gap-4">
             <div>
-              <div className="text-sm text-gray-300 mb-1">
-                {booking.roomType || "Room"}
-              </div>
-              <div className="text-sm text-gray-400">
+              <p className="text-[#3a3a3a] text-[9px] tracking-[0.18em] uppercase mb-1">
                 {booking.nights || 1}{" "}
-                {(booking.nights || 1) === 1 ? "night" : "nights"}
-              </div>
+                {(booking.nights || 1) === 1 ? "Night" : "Nights"}
+              </p>
+              <p
+                className="text-white text-2xl font-bold"
+                style={{ fontFamily: "'Georgia', serif" }}
+              >
+                Rs.{" "}
+                {(
+                  booking.totalAmount ||
+                  booking.totalPrice ||
+                  0
+                ).toLocaleString()}
+              </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-sm text-gray-300">Total Amount</div>
-                <div className="text-2xl font-bold text-gray-100">
-                  Rs.{booking.totalAmount || booking.totalPrice || 0}
-                </div>
-              </div>
-
-              <div className="flex gap-2 flex-wrap">
-                {booking.status === "upcoming" && (
-                  <>
-                    <button className="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-700 flex items-center gap-2 text-gray-100">
-                      <Phone className="w-4 h-4" />
-                      <span className="hidden md:inline">Contact</span>
-                    </button>
-                    <button className="px-4 py-2 bg-red-700 text-red-100 border border-red-700 rounded-lg hover:bg-red-600">
-                      Cancel
-                    </button>
-                  </>
-                )}
-
-                <button
-                  onClick={() =>
-                    router.push(
-                      `/user/review?hotelId=${hotelData?._id || booking.hotelId || booking.hotel?._id}`,
-                    )
-                  }
-                  className="px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-700 flex items-center gap-2 text-gray-100"
-                >
-                  <Star className="w-4 h-4 fill-amber-500" />
-                  <span className="hidden md:inline">Review</span>
-                </button>
-
-                <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2">
-                  <span>Details</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+            <div className="flex items-center gap-2">
+              {(booking.status === "upcoming" ||
+                booking.status === "confirmed") && (
+                <>
+                  <button className="border border-[#2a2a2a] text-[#6b7280] text-[10px] tracking-[0.14em] uppercase px-4 py-2.5 hover:border-[#3a3a3a] hover:text-[#9ca3af] transition-colors bg-transparent cursor-pointer flex items-center gap-1.5">
+                    <Phone size={12} /> Contact
+                  </button>
+                  <button className="border border-[#7f1d1d] text-[#f87171] text-[10px] tracking-[0.14em] uppercase px-4 py-2.5 hover:bg-[#7f1d1d] hover:text-white transition-colors bg-transparent cursor-pointer">
+                    Cancel
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() =>
+                  router.push(`/user/review?hotelId=${hotelReviewId}`)
+                }
+                className="border border-[#2a2a2a] text-[#6b7280] text-[10px] tracking-[0.14em] uppercase px-4 py-2.5 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors bg-transparent cursor-pointer flex items-center gap-1.5"
+              >
+                <Star size={12} /> Review
+              </button>
+              <button className="bg-[#c9a96e] text-[#0a0a0a] text-[10px] font-bold tracking-[0.14em] uppercase px-5 py-2.5 hover:opacity-90 transition-opacity cursor-pointer border-none flex items-center gap-1.5">
+                Details <ChevronRight size={12} />
+              </button>
             </div>
           </div>
         </div>

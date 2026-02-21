@@ -1,12 +1,18 @@
 export default function BookingHeader() {
   return (
-    <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold">Booking History</h1>
-        <p className="text-gray-300 text-sm mt-1">
-          View and manage all your hotel bookings
-        </p>
-      </div>
-    </header>
+    <div className="border-b border-[#1a1a1a] px-12 py-12">
+      <p className="text-[#c9a96e] text-[10px] tracking-[0.22em] uppercase mb-3">
+        My Account
+      </p>
+      <h1
+        className="text-white text-5xl font-bold uppercase leading-tight m-0"
+        style={{ fontFamily: "'Georgia', serif" }}
+      >
+        Booking History
+      </h1>
+      <p className="text-[#4b5563] text-sm mt-3">
+        View and manage all your hotel bookings
+      </p>
+    </div>
   );
 }
