@@ -5,9 +5,14 @@ import { useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { handleUpdateProfile } from "@/lib/actions/auth-action";
 import { UpdateUserData, updateUserSchema } from "../schema";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import DarkPageLayout, {
+  DarkSection,
+  DarkButton,
+  DarkInput,
+  styles,
+} from "@/app/_components/ui/DarkPage";
 
 export default function UpdateUserForm({ user }: { user: any }) {
   const router = useRouter();
@@ -33,13 +38,11 @@ export default function UpdateUserForm({ user }: { user: any }) {
 
   const handleImageChange = (
     file: File | undefined,
-    onChange: (file: File | undefined) => void,
+    onChange: (f: File | undefined) => void,
   ) => {
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
-      };
+      reader.onloadend = () => setPreviewImage(reader.result as string);
       reader.readAsDataURL(file);
     } else {
       setPreviewImage(null);
@@ -47,12 +50,10 @@ export default function UpdateUserForm({ user }: { user: any }) {
     onChange(file);
   };
 
-  const handleDismissImage = (onChange?: (file: File | undefined) => void) => {
+  const handleDismissImage = (onChange?: (f: File | undefined) => void) => {
     setPreviewImage(null);
     onChange?.(undefined);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const onSubmit = async (data: UpdateUserData) => {
@@ -62,213 +63,234 @@ export default function UpdateUserForm({ user }: { user: any }) {
       formData.append("fullName", data.fullName);
       formData.append("email", data.email);
       formData.append("username", data.username);
-      if (data.image) {
-        formData.append("image", data.image);
-      }
+      if (data.image) formData.append("image", data.image);
+
       const response = await handleUpdateProfile(formData);
-
-      if (!response.success) {
+      if (!response.success)
         throw new Error(response.message || "Update profile failed");
-      }
 
-      // Update auth context
       await checkAuth();
-
       handleDismissImage();
       toast.success("Profile updated successfully");
-
-      // Redirect back to profile page
       router.push("/user/profile");
-    } catch (error: Error | any) {
-      toast.error(error.message || "Profile update failed");
-      setError(error.message || "Profile update failed");
+    } catch (err: any) {
+      toast.error(err.message || "Profile update failed");
+      setError(err.message || "Profile update failed");
     }
   };
 
+  const initials = user?.username?.charAt(0).toUpperCase() || "U";
+  const currentImage = previewImage
+    ? previewImage
+    : user?.imageUrl
+      ? process.env.NEXT_PUBLIC_API_BASE_URL + user.imageUrl
+      : null;
+
+  const avatar = (
+    <div style={{ position: "relative", flexShrink: 0 }}>
+      <div
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: "50%",
+          overflow: "hidden",
+          border: "2px solid #2a2a2a",
+        }}
+      >
+        {currentImage ? (
+          <img
+            src={currentImage}
+            alt="Profile"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: "linear-gradient(135deg, #c9a96e 0%, #8b6914 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#0a0a0a",
+              fontSize: 26,
+              fontWeight: 700,
+            }}
+          >
+            {initials}
+          </div>
+        )}
+      </div>
+      {previewImage && (
+        <Controller
+          name="image"
+          control={control}
+          render={({ field: { onChange } }) => (
+            <button
+              type="button"
+              onClick={() => handleDismissImage(onChange)}
+              style={{
+                position: "absolute",
+                top: -4,
+                right: -4,
+                width: 20,
+                height: 20,
+                borderRadius: "50%",
+                background: "#ef4444",
+                border: "none",
+                color: "#fff",
+                fontSize: 9,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ✕
+            </button>
+          )}
+        />
+      )}
+    </div>
+  );
+
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Edit Profile</h1>
-          <p className="text-gray-500 mt-1">Update your personal information</p>
-        </div>
-        <Link
+    <DarkPageLayout
+      eyebrow="Your Account"
+      title="Edit Profile"
+      heroHeight="38vh"
+      heroTopRight={
+        <a
           href="/user/profile"
-          className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+          style={{
+            color: "#6b7280",
+            fontSize: 11,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            textDecoration: "none",
+          }}
         >
           ← Back to Profile
-        </Link>
-      </div>
-
-      {/* Form Card */}
-      <div className="bg-white rounded-3xl shadow-lg border-2 border-blue-500 overflow-hidden">
-        {/* Cover Image */}
-        <div className="h-32 bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100"></div>
-
-        <form className="px-8 py-6" onSubmit={handleSubmit(onSubmit)}>
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Profile Image Section */}
-          <div className="mb-8 -mt-20">
-            <div className="flex items-end gap-4">
-              <div className="relative">
-                <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200">
-                  {previewImage ? (
-                    <img
-                      src={previewImage}
-                      alt="Profile Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : user?.imageUrl ? (
-                    <img
-                      src={process.env.NEXT_PUBLIC_API_BASE_URL + user.imageUrl}
-                      alt="Profile Image"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-4xl font-bold">
-                      {user?.username?.charAt(0).toUpperCase() || "U"}
-                    </div>
+        </a>
+      }
+      avatarSlot={avatar}
+      stats={[
+        {
+          label: "Profile Picture",
+          value: (
+            <Controller
+              name="image"
+              control={control}
+              render={({ field: { onChange } }) => (
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={(e) =>
+                      handleImageChange(e.target.files?.[0], onChange)
+                    }
+                    accept=".jpg,.jpeg,.png,.webp"
+                    style={{
+                      color: "#6b7280",
+                      fontSize: 13,
+                      fontFamily: "'Georgia', serif",
+                    }}
+                  />
+                  {errors.image && (
+                    <p style={styles.errorText}>{errors.image.message}</p>
                   )}
                 </div>
-                {previewImage && (
-                  <Controller
-                    name="image"
-                    control={control}
-                    render={({ field: { onChange } }) => (
-                      <button
-                        type="button"
-                        onClick={() => handleDismissImage(onChange)}
-                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 shadow-lg"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  />
-                )}
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Profile Picture
-                </label>
-                <Controller
-                  name="image"
-                  control={control}
-                  render={({ field: { onChange } }) => (
-                    <div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        onChange={(e) =>
-                          handleImageChange(e.target.files?.[0], onChange)
-                        }
-                        accept=".jpg,.jpeg,.png,.webp"
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
-                      />
-                    </div>
-                  )}
-                />
-                {errors.image && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {errors.image.message}
-                  </p>
-                )}
-              </div>
-            </div>
+              )}
+            />
+          ),
+        },
+      ]}
+    >
+      <DarkSection eyebrow="Update Details" title="Personal Info">
+        {error && (
+          <div
+            style={{
+              marginBottom: "2rem",
+              padding: "1rem 1.25rem",
+              border: "1px solid #7f1d1d",
+              background: "#1a0a0a",
+              color: "#ef4444",
+              fontSize: 13,
+            }}
+          >
+            {error}
           </div>
+        )}
 
-          {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div style={{ borderTop: "1px solid #1a1a1a" }}>
             {/* Full Name */}
-            <div>
+            <div style={styles.row}>
               <label
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                style={{ ...styles.eyebrow, paddingTop: "0.9rem" }}
                 htmlFor="fullName"
               >
                 Full Name
               </label>
-              <input
+              <DarkInput
                 id="fullName"
-                type="text"
-                {...register("fullName")}
-                className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition-colors  text-gray-500"
                 placeholder="Enter your full name"
+                registration={register("fullName")}
+                error={errors.fullName?.message}
               />
-              {errors.fullName && (
-                <p className="text-sm text-red-600 mt-1">
-                  {errors.fullName.message}
-                </p>
-              )}
             </div>
 
             {/* Username */}
-            <div>
+            <div style={styles.row}>
               <label
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                style={{ ...styles.eyebrow, paddingTop: "0.9rem" }}
                 htmlFor="username"
               >
                 Username
               </label>
-              <input
+              <DarkInput
                 id="username"
-                type="text"
-                {...register("username")}
-                className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition-colors text-gray-500"
                 placeholder="Enter your username"
+                registration={register("username")}
+                error={errors.username?.message}
               />
-              {errors.username && (
-                <p className="text-sm text-red-600 mt-1">
-                  {errors.username.message}
-                </p>
-              )}
             </div>
 
             {/* Email */}
-            <div className="md:col-span-2">
+            <div style={styles.row}>
               <label
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                style={{ ...styles.eyebrow, paddingTop: "0.9rem" }}
                 htmlFor="email"
               >
                 Email Address
               </label>
-              <input
+              <DarkInput
                 id="email"
                 type="email"
-                {...register("email")}
-                className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition-colors  text-gray-500"
                 placeholder="Enter your email"
+                registration={register("email")}
+                error={errors.email?.message}
               />
-              {errors.email && (
-                <p className="text-sm text-red-600 mt-1">
-                  {errors.email.message}
-                </p>
-              )}
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 justify-end pt-4 border-t">
-            <Link
-              href="/user/profile"
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-            >
+          <div
+            style={{
+              marginTop: "3rem",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "1rem",
+            }}
+          >
+            <DarkButton href="/user/profile" variant="outline">
               Cancel
-            </Link>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? "Updating..." : "Save Changes"}
-            </button>
+            </DarkButton>
+            <DarkButton type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </DarkButton>
           </div>
         </form>
-      </div>
-    </div>
+      </DarkSection>
+    </DarkPageLayout>
   );
 }

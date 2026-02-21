@@ -14,10 +14,11 @@ export default async function EditProfilePage() {
   }
 
   return (
-    <div className="flex-1 p-8 bg-gray-50">
-      <div className="max-w-5xl mx-auto">
-        <UpdateUserForm user={result.data} />
-      </div>
+    <div
+      className="flex-1 p-8"
+      style={{ background: "#0a0a0a", minHeight: "100vh" }}
+    >
+      <UpdateUserForm user={result.data} />
     </div>
   );
 }
