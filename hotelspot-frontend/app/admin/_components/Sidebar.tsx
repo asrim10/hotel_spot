@@ -69,12 +69,27 @@ const BookingsIcon = () => (
     <line x1="3" y1="10" x2="21" y2="10" />
   </svg>
 );
+const ReviewsIcon = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
 
 const ADMIN_LINKS = [
   { href: "/admin", label: "Dashboard", icon: DashboardIcon },
   { href: "/admin/users", label: "Users", icon: UsersIcon },
   { href: "/admin/hotels", label: "Hotels", icon: HotelsIcon },
   { href: "/admin/bookings", label: "Bookings", icon: BookingsIcon },
+  { href: "/admin/review", label: "Reviews", icon: ReviewsIcon },
 ];
 
 export default function AdminSidebar() {
@@ -83,9 +98,9 @@ export default function AdminSidebar() {
     href === "/admin" ? pathname === href : pathname?.startsWith(href);
 
   return (
-    <aside className="sticky top-0 h-screen w-60 bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col flex-shrink-0 overflow-y-auto">
+    <aside className="sticky top-0 h-screen w-60 bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col shrink-0 overflow-y-auto">
       <div className="px-6 py-7 border-b border-[#1a1a1a] flex items-center gap-3.5">
-        <div className="w-8.5 h-8.5 bg-[#c9a96e] flex items-center justify-center text-[#0a0a0a] text-sm font-extrabold tracking-wide flex-shrink-0">
+        <div className="w-8.5 h-8.5 bg-[#c9a96e] flex items-center justify-center text-[#0a0a0a] text-sm font-extrabold tracking-wide shrink-0">
           A
         </div>
         <div>
@@ -109,10 +124,10 @@ export default function AdminSidebar() {
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 px-3 py-2.5 text-[13px] tracking-[0.02em] transition-all border-l-2 no-underline group ${
+                className={`flex items-center gap-3 px-3 py-2.5 text-[13px] tracking-[0.02em] transition-all border-l-2 no-underline ${
                   active
                     ? "bg-[#161612] border-[#c9a96e] text-[#c9a96e] font-semibold"
-                    : "border-transparent text-[#6b7280] font-normal hover:bg-[#111] hover:text-white hover:border-transparent"
+                    : "border-transparent text-[#6b7280] font-normal hover:bg-[#111] hover:text-white"
                 }`}
               >
                 <Icon />
