@@ -7,12 +7,7 @@ import { handleUpdateProfile } from "@/lib/actions/auth-action";
 import { UpdateUserData, updateUserSchema } from "../schema";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
-import DarkPageLayout, {
-  DarkSection,
-  DarkButton,
-  DarkInput,
-  styles,
-} from "@/app/_components/ui/DarkPage";
+import Link from "next/link";
 
 export default function UpdateUserForm({ user }: { user: any }) {
   const router = useRouter();
@@ -86,211 +81,228 @@ export default function UpdateUserForm({ user }: { user: any }) {
       ? process.env.NEXT_PUBLIC_API_BASE_URL + user.imageUrl
       : null;
 
-  const avatar = (
-    <div style={{ position: "relative", flexShrink: 0 }}>
-      <div
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: "50%",
-          overflow: "hidden",
-          border: "2px solid #2a2a2a",
-        }}
-      >
-        {currentImage ? (
-          <img
-            src={currentImage}
-            alt="Profile"
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              background: "linear-gradient(135deg, #c9a96e 0%, #8b6914 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#0a0a0a",
-              fontSize: 26,
-              fontWeight: 700,
-            }}
-          >
-            {initials}
-          </div>
-        )}
-      </div>
-      {previewImage && (
-        <Controller
-          name="image"
-          control={control}
-          render={({ field: { onChange } }) => (
-            <button
-              type="button"
-              onClick={() => handleDismissImage(onChange)}
-              style={{
-                position: "absolute",
-                top: -4,
-                right: -4,
-                width: 20,
-                height: 20,
-                borderRadius: "50%",
-                background: "#ef4444",
-                border: "none",
-                color: "#fff",
-                fontSize: 9,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              ✕
-            </button>
-          )}
-        />
-      )}
-    </div>
-  );
-
   return (
-    <DarkPageLayout
-      eyebrow="Your Account"
-      title="Edit Profile"
-      heroHeight="38vh"
-      heroTopRight={
-        <a
-          href="/user/profile"
-          style={{
-            color: "#6b7280",
-            fontSize: 11,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            textDecoration: "none",
-          }}
-        >
-          ← Back to Profile
-        </a>
-      }
-      avatarSlot={avatar}
-      stats={[
-        {
-          label: "Profile Picture",
-          value: (
-            <Controller
-              name="image"
-              control={control}
-              render={({ field: { onChange } }) => (
-                <div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    onChange={(e) =>
-                      handleImageChange(e.target.files?.[0], onChange)
-                    }
-                    accept=".jpg,.jpeg,.png,.webp"
-                    style={{
-                      color: "#6b7280",
-                      fontSize: 13,
-                      fontFamily: "'Georgia', serif",
-                    }}
+    <>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');`}</style>
+
+      <div
+        className="min-h-screen bg-[#0a0a0a] text-white"
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
+      >
+        {/*  Hero  */}
+        <div className="relative h-[38vh] min-h-65 border-b border-white/6 px-10 flex flex-col justify-end pb-10 overflow-hidden">
+          <div className="absolute inset-0 bg-linear-to-b from-white/1 to-transparent pointer-events-none" />
+
+          {/* Top row */}
+          <div className="flex items-start justify-between mb-8">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[#6b6b8a]">
+              Your Account
+            </p>
+            <Link
+              href="/user/profile"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#6b6b8a] hover:text-white/60 transition-colors no-underline"
+            >
+              ← Back to Profile
+            </Link>
+          </div>
+
+          {/* Avatar + title */}
+          <div className="flex items-end gap-6">
+            {/* Avatar with dismiss button */}
+            <div className="relative shrink-0">
+              <div className="w-18 h-18 rounded-full overflow-hidden border-2 border-[#2a2a2a]">
+                {currentImage ? (
+                  <img
+                    src={currentImage}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
                   />
-                  {errors.image && (
-                    <p style={styles.errorText}>{errors.image.message}</p>
+                ) : (
+                  <div
+                    className="w-full h-full flex items-center justify-center text-[#0a0a0a] text-[26px] font-bold"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #c9a96e 0%, #8b6914 100%)",
+                    }}
+                  >
+                    {initials}
+                  </div>
+                )}
+              </div>
+              {previewImage && (
+                <Controller
+                  name="image"
+                  control={control}
+                  render={({ field: { onChange } }) => (
+                    <button
+                      type="button"
+                      onClick={() => handleDismissImage(onChange)}
+                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 border-none text-white text-[9px] flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors"
+                    >
+                      ✕
+                    </button>
+                  )}
+                />
+              )}
+            </div>
+
+            {/* Title + file input */}
+            <div className="flex-1 min-w-0">
+              <h1
+                className="text-[42px] font-bold leading-none text-white uppercase mb-4"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
+                Edit Profile
+              </h1>
+              {/* Profile picture upload in hero stats area */}
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b6b8a] mb-1.5">
+                  Profile Picture
+                </p>
+                <Controller
+                  name="image"
+                  control={control}
+                  render={({ field: { onChange } }) => (
+                    <div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        onChange={(e) =>
+                          handleImageChange(e.target.files?.[0], onChange)
+                        }
+                        accept=".jpg,.jpeg,.png,.webp"
+                        className="text-[13px] text-[#6b6b8a] file:mr-3 file:py-1.5 file:px-3 file:rounded file:border file:border-white/10 file:bg-white/4 file:text-xs file:text-[#6b6b8a] file:cursor-pointer file:uppercase file:tracking-wider hover:file:border-white/20 hover:file:text-white/60 file:transition-all"
+                        style={{ fontFamily: "'Georgia', serif" }}
+                      />
+                      {errors.image && (
+                        <p className="mt-1 text-xs text-red-400">
+                          {errors.image.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/*  Body  */}
+        <div className="max-w-215 mx-auto px-10 py-14">
+          {/* Section header */}
+          <div className="mb-8">
+            <p className="text-[10px] uppercase tracking-[0.15em] text-[#6b6b8a] mb-1.5">
+              Update Details
+            </p>
+            <h2
+              className="text-[32px] font-bold text-white"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              Personal Info
+            </h2>
+            <div className="mt-4 h-px bg-white/6" />
+          </div>
+
+          {/* Error banner */}
+          {error && (
+            <div className="mb-8 px-5 py-4 border border-red-900/60 bg-red-950/30 text-red-400 text-sm rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="border-t border-white/4">
+              {/* Full Name */}
+              <div className="flex items-baseline gap-8 py-5 border-b border-white/4">
+                <label
+                  htmlFor="fullName"
+                  className="w-44 shrink-0 text-[10px] uppercase tracking-[0.15em] text-[#6b6b8a] pt-0.5"
+                >
+                  Full Name
+                </label>
+                <div className="flex-1">
+                  <input
+                    id="fullName"
+                    placeholder="Enter your full name"
+                    {...register("fullName")}
+                    className="w-full bg-transparent border-b border-white/10 text-sm text-white/80 placeholder:text-[#6b6b8a] py-2 outline-none focus:border-[#C9A84C]/40 transition-colors"
+                  />
+                  {errors.fullName && (
+                    <p className="mt-1.5 text-xs text-red-400">
+                      {errors.fullName.message}
+                    </p>
                   )}
                 </div>
-              )}
-            />
-          ),
-        },
-      ]}
-    >
-      <DarkSection eyebrow="Update Details" title="Personal Info">
-        {error && (
-          <div
-            style={{
-              marginBottom: "2rem",
-              padding: "1rem 1.25rem",
-              border: "1px solid #7f1d1d",
-              background: "#1a0a0a",
-              color: "#ef4444",
-              fontSize: 13,
-            }}
-          >
-            {error}
-          </div>
-        )}
+              </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div style={{ borderTop: "1px solid #1a1a1a" }}>
-            {/* Full Name */}
-            <div style={styles.row}>
-              <label
-                style={{ ...styles.eyebrow, paddingTop: "0.9rem" }}
-                htmlFor="fullName"
-              >
-                Full Name
-              </label>
-              <DarkInput
-                id="fullName"
-                placeholder="Enter your full name"
-                registration={register("fullName")}
-                error={errors.fullName?.message}
-              />
+              {/* Username */}
+              <div className="flex items-baseline gap-8 py-5 border-b border-white/4">
+                <label
+                  htmlFor="username"
+                  className="w-44 shrink-0 text-[10px] uppercase tracking-[0.15em] text-[#6b6b8a] pt-0.5"
+                >
+                  Username
+                </label>
+                <div className="flex-1">
+                  <input
+                    id="username"
+                    placeholder="Enter your username"
+                    {...register("username")}
+                    className="w-full bg-transparent border-b border-white/10 text-sm text-white/80 placeholder:text-[#6b6b8a] py-2 outline-none focus:border-[#C9A84C]/40 transition-colors"
+                  />
+                  {errors.username && (
+                    <p className="mt-1.5 text-xs text-red-400">
+                      {errors.username.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="flex items-baseline gap-8 py-5 border-b border-white/4">
+                <label
+                  htmlFor="email"
+                  className="w-44 shrink-0 text-[10px] uppercase tracking-[0.15em] text-[#6b6b8a] pt-0.5"
+                >
+                  Email Address
+                </label>
+                <div className="flex-1">
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    {...register("email")}
+                    className="w-full bg-transparent border-b border-white/10 text-sm text-white/80 placeholder:text-[#6b6b8a] py-2 outline-none focus:border-[#C9A84C]/40 transition-colors"
+                  />
+                  {errors.email && (
+                    <p className="mt-1.5 text-xs text-red-400">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* Username */}
-            <div style={styles.row}>
-              <label
-                style={{ ...styles.eyebrow, paddingTop: "0.9rem" }}
-                htmlFor="username"
+            {/* Footer actions */}
+            <div className="mt-12 flex justify-end gap-3">
+              <Link
+                href="/user/profile"
+                className="px-5 py-2.5 rounded-lg border border-white/10 bg-transparent text-sm text-[#6b6b8a] uppercase tracking-widest hover:border-white/20 hover:text-white/60 transition-all no-underline"
               >
-                Username
-              </label>
-              <DarkInput
-                id="username"
-                placeholder="Enter your username"
-                registration={register("username")}
-                error={errors.username?.message}
-              />
-            </div>
-
-            {/* Email */}
-            <div style={styles.row}>
-              <label
-                style={{ ...styles.eyebrow, paddingTop: "0.9rem" }}
-                htmlFor="email"
+                Cancel
+              </Link>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-5 py-2.5 rounded-lg border border-[#C9A84C]/30 bg-[#C9A84C]/10 text-sm text-[#C9A84C] uppercase tracking-widest hover:bg-[#C9A84C]/20 hover:border-[#C9A84C]/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                Email Address
-              </label>
-              <DarkInput
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                registration={register("email")}
-                error={errors.email?.message}
-              />
+                {isSubmitting ? "Saving..." : "Save Changes"}
+              </button>
             </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: "3rem",
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "1rem",
-            }}
-          >
-            <DarkButton href="/user/profile" variant="outline">
-              Cancel
-            </DarkButton>
-            <DarkButton type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Changes"}
-            </DarkButton>
-          </div>
-        </form>
-      </DarkSection>
-    </DarkPageLayout>
+          </form>
+        </div>
+      </div>
+    </>
   );
 }
