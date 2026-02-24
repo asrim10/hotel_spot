@@ -6,6 +6,7 @@ export const CreateHotelDTO = HotelSchema.pick({
   address: true,
   city: true,
   country: true,
+  coordinates: true,
   rating: true,
   description: true,
   price: true,

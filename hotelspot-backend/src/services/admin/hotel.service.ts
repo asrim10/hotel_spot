@@ -1,11 +1,21 @@
 import { CreateHotelDTO, UpdateHotelDTO } from "../../dtos/hotel.dto";
 import { HotelRepository } from "../../repositories/hotel.repositories";
 import { HttpError } from "../../errors/http-error";
+import { geocodeAddress } from "../../config/geocode";
 
 let hotelRepository = new HotelRepository();
 
 export class AdminHotelService {
   async createHotel(data: CreateHotelDTO) {
+    if (!data.coordinates) {
+      const coords = await geocodeAddress(
+        data.address,
+        data.city,
+        data.country,
+      );
+      if (coords) data.coordinates = coords;
+    }
+
     const newHotel = await hotelRepository.create(data);
     return newHotel;
   }
@@ -29,6 +39,18 @@ export class AdminHotelService {
     if (!hotel) {
       throw new HttpError(404, "Hotel not found");
     }
+
+    const locationChanged =
+      updateData.address || updateData.city || updateData.country;
+    if (locationChanged && !updateData.coordinates) {
+      const coords = await geocodeAddress(
+        updateData.address ?? hotel.address,
+        updateData.city ?? hotel.city,
+        updateData.country ?? hotel.country,
+      );
+      if (coords) updateData.coordinates = coords;
+    }
+
     const updatedHotel = await hotelRepository.update(id, updateData);
     return updatedHotel;
   }

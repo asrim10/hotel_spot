@@ -5,6 +5,12 @@ export const HotelSchema = z.object({
   address: z.string().min(5, "Address must be at least 5 characters"),
   city: z.string().min(2, "City must be at least 2 characters"),
   country: z.string().min(2, "Country must be at least 2 characters"),
+  coordinates: z
+    .object({
+      lat: z.number(),
+      lng: z.number(),
+    })
+    .optional(),
   rating: z.coerce
     .number()
     .min(0)

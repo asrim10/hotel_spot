@@ -22,6 +22,10 @@ interface Hotel {
   price: number;
   availableRooms: number;
   imageUrl?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 interface FavoriteMap {
@@ -310,6 +314,7 @@ export default function DashboardPage() {
                   selectedHotel.description ||
                   "A beautiful hotel with excellent amenities and service.",
                 location: `${selectedHotel.city}, ${selectedHotel.country}`,
+                coordinates: selectedHotel.coordinates,
               }}
             />
           </div>

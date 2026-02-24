@@ -7,7 +7,11 @@ import { createBooking } from "../../../lib/api/booking";
 import { Heart, MapPin, Star, Waves, ChevronLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "@/app/context/AuthContext";
+import dynamic from "next/dynamic";
 
+const HotelMap = dynamic(() => import("../_components/HotelMap"), {
+  ssr: false,
+});
 const inputCls =
   "w-full bg-[#0d0d0d] border border-[#2a2a2a] text-white text-sm px-4 py-3 outline-none focus:border-[#c9a96e] transition-colors placeholder:text-[#3a3a3a]";
 const labelCls =
@@ -321,23 +325,32 @@ export default function HotelBookingPage() {
             {/* LOCATION */}
             <div className="border-b border-[#1a1a1a] pb-12 mb-12">
               <SectionTitle eyebrow="Where We Are" title="Location" />
-              <div className="h-52 bg-[#0d0d0d] border border-[#1a1a1a] flex items-center justify-center relative overflow-hidden">
-                <div
-                  className="absolute inset-0 opacity-10"
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(0deg,#c9a96e,#c9a96e 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,#c9a96e,#c9a96e 1px,transparent 1px,transparent 40px)",
-                  }}
-                />
-                <div className="relative flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 border border-[#c9a96e]/40 rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-[#c9a96e] rounded-full" />
+              {hotel.coordinates ? (
+                <>
+                  <div className="h-52 w-full overflow-hidden border border-[#1a1a1a]">
+                    <HotelMap
+                      lat={hotel.coordinates.lat}
+                      lng={hotel.coordinates.lng}
+                      hotelName={hotel.hotelName || hotel.name}
+                      location={location}
+                    />
                   </div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${hotel.coordinates.lat},${hotel.coordinates.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-block bg-[#0a0a0a]/90 border border-[#2a2a2a] text-[#c9a96e] text-[10px] tracking-[0.14em] uppercase px-4 py-2 hover:border-[#c9a96e] hover:text-white transition-colors"
+                  >
+                    Open in Google Maps
+                  </a>
+                </>
+              ) : (
+                <div className="h-52 bg-[#0d0d0d] border border-[#1a1a1a] flex items-center justify-center">
                   <p className="text-[#3a3a3a] text-[9px] tracking-[0.2em] uppercase">
-                    {location}
+                    Location unavailable
                   </p>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* REVIEWS */}
