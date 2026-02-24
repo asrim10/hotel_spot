@@ -8,10 +8,12 @@ import { Heart, MapPin, Star, Waves, ChevronLeft } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "@/app/context/AuthContext";
 import dynamic from "next/dynamic";
+import { handleInitiateKhaltiPayment } from "@/lib/actions/payment-action";
 
 const HotelMap = dynamic(() => import("../_components/HotelMap"), {
   ssr: false,
 });
+
 const inputCls =
   "w-full bg-[#0d0d0d] border border-[#2a2a2a] text-white text-sm px-4 py-3 outline-none focus:border-[#c9a96e] transition-colors placeholder:text-[#3a3a3a]";
 const labelCls =
@@ -41,15 +43,6 @@ const MOCK_REVIEWS = [
   {
     name: "John D.",
     text: "Great location and fantastic amenities. The pool area was a highlight. Room was clean and comfortable.",
-  },
-];
-
-const ROOM_OPTIONS = [
-  { name: "Deluxe King Room", desc: "1 King Bed, City View", price: 250 },
-  {
-    name: "Ocean View Suite",
-    desc: "1 King Bed, 1 Sofa Bed, Ocean View",
-    price: 450,
   },
 ];
 
@@ -146,14 +139,17 @@ export default function HotelBookingPage() {
     return (process.env.NEXT_PUBLIC_API_BASE_URL || "") + url;
   };
 
-  const handleBook = async () => {
+  const handleBook = async (paymentMethod: "cash" | "online") => {
     if (!hotel) return toast.error("No hotel selected");
     if (!checkIn || !checkOut)
       return toast.error("Please select check-in and check-out dates");
     if (!fullName || !email)
       return toast.error("Please provide your name and email");
+
     try {
       setSubmitting(true);
+
+      // Step 1: Create booking
       const res = await createBooking({
         hotelId: hotel._id || hotel.id || hotelId,
         fullName,
@@ -161,12 +157,35 @@ export default function HotelBookingPage() {
         checkInDate: checkIn,
         checkOutDate: checkOut,
         totalPrice,
-        paymentMethod: "cash",
+        paymentMethod,
       });
-      if (res?.success) {
-        toast.success("Booking created successfully");
-        router.push("/user/booking/history");
-      } else toast.error(res?.message || "Booking failed");
+
+      if (!res?.success) return toast.error(res?.message || "Booking failed");
+
+      const bookingId = res.data._id;
+
+      // Step 2: Khalti payment
+      if (paymentMethod === "online") {
+        const khaltiData = await handleInitiateKhaltiPayment({
+          bookingId,
+          totalPrice,
+          fullName,
+          email,
+        });
+
+        if (khaltiData.success && khaltiData.data?.payment_url) {
+          window.location.href = khaltiData.data.payment_url;
+        } else {
+          toast.error(
+            khaltiData.message || "Failed to initiate Khalti payment",
+          );
+        }
+        return;
+      }
+
+      // Step 3: Cash — go to history
+      toast.success("Booking created successfully");
+      router.push("/user/booking/history");
     } catch (e: any) {
       toast.error(e.message || "Booking failed");
     } finally {
@@ -221,9 +240,8 @@ export default function HotelBookingPage() {
 
       {!loading && hotel && (
         <div className="grid" style={{ gridTemplateColumns: "1fr 380px" }}>
-          {/* ── LEFT / MAIN ── */}
+          {/* LEFT */}
           <div className="border-r border-[#1a1a1a] px-12 py-12">
-            {/* HERO */}
             <div className="mb-3">
               <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2">
                 {location}
@@ -263,30 +281,20 @@ export default function HotelBookingPage() {
                 gridTemplateRows: "280px",
               }}
             >
-              <div className="overflow-hidden bg-[#111]">
-                <img
-                  src={getImageUrl(hotel.imageUrl)}
-                  alt={hotel.hotelName}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="overflow-hidden bg-[#111]">
-                <img
-                  src={getImageUrl(hotel.imageUrl)}
-                  alt={hotel.hotelName}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="relative overflow-hidden bg-[#111]">
-                <img
-                  src={getImageUrl(hotel.imageUrl)}
-                  alt={hotel.hotelName}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                />
-                <button className="absolute bottom-4 right-4 bg-[#0a0a0a]/90 border border-[#2a2a2a] text-[#9ca3af] text-[10px] tracking-[0.14em] uppercase px-4 py-2 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors cursor-pointer">
-                  All Photos
-                </button>
-              </div>
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="overflow-hidden bg-[#111] relative">
+                  <img
+                    src={getImageUrl(hotel.imageUrl)}
+                    alt={hotel.hotelName}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  />
+                  {i === 2 && (
+                    <button className="absolute bottom-4 right-4 bg-[#0a0a0a]/90 border border-[#2a2a2a] text-[#9ca3af] text-[10px] tracking-[0.14em] uppercase px-4 py-2 hover:border-[#c9a96e] hover:text-[#c9a96e] transition-colors cursor-pointer">
+                      All Photos
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
 
             {/* ABOUT */}
@@ -335,6 +343,7 @@ export default function HotelBookingPage() {
                       location={location}
                     />
                   </div>
+                  {/* ✅ Fixed broken <a> tag */}
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${hotel.coordinates.lat},${hotel.coordinates.lng}`}
                     target="_blank"
@@ -388,7 +397,7 @@ export default function HotelBookingPage() {
             </div>
           </div>
 
-          {/* ── RIGHT / BOOKING SIDEBAR ── */}
+          {/* RIGHT / BOOKING SIDEBAR */}
           <div className="sticky top-0 h-screen overflow-y-auto bg-[#0d0d0d] border-l border-[#1a1a1a] flex flex-col">
             <div className="p-8 border-b border-[#1a1a1a]">
               <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2">
@@ -488,13 +497,26 @@ export default function HotelBookingPage() {
                 />
               </div>
 
-              <button
-                disabled={submitting || nights <= 0}
-                onClick={handleBook}
-                className="w-full bg-[#c9a96e] text-[#0a0a0a] text-[11px] font-bold tracking-[0.18em] uppercase py-4 hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed border-none cursor-pointer mt-auto"
-              >
-                {submitting ? "Booking..." : "Reserve Now"}
-              </button>
+              {/* PAYMENT BUTTONS */}
+              <div className="flex flex-col gap-3 mt-auto">
+                {/* Khalti */}
+                <button
+                  disabled={submitting || nights <= 0}
+                  onClick={() => handleBook("online")}
+                  className="w-full bg-[#5C2D91] text-white text-[11px] font-bold tracking-[0.18em] uppercase py-4 hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed border-none cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {submitting ? "Processing..." : "Pay with Khalti"}
+                </button>
+
+                {/* Cash */}
+                <button
+                  disabled={submitting || nights <= 0}
+                  onClick={() => handleBook("cash")}
+                  className="w-full bg-transparent border border-[#c9a96e] text-[#c9a96e] text-[11px] font-bold tracking-[0.18em] uppercase py-4 hover:bg-[#c9a96e] hover:text-[#0a0a0a] transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {submitting ? "Booking..." : "Pay at Hotel (Cash)"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

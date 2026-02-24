@@ -32,6 +32,10 @@ export const API = {
     UPDATE: (reviewId: string) => `/api/reviews/${reviewId}`,
     DELETE: (reviewId: string) => `/api/reviews/${reviewId}`,
   },
+  PAYMENT: {
+    KHALTI_INITIATE: "/api/payment/khalti/initiate",
+    KHALTI_VERIFY: "/api/payment/khalti/verify",
+  },
 
   ADMIN: {
     USER: {

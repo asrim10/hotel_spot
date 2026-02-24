@@ -22,6 +22,7 @@ const BookingSchema: Schema = new Schema<BookingType>(
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed"],
+      default: "pending",
       required: false,
     },
 
@@ -30,6 +31,9 @@ const BookingSchema: Schema = new Schema<BookingType>(
       enum: ["pending", "confirmed", "cancelled", "checked_in", "checked_out"],
       default: "pending",
     },
+
+    pidx: { type: String, required: false }, // ← Khalti payment index
+    transactionId: { type: String, required: false }, // ← set after verification
   },
   {
     timestamps: true,

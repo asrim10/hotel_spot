@@ -10,6 +10,7 @@ import hotelRoutes from "./routes/hotel.routes";
 import bookingRoutes from "./routes/booking.routes";
 import favouriteRoutes from "./routes/favourite.routes";
 import reviewRoutes from "./routes/review.routes";
+import paymentRoutes from "./routes/payment.routes";
 
 import adminUserRoutes from "./routes/admin/user.routes";
 import adminHotelRoutes from "./routes/admin/hotel.routes";
@@ -42,6 +43,7 @@ app.use("/api/hotels", hotelRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/fav", favouriteRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/payment", paymentRoutes);
 
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/hotels", adminHotelRoutes);
