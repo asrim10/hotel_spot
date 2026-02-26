@@ -343,7 +343,6 @@ export default function HotelBookingPage() {
                       location={location}
                     />
                   </div>
-                  {/* ✅ Fixed broken <a> tag */}
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${hotel.coordinates.lat},${hotel.coordinates.lng}`}
                     target="_blank"
@@ -397,7 +396,6 @@ export default function HotelBookingPage() {
             </div>
           </div>
 
-          {/* RIGHT / BOOKING SIDEBAR */}
           <div className="sticky top-0 h-screen overflow-y-auto bg-[#0d0d0d] border-l border-[#1a1a1a] flex flex-col">
             <div className="p-8 border-b border-[#1a1a1a]">
               <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2">

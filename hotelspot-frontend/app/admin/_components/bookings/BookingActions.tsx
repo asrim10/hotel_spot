@@ -317,9 +317,7 @@ export function BookingActions({
                     <p className={infoValueCls}>{booking.hotelName}</p>
                   ) : (
                     <div>
-                      <p className="text-[#6b7280] text-xs m-0 mb-0.5">
-                        ID (name not joined)
-                      </p>
+                      <p className="text-[#6b7280] text-xs m-0 mb-0.5">ID</p>
                       <code className="text-[#3a3a3a] text-[10px] font-mono">
                         {booking.hotelId}
                       </code>

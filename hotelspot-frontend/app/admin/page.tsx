@@ -129,7 +129,7 @@ export default async function AdminDashboardPage() {
                 </span>
               </div>
               <a
-                href="/admin/hotels/new"
+                href="/admin/hotels/create"
                 className="px-4 py-2 rounded-lg border border-[#C9A84C]/25 bg-[#C9A84C]/8 text-[11px] text-[#C9A84C] uppercase tracking-widest hover:bg-[#C9A84C]/15 transition-all"
               >
                 + Add Hotel

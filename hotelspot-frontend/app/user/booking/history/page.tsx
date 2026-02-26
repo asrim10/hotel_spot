@@ -11,6 +11,7 @@ import BookingTabs from "../_components/BookingTabs";
 import BookingCard from "../_components/BookingCard";
 import BookingSummaryStats from "../_components/BookingSummary";
 import { getLocationString } from "@/app/BookingUtils";
+import { handleDeleteBooking } from "@/lib/actions/booking-action";
 
 export default function BookingHistoryPage() {
   const { user } = useAuth();
@@ -75,6 +76,20 @@ export default function BookingHistoryPage() {
     });
   }, [bookings]);
 
+  const handleCancel = async (bookingId: string) => {
+    const res = await handleDeleteBooking(bookingId);
+    if (res?.success) {
+      toast.success("Booking cancelled successfully");
+      setBookings((prev) =>
+        prev.map((b) =>
+          (b._id || b.id) === bookingId ? { ...b, status: "cancelled" } : b,
+        ),
+      );
+    } else {
+      toast.error(res?.message || "Failed to cancel booking");
+    }
+  };
+
   const filtered = filterBookings();
 
   return (
@@ -122,6 +137,7 @@ export default function BookingHistoryPage() {
                   booking={booking}
                   hotelData={getHotelData(booking)}
                   onReview={setReviewBooking}
+                  onCancel={handleCancel} // 👈 pass handler
                 />
               </div>
             ))}
