@@ -4,11 +4,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegisterData, registerSchema } from "../schema";
 import { useRouter } from "next/navigation";
-import { startTransition, useTransition } from "react";
-import { useState } from "react";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple } from "react-icons/fa";
+import { useTransition, useState } from "react";
 import { handleRegister } from "@/lib/actions/auth-action";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -22,6 +20,8 @@ export default function RegisterForm() {
   });
   const [pending, setTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const submit = async (values: RegisterData) => {
     setError(null);
@@ -40,7 +40,6 @@ export default function RegisterForm() {
         setError(err.message || "Registration failed");
       }
     });
-    console.log("register", values);
   };
 
   return (
@@ -74,6 +73,7 @@ export default function RegisterForm() {
             <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
+
         <div className="space-y-1">
           <label className="text-sm font-medium" htmlFor="username">
             Username
@@ -129,14 +129,23 @@ export default function RegisterForm() {
           <label className="text-sm font-medium" htmlFor="password">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
-            {...register("password")}
-            placeholder="Enter new password"
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 pr-10 text-sm outline-none focus:border-foreground/40"
+              {...register("password")}
+              placeholder="Enter new password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
           {errors.password?.message && (
             <p className="text-xs text-red-600">{errors.password.message}</p>
           )}
@@ -146,14 +155,23 @@ export default function RegisterForm() {
           <label className="text-sm font-medium" htmlFor="confirmPassword">
             Confirm Password
           </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
-            {...register("confirmPassword")}
-            placeholder="Enter same password "
-          />
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              autoComplete="new-password"
+              className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 pr-10 text-sm outline-none focus:border-foreground/40"
+              {...register("confirmPassword")}
+              placeholder="Enter same password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
           {errors.confirmPassword?.message && (
             <p className="text-xs text-red-600">
               {errors.confirmPassword.message}
@@ -163,29 +181,14 @@ export default function RegisterForm() {
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || pending}
           className="h-10 w-full rounded-md bg-black text-white text-sm font-semibold hover:opacity-95 disabled:opacity-60"
         >
-          {isSubmitting ? "Creating account..." : "Sign Up"}
+          {isSubmitting || pending ? "Creating account..." : "Sign Up"}
         </button>
 
         <div className="flex items-center gap-4 mt-4">
           <div className="flex-1 h-px bg-gray-300" />
-        </div>
-
-        <div className="mt-4 flex gap-3">
-          <button
-            type="button"
-            className="flex-1 flex items-center justify-center gap-2 rounded-md border border-gray-200 py-2 bg-black"
-          >
-            <FcGoogle /> Continue with Google
-          </button>
-          <button
-            type="button"
-            className="flex-1 flex items-center justify-center gap-2 rounded-md border border-gray-200 py-2 bg-black"
-          >
-            <FaApple /> Continue with Apple
-          </button>
         </div>
       </form>
     </div>

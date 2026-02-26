@@ -6,13 +6,14 @@ import { LoginData, loginSchema } from "../schema";
 import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
-import { FaApple } from "react-icons/fa";
 import { handleLogin } from "@/lib/actions/auth-action";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -100,18 +101,28 @@ export default function LoginForm() {
           <label className="text-sm font-medium" htmlFor="password">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 text-sm outline-none focus:border-foreground/40"
-            {...register("password")}
-            placeholder="Enter your password"
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              className="h-10 w-full rounded-md border border-black/10 dark:border-white/15 bg-background px-3 pr-10 text-sm outline-none focus:border-foreground/40"
+              {...register("password")}
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
           {errors.password?.message && (
             <p className="text-xs text-red-600">{errors.password.message}</p>
           )}
         </div>
+
         <Link
           href="/request-password-reset"
           className="text-sm text-blue-600 hover:text-blue-700 font-medium transition md:ml-auto block text-right"
@@ -129,15 +140,6 @@ export default function LoginForm() {
 
         <div className="flex items-center gap-4 mt-4">
           <div className="flex-1 h-px bg-gray-300" />
-        </div>
-
-        <div className="mt-4 flex gap-3">
-          <button
-            type="button"
-            className="flex-1 flex items-center justify-center gap-2 rounded-md border border-gray-200 py-2 bg-black"
-          >
-            <FcGoogle /> Continue with Google
-          </button>
         </div>
       </form>
     </div>
