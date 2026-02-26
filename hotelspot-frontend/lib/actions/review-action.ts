@@ -5,6 +5,7 @@ import {
   createReview,
   deleteReview,
   getMyReviews,
+  getPublicReviews,
   getReviewById,
   getReviewsByHotel,
   updateReview,
@@ -131,6 +132,23 @@ export const handleDeleteReview = async (id: string) => {
     return {
       success: false,
       message: error.message || "Delete review action failed",
+    };
+  }
+};
+export const handleGetPublicReviews = async () => {
+  try {
+    const result = await getPublicReviews();
+    if (result.success) {
+      return { success: true, data: result.data };
+    }
+    return {
+      success: false,
+      message: result.message || "Failed to fetch reviews",
+    };
+  } catch (error: Error | any) {
+    return {
+      success: false,
+      message: error.message || "Failed to fetch reviews",
     };
   }
 };

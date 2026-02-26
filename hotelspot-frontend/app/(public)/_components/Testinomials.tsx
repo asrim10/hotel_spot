@@ -1,62 +1,40 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { handleGetPublicReviews } from "@/lib/actions/review-action";
 
-type Testimonial = {
-  id: number;
-  category: string;
-  title: string;
-  message: string;
-  name: string;
-  role: string;
-  avatar: string;
-  image: string;
+type Review = {
+  _id: string;
+  fullName: string;
   rating: number;
+  comment: string;
+  createdAt: string;
 };
 
-const testimonialsData: Testimonial[] = [
-  {
-    id: 1,
-    category: "LUXURIOUS HOTEL",
-    title: "Amazing Experience",
-    message:
-      "We loved our stay at Hotelspot! The room was spotless, the staff were incredibly attentive, and the view from our balcony was breathtaking. Everything felt premium and comfortable.",
-    name: "Andrew Simon",
-    role: "Travel Blogger",
-    avatar: "/images/user1.jpg",
-    image: "/images/testimonial1.jpg",
-    rating: 5,
-  },
-  {
-    id: 2,
-    category: "FULLY RELAXATION",
-    title: "Perfect Vacation Spot",
-    message:
-      "Hotelspot is the definition of luxury and peace. The environment was calm, food was delicious, and the service was quick. It truly felt like a second home with a premium touch.",
-    name: "Michel John",
-    role: "Property Expert",
-    avatar: "/images/user2.jpg",
-    image: "/images/testimonial2.jpg",
-    rating: 5,
-  },
-];
-
 export default function Testimonials() {
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const result = await handleGetPublicReviews();
+      if (result.success) {
+        setReviews(result.data.slice(0, 6));
+      }
+    };
+    fetchReviews();
+  }, []);
+
   const handlePrev = () => {
-    setActiveIndex((prev) =>
-      prev === 0 ? testimonialsData.length - 1 : prev - 1,
-    );
+    setActiveIndex((prev) => (prev === 0 ? reviews.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setActiveIndex((prev) =>
-      prev === testimonialsData.length - 1 ? 0 : prev + 1,
-    );
+    setActiveIndex((prev) => (prev === reviews.length - 1 ? 0 : prev + 1));
   };
+
+  if (reviews.length === 0) return null;
 
   return (
     <section
@@ -79,68 +57,66 @@ export default function Testimonials() {
 
       {/* Slider */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
-        {testimonialsData.map((item, index) => {
+        {reviews.map((item, index) => {
           const isActive = index === activeIndex;
 
           return (
             <div
-              key={item.id}
-              className={`relative w-full h-[420px] overflow-hidden transition-all duration-500 ${
+              key={item._id}
+              className={`relative w-full overflow-hidden transition-all duration-500 ${
                 isActive ? "opacity-100 scale-100" : "opacity-40 scale-95"
               }`}
             >
-              {/* Background Image */}
-              <Image
-                src={item.image}
-                alt={item.name}
-                fill
-                className="object-cover"
-              />
+              {/* Card */}
+              <div className="relative w-full bg-black/70 backdrop-blur-md border border-white/10 p-8 flex">
+                {/* Gold Side Strip */}
+                <div className="w-16 flex items-center justify-center bg-yellow-500">
+                  <p className="text-black font-semibold tracking-widest rotate-[-90deg] text-sm whitespace-nowrap">
+                    GUEST REVIEW
+                  </p>
+                </div>
 
-              {/* Overlay Card */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="relative w-[90%] bg-black/70 backdrop-blur-md border border-white/10 p-8 flex">
-                  {/* Gold Side Strip */}
-                  <div className="w-16 flex items-center justify-center bg-yellow-500">
-                    <p className="text-black font-semibold tracking-widest rotate-[-90deg] text-sm">
-                      {item.category}
-                    </p>
+                {/* Content */}
+                <div className="flex-1 px-8">
+                  {/* Stars */}
+                  <div className="flex gap-1 text-yellow-500 mb-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={18}
+                        fill={i < item.rating ? "gold" : "none"}
+                        stroke="gold"
+                      />
+                    ))}
                   </div>
 
-                  {/* Content */}
-                  <div className="flex-1 px-8">
-                    {/* Stars */}
-                    <div className="flex gap-1 text-yellow-500 mb-4">
-                      {Array.from({ length: item.rating }).map((_, i) => (
-                        <Star key={i} size={18} fill="gold" stroke="gold" />
-                      ))}
+                  {/* Message */}
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    "{item.comment}"
+                  </p>
+
+                  <div className="w-full h-[1px] bg-white/20 my-6" />
+
+                  {/* User */}
+                  <div className="flex items-center gap-4">
+                    {/* Avatar placeholder */}
+                    <div className="w-12 h-12 rounded-full border border-yellow-500 bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                      <span className="text-yellow-500 font-serif text-lg font-bold">
+                        {item.fullName.charAt(0).toUpperCase()}
+                      </span>
                     </div>
 
-                    {/* Message */}
-                    <p className="text-white/80 text-sm leading-relaxed">
-                      "{item.message}"
-                    </p>
-
-                    <div className="w-full h-[1px] bg-white/20 my-6" />
-
-                    {/* User */}
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full overflow-hidden border border-yellow-500">
-                        <Image
-                          src={item.avatar}
-                          alt={item.name}
-                          width={60}
-                          height={60}
-                          className="object-cover"
-                        />
-                      </div>
-
-                      <div>
-                        <h3 className="text-white font-serif text-lg">
-                          {item.name}
-                        </h3>
-                        <p className="text-white/60 text-sm">{item.role}</p>
-                      </div>
+                    <div>
+                      <h3 className="text-white font-serif text-lg">
+                        {item.fullName}
+                      </h3>
+                      <p className="text-white/60 text-sm">
+                        {new Date(item.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -152,7 +128,6 @@ export default function Testimonials() {
 
       {/* Bottom Navigation */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 mt-14 flex items-center">
-        {/* Left Arrow */}
         <button
           onClick={handlePrev}
           className="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-500 hover:bg-yellow-600 transition"
@@ -165,12 +140,11 @@ export default function Testimonials() {
           <div
             className="absolute top-0 left-0 h-[2px] bg-yellow-500 transition-all duration-500"
             style={{
-              width: `${((activeIndex + 1) / testimonialsData.length) * 100}%`,
+              width: `${((activeIndex + 1) / reviews.length) * 100}%`,
             }}
           />
         </div>
 
-        {/* Right Arrow */}
         <button
           onClick={handleNext}
           className="w-10 h-10 flex items-center justify-center rounded-full border border-white/30 hover:border-yellow-500 transition"

@@ -44,6 +44,9 @@ export const API = {
     MARK_ALL_READ: "/api/notify/mark-all-read",
     DELETE: (id: string) => `/api/notify/${id}`,
   },
+  PUBLIC_REVIEW: {
+    GET_ALL: "/api/public/review",
+  },
 
   ADMIN: {
     USER: {

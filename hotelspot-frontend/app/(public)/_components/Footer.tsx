@@ -1,4 +1,13 @@
 import { MapPin, Phone, Mail, Building2 } from "lucide-react";
+import { FaApple, FaCcMastercard, FaCcPaypal, FaCcVisa } from "react-icons/fa";
+import { SiGooglepay } from "react-icons/si";
+import {
+  FaFacebookF,
+  FaLinkedinIn,
+  FaYoutube,
+  FaInstagram,
+} from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 export default function Footer() {
   return (
@@ -6,7 +15,6 @@ export default function Footer() {
       id="contact"
       className="relative w-full bg-[#1a1f25] pt-16 pb-8 scroll-mt-28"
     >
-      {/* Top Border Line */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-white/10" />
 
       <div className="max-w-7xl mx-auto px-6">
@@ -29,38 +37,51 @@ export default function Footer() {
           {/* Subscribe */}
           <div>
             <h3 className="text-white text-xl font-serif mb-6">
-              Subscribe To Receive <br />
-              Latest Offers
+              Our links <br />
             </h3>
 
-            <div className="relative mb-6">
-              <input
-                type="email"
-                placeholder="Enter Email"
-                className="w-full bg-[#252b33] text-white/70 px-5 py-3 pr-28 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              />
-              <button className="absolute right-1 top-1 bottom-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 rounded-full text-sm transition">
-                SUBSCRIBE
-              </button>
-            </div>
-
-            {/* Social Icons */}
             <div className="flex gap-3">
-              <button className="w-10 h-10 rounded-full border border-white/20 hover:border-yellow-500 flex items-center justify-center text-white hover:text-yellow-500 transition">
-                f
-              </button>
-              <button className="w-10 h-10 rounded-full border border-white/20 hover:border-yellow-500 flex items-center justify-center text-white hover:text-yellow-500 transition">
-                𝕏
-              </button>
-              <button className="w-10 h-10 rounded-full bg-yellow-500 hover:bg-yellow-600 flex items-center justify-center text-black transition">
-                in
-              </button>
-              <button className="w-10 h-10 rounded-full border border-white/20 hover:border-yellow-500 flex items-center justify-center text-white hover:text-yellow-500 transition">
-                ▶
-              </button>
-              <button className="w-10 h-10 rounded-full border border-white/20 hover:border-yellow-500 flex items-center justify-center text-white hover:text-yellow-500 transition">
-                📷
-              </button>
+              {[
+                {
+                  icon: <FaFacebookF size={14} />,
+                  href: "https://facebook.com",
+                  className:
+                    "border border-white/20 hover:border-yellow-500 text-white hover:text-yellow-500",
+                },
+                {
+                  icon: <FaXTwitter size={14} />,
+                  href: "https://x.com",
+                  className:
+                    "border border-white/20 hover:border-yellow-500 text-white hover:text-yellow-500",
+                },
+                {
+                  icon: <FaLinkedinIn size={14} />,
+                  href: "https://linkedin.com",
+                  className: "bg-yellow-500 hover:bg-yellow-600 text-black",
+                },
+                {
+                  icon: <FaYoutube size={14} />,
+                  href: "https://youtube.com",
+                  className:
+                    "border border-white/20 hover:border-yellow-500 text-white hover:text-yellow-500",
+                },
+                {
+                  icon: <FaInstagram size={14} />,
+                  href: "https://instagram.com",
+                  className:
+                    "border border-white/20 hover:border-yellow-500 text-white hover:text-yellow-500",
+                },
+              ].map(({ icon, href, className }, i) => (
+                <a
+                  key={i}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition ${className}`}
+                >
+                  {icon}
+                </a>
+              ))}
             </div>
           </div>
 
@@ -70,7 +91,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="#"
+                  href="#about"
                   className="text-white/60 hover:text-yellow-500 text-sm flex items-center gap-2 transition"
                 >
                   → About us
@@ -109,7 +130,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="#"
+                  href="#feedback"
                   className="text-white/60 hover:text-yellow-500 text-sm flex items-center gap-2 transition"
                 >
                   → Client Reviews
@@ -143,9 +164,9 @@ export default function Footer() {
                   <MapPin className="text-yellow-500" size={18} />
                 </div>
                 <p className="text-white/60 text-sm leading-relaxed">
-                  789 Inner Lane, Holy park,
+                  Changunarayan-3, Bhaktapur
                   <br />
-                  California, USA
+                  Nepal
                 </p>
               </li>
 
@@ -154,8 +175,7 @@ export default function Footer() {
                   <Phone className="text-yellow-500" size={18} />
                 </div>
                 <div className="text-white/60 text-sm">
-                  <p>+01 234 567 890</p>
-                  <p>+09 876 543 210</p>
+                  <p>+977-9863039493</p>
                 </div>
               </li>
 
@@ -164,8 +184,7 @@ export default function Footer() {
                   <Mail className="text-yellow-500" size={18} />
                 </div>
                 <div className="text-white/60 text-sm">
-                  <p>mailinfo@hotelspot.com</p>
-                  <p>support24@hotelspot.com</p>
+                  <p>asrimsuwal7@gmail.com</p>
                 </div>
               </li>
             </ul>
@@ -193,21 +212,43 @@ export default function Footer() {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap justify-center">
-            <div className="px-3 py-1 bg-white/5 rounded text-white/70 text-xs">
-              Apple Pay
-            </div>
-            <div className="px-3 py-1 bg-white/5 rounded text-white/70 text-xs">
-              Mastercard
-            </div>
-            <div className="px-3 py-1 bg-white/5 rounded text-white/70 text-xs">
-              Google Pay
-            </div>
-            <div className="px-3 py-1 bg-white/5 rounded text-white/70 text-xs">
-              PayPal
-            </div>
-            <div className="px-3 py-1 bg-white/5 rounded text-white/70 text-xs">
-              Visa
-            </div>
+            {[
+              {
+                label: "Apple Pay",
+                icon: <FaApple size={14} />,
+                href: "https://www.apple.com/apple-pay/",
+              },
+              {
+                label: "Mastercard",
+                icon: <FaCcMastercard size={14} />,
+                href: "https://www.mastercard.com",
+              },
+              {
+                label: "Google Pay",
+                icon: <SiGooglepay size={14} />,
+                href: "https://pay.google.com",
+              },
+              {
+                label: "PayPal",
+                icon: <FaCcPaypal size={14} />,
+                href: "https://www.paypal.com",
+              },
+              {
+                label: "Visa",
+                icon: <FaCcVisa size={14} />,
+                href: "https://www.visa.com",
+              },
+            ].map(({ label, icon, href }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-3 py-1 bg-white/5 rounded text-white/70 text-xs hover:bg-white/10 hover:text-white transition"
+              >
+                {icon} {label}
+              </a>
+            ))}
           </div>
         </div>
       </div>

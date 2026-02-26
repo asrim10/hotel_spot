@@ -13,6 +13,8 @@ import reviewRoutes from "./routes/review.routes";
 import paymentRoutes from "./routes/payment.routes";
 import notificationRoutes from "./routes/notification.routes";
 
+import publicReviewRoutes from "./routes/public/review.routes";
+
 import adminUserRoutes from "./routes/admin/user.routes";
 import adminHotelRoutes from "./routes/admin/hotel.routes";
 import adminBookingRoutes from "./routes/admin/booking.routes";
@@ -48,6 +50,8 @@ app.use("/api/fav", favouriteRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/notify", notificationRoutes);
+
+app.use("/api/public/review", publicReviewRoutes);
 
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/hotels", adminHotelRoutes);

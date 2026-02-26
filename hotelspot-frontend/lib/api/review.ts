@@ -78,3 +78,15 @@ export const deleteReview = async (reviewId: string) => {
     );
   }
 };
+export const getPublicReviews = async () => {
+  try {
+    const response = await axios.get(API.PUBLIC_REVIEW.GET_ALL);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch public reviews",
+    );
+  }
+};
