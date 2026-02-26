@@ -15,7 +15,7 @@ import {
 
 const menuItems = [
   { label: "Home", href: "/user/dashboard", icon: Home },
-  { label: "Discover", href: "/user/discover", icon: Compass },
+  { label: "Discover", href: "/user/hotels", icon: Compass },
   { label: "Favourite", href: "/user/favourite", icon: Heart },
   { label: "Inbox", href: "/dashboard/inbox", icon: Inbox, badge: 0 },
   {
