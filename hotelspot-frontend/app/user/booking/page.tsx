@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/app/context/AuthContext";
 import dynamic from "next/dynamic";
 import { handleInitiateKhaltiPayment } from "@/lib/actions/payment-action";
+import { getReviewsByHotel } from "@/lib/api/review";
 
 const HotelMap = dynamic(() => import("../_components/HotelMap"), {
   ssr: false,
@@ -35,17 +36,6 @@ function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
   );
 }
 
-const MOCK_REVIEWS = [
-  {
-    name: "Emily R.",
-    text: "Absolutely breathtaking! The views were stunning and the service was impeccable. Can't wait to come back!",
-  },
-  {
-    name: "John D.",
-    text: "Great location and fantastic amenities. The pool area was a highlight. Room was clean and comfortable.",
-  },
-];
-
 export default function HotelBookingPage() {
   const searchParams = useSearchParams();
   const hotelId = searchParams?.get("hotelId") || "";
@@ -54,6 +44,7 @@ export default function HotelBookingPage() {
 
   const [hotel, setHotel] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
@@ -74,6 +65,17 @@ export default function HotelBookingPage() {
       })
       .catch(() => setHotel(null))
       .finally(() => setLoading(false));
+  }, [hotelId]);
+
+  useEffect(() => {
+    if (!hotelId) return;
+    getReviewsByHotel(hotelId)
+      .then((res: any) => {
+        if (res?.success && Array.isArray(res.data)) setReviews(res.data);
+        else if (Array.isArray(res)) setReviews(res);
+        else setReviews([]);
+      })
+      .catch(() => setReviews([]));
   }, [hotelId]);
 
   useEffect(() => {
@@ -149,7 +151,6 @@ export default function HotelBookingPage() {
     try {
       setSubmitting(true);
 
-      // Step 1: Create booking
       const res = await createBooking({
         hotelId: hotel._id || hotel.id || hotelId,
         fullName,
@@ -164,7 +165,6 @@ export default function HotelBookingPage() {
 
       const bookingId = res.data._id;
 
-      // Step 2: Khalti payment
       if (paymentMethod === "online") {
         const khaltiData = await handleInitiateKhaltiPayment({
           bookingId,
@@ -183,7 +183,6 @@ export default function HotelBookingPage() {
         return;
       }
 
-      // Step 3: Cash — go to history
       toast.success("Booking created successfully");
       router.push("/user/booking/history");
     } catch (e: any) {
@@ -196,6 +195,12 @@ export default function HotelBookingPage() {
   const location = hotel
     ? [hotel.address, hotel.city, hotel.country].filter(Boolean).join(", ")
     : "";
+
+  const avgRating = reviews.length
+    ? (
+        reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length
+      ).toFixed(1)
+    : null;
 
   return (
     <div
@@ -253,17 +258,15 @@ export default function HotelBookingPage() {
                 {hotel.hotelName || hotel.name}
               </h1>
               <div className="flex items-center gap-4 mt-3">
-                {hotel.rating && (
+                {avgRating && (
                   <div className="flex items-center gap-1.5">
                     <Star size={13} className="text-[#c9a96e] fill-[#c9a96e]" />
                     <span className="text-[#c9a96e] text-sm font-bold">
-                      {hotel.rating}
+                      {avgRating}
                     </span>
-                    {hotel.reviewsCount && (
-                      <span className="text-[#4b5563] text-xs">
-                        ({hotel.reviewsCount} reviews)
-                      </span>
-                    )}
+                    <span className="text-[#4b5563] text-xs">
+                      ({reviews.length} reviews)
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center gap-1.5 text-[#4b5563] text-xs">
@@ -364,38 +367,74 @@ export default function HotelBookingPage() {
             {/* REVIEWS */}
             <div>
               <SectionTitle eyebrow="What Guests Say" title="Guest Reviews" />
-              <div className="flex flex-col gap-px bg-[#1a1a1a]">
-                {MOCK_REVIEWS.map((r, i) => (
-                  <div key={i} className="bg-[#0d0d0d] p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 bg-[#1a1a1a] border border-[#2a2a2a] rounded-full flex items-center justify-center text-[#c9a96e] text-xs font-bold">
-                        {r.name[0]}
+              {reviews.length === 0 ? (
+                <div className="border border-[#1a1a1a] p-10 text-center">
+                  <p className="text-[#3a3a3a] text-[10px] tracking-[0.2em] uppercase">
+                    No reviews yet
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-px bg-[#1a1a1a]">
+                  {reviews.map((r: any, i: number) => {
+                    const reviewer =
+                      r.userId?.fullName || r.fullName || r.name || "Guest";
+                    const comment = r.comment || r.text || "";
+                    const rating = r.rating || 5;
+                    return (
+                      <div key={r._id || i} className="bg-[#0d0d0d] p-6">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-8 h-8 bg-[#1a1a1a] border border-[#2a2a2a] rounded-full flex items-center justify-center text-[#c9a96e] text-xs font-bold">
+                            {reviewer[0]?.toUpperCase()}
+                          </div>
+                          <span className="text-white text-sm font-bold">
+                            {reviewer}
+                          </span>
+                          <div className="flex gap-0.5">
+                            {[...Array(5)].map((_, j) => (
+                              <Star
+                                key={j}
+                                size={10}
+                                className={
+                                  j < rating
+                                    ? "text-[#c9a96e] fill-[#c9a96e]"
+                                    : "text-[#2a2a2a] fill-[#2a2a2a]"
+                                }
+                              />
+                            ))}
+                          </div>
+                          {r.createdAt && (
+                            <span className="text-[#3a3a3a] text-[10px] ml-auto">
+                              {new Date(r.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                },
+                              )}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[#6b7280] text-sm leading-relaxed m-0">
+                          {comment}
+                        </p>
                       </div>
-                      <span className="text-white text-sm font-bold">
-                        {r.name}
-                      </span>
-                      <div className="flex gap-0.5">
-                        {[...Array(5)].map((_, j) => (
-                          <Star
-                            key={j}
-                            size={10}
-                            className="text-[#c9a96e] fill-[#c9a96e]"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-[#6b7280] text-sm leading-relaxed m-0">
-                      {r.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <button className="text-[#c9a96e] text-[10px] tracking-[0.16em] uppercase mt-5 bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity">
-                Show all {hotel.reviewsCount ?? ""} reviews →
-              </button>
+                    );
+                  })}
+                </div>
+              )}
+              {reviews.length > 0 && (
+                <button
+                  onClick={() => router.push(`/user/review?hotelId=${hotelId}`)}
+                  className="text-[#c9a96e] text-[10px] tracking-[0.16em] uppercase mt-5 bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                >
+                  Show all {reviews.length} reviews →
+                </button>
+              )}
             </div>
           </div>
 
+          {/* RIGHT - BOOKING PANEL */}
           <div className="sticky top-0 h-screen overflow-y-auto bg-[#0d0d0d] border-l border-[#1a1a1a] flex flex-col">
             <div className="p-8 border-b border-[#1a1a1a]">
               <p className="text-[#c9a96e] text-[9px] tracking-[0.2em] uppercase mb-2">
@@ -449,7 +488,6 @@ export default function HotelBookingPage() {
                 </select>
               </div>
 
-              {/* Price breakdown */}
               {nights > 0 && (
                 <div className="border-t border-b border-[#1a1a1a] py-5 flex flex-col gap-2">
                   <div className="flex justify-between text-sm">
@@ -495,9 +533,7 @@ export default function HotelBookingPage() {
                 />
               </div>
 
-              {/* PAYMENT BUTTONS */}
               <div className="flex flex-col gap-3 mt-auto">
-                {/* Khalti */}
                 <button
                   disabled={submitting || nights <= 0}
                   onClick={() => handleBook("online")}
@@ -505,8 +541,6 @@ export default function HotelBookingPage() {
                 >
                   {submitting ? "Processing..." : "Pay with Khalti"}
                 </button>
-
-                {/* Cash */}
                 <button
                   disabled={submitting || nights <= 0}
                   onClick={() => handleBook("cash")}
