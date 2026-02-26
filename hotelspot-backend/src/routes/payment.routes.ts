@@ -7,13 +7,13 @@ const paymentController = new PaymentController();
 
 router.post(
   "/khalti/initiate",
-  paymentController.initiatePayment.bind(paymentController),
   authorizedMiddleware,
+  paymentController.initiatePayment.bind(paymentController),
 );
 router.post(
   "/khalti/verify",
-  paymentController.verifyPayment.bind(paymentController),
   authorizedMiddleware,
+  paymentController.verifyPayment.bind(paymentController),
 );
 
 export default router;
