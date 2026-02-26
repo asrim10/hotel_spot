@@ -11,11 +11,14 @@ import bookingRoutes from "./routes/booking.routes";
 import favouriteRoutes from "./routes/favourite.routes";
 import reviewRoutes from "./routes/review.routes";
 import paymentRoutes from "./routes/payment.routes";
+import notificationRoutes from "./routes/notification.routes";
 
 import adminUserRoutes from "./routes/admin/user.routes";
 import adminHotelRoutes from "./routes/admin/hotel.routes";
 import adminBookingRoutes from "./routes/admin/booking.routes";
 import adminReviewRoutes from "./routes/admin/review.routes";
+import adminNotificationRoutes from "./routes/admin/notification.routes";
+
 dotenv.config();
 
 console.log(process.env.PORT);
@@ -44,11 +47,13 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/fav", favouriteRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/notify", notificationRoutes);
 
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/hotels", adminHotelRoutes);
 app.use("/api/admin/bookings", adminBookingRoutes);
 app.use("/api/admin/reviews", adminReviewRoutes);
+app.use("/api/admin/notify", adminNotificationRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to API World!");

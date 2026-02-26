@@ -24,6 +24,7 @@ export const API = {
     GET_ONE: (favouriteId: string) => `/api/fav/${favouriteId}`,
     DELETE: (favouriteId: string) => `/api/fav/${favouriteId}`,
   },
+
   REVIEW: {
     CREATE: "/api/reviews/",
     GET_MY: "/api/reviews/me",
@@ -35,6 +36,13 @@ export const API = {
   PAYMENT: {
     KHALTI_INITIATE: "/api/payment/khalti/initiate",
     KHALTI_VERIFY: "/api/payment/khalti/verify",
+  },
+  NOTIFICATION: {
+    GET_ALL: "/api/notify/",
+    UNREAD_COUNT: "/api/notify/unread-count",
+    MARK_AS_READ: (id: string) => `/api/notify/${id}/read`,
+    MARK_ALL_READ: "/api/notify/mark-all-read",
+    DELETE: (id: string) => `/api/notify/${id}`,
   },
 
   ADMIN: {
@@ -91,6 +99,14 @@ export const API = {
       UPDATE: (reviewId: string) => `/api/admin/reviews/${reviewId}`,
       DELETE: (reviewId: string) => `/api/admin/reviews/${reviewId}`,
       ANALYTICS_STATS: "/api/admin/reviews/analytics/stats",
+    },
+    NOTIFICATION: {
+      GET_ALL: "/api/admin/notify/",
+      GET_ONE: (id: string) => `/api/admin/notify/${id}`,
+      GET_BY_USER: (userId: string) => `/api/admin/notify/user/${userId}`,
+      DELETE: (id: string) => `/api/admin/notify/${id}`,
+      DELETE_ALL_BY_USER: (userId: string) =>
+        `/api/admin/notify/user/${userId}`,
     },
   },
 };

@@ -2,6 +2,7 @@
 import { useAuth } from "@/app/context/AuthContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Home,
   Compass,
@@ -12,12 +13,13 @@ import {
   User,
   LogOut,
 } from "lucide-react";
+import { handleGetUnreadCount } from "@/lib/actions/notification-action";
 
 const menuItems = [
   { label: "Home", href: "/user/dashboard", icon: Home },
   { label: "Discover", href: "/user/hotels", icon: Compass },
   { label: "Favourite", href: "/user/favourite", icon: Heart },
-  { label: "Inbox", href: "/dashboard/inbox", icon: Inbox, badge: 0 },
+  { label: "Inbox", href: "/user/inbox", icon: Inbox, badge: true },
   {
     label: "Booking History",
     href: "/user/booking/history",
@@ -31,6 +33,21 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const initials = user?.username?.charAt(0).toUpperCase() || "U";
+  const [unreadCount, setUnreadCount] = useState(0); // 👈 new
+
+  // 👇 poll unread count every 30 seconds
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchCount = async () => {
+      const res = await handleGetUnreadCount();
+      if (res?.success) setUnreadCount(res.data || 0);
+    };
+
+    fetchCount();
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
     <div
@@ -92,9 +109,10 @@ export default function Sidebar() {
                     {item.label}
                   </span>
                 </div>
-                {"badge" in item && typeof item.badge === "number" && (
+                {/* 👇 show unread badge only for Inbox */}
+                {"badge" in item && item.badge && unreadCount > 0 && (
                   <span className="bg-[#c9a96e] text-[#0a0a0a] text-[9px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                    {item.badge}
+                    {unreadCount}
                   </span>
                 )}
               </Link>

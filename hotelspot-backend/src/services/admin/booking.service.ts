@@ -3,10 +3,90 @@ import { sendEmail } from "../../config/email";
 import { CreateBookingDTO, UpdateBookingDTO } from "../../dtos/booking.dto";
 import { HttpError } from "../../errors/http-error";
 import { BookingRepository } from "../../repositories/booking.repositories";
+import { AdminNotificationService } from "./notification.service";
 
 let bookingRepository = new BookingRepository();
+const adminNotificationService = new AdminNotificationService();
+
+const NOTIFICATION_MAP: Record<
+  string,
+  { title: string; type: string; message: (booking: any) => string }
+> = {
+  confirmed: {
+    title: "Booking Confirmed ✅",
+    type: "booking_confirmed",
+    message: (b) =>
+      `Your booking has been confirmed. Check-in: ${new Date(b.checkInDate).toDateString()}`,
+  },
+  cancelled: {
+    title: "Booking Cancelled ❌",
+    type: "booking_cancelled",
+    message: (b) =>
+      `Your booking has been cancelled. Check-in was: ${new Date(b.checkInDate).toDateString()}`,
+  },
+  checked_in: {
+    title: "Checked In 🏨",
+    type: "checked_in",
+    message: (b) =>
+      `You have been checked in. Enjoy your stay! Check-out: ${new Date(b.checkOutDate).toDateString()}`,
+  },
+  checked_out: {
+    title: "Checked Out 👋",
+    type: "checked_out",
+    message: () => `You have been checked out. Thank you for staying with us!`,
+  },
+  pending: {
+    title: "Booking Pending ⏳",
+    type: "booking_pending",
+    message: (b) =>
+      `Your booking is pending review. Check-in: ${new Date(b.checkInDate).toDateString()}`,
+  },
+};
 
 export class AdminBookingService {
+  // helper to extract userId from populated or plain field
+  private extractUserId(booking: any): string {
+    const userId = booking.userId;
+    return typeof userId === "object" ? userId?._id?.toString() : userId;
+  }
+
+  // helper to send email + create notification
+  private async notifyUser(
+    booking: any,
+    status: string,
+    bookingId: string,
+  ): Promise<void> {
+    const notif = NOTIFICATION_MAP[status];
+    if (!notif) return;
+
+    const userId = this.extractUserId(booking);
+
+    // send email
+    try {
+      const { subject, html } = bookingStatusEmail(
+        booking.fullName,
+        status,
+        booking,
+      );
+      await sendEmail(booking.email, subject, html);
+    } catch (emailError) {
+      console.error("Failed to send email:", emailError);
+    }
+
+    // create notification
+    try {
+      await adminNotificationService.createNotification({
+        userId,
+        title: notif.title,
+        type: notif.type as any,
+        message: notif.message(booking),
+        bookingId,
+      });
+    } catch (notifError) {
+      console.error("Failed to create notification:", notifError);
+    }
+  }
+
   async getAllBookings(page: number = 1, size: number = 10, search?: string) {
     if (page < 1) {
       throw new HttpError(400, "Page number must be greater than 0");
@@ -84,16 +164,7 @@ export class AdminBookingService {
 
     const updatedBooking = await bookingRepository.update(id, { status });
 
-    try {
-      const { subject, html } = bookingStatusEmail(
-        booking.fullName,
-        status,
-        booking,
-      );
-      await sendEmail(booking.email, subject, html);
-    } catch (emailError) {
-      console.error("Failed to send booking status email:", emailError);
-    }
+    await this.notifyUser(booking, status, id);
 
     return updatedBooking;
   }
@@ -148,16 +219,7 @@ export class AdminBookingService {
       status: "cancelled",
     });
 
-    try {
-      const { subject, html } = bookingStatusEmail(
-        booking.fullName,
-        "cancelled",
-        booking,
-      );
-      await sendEmail(booking.email, subject, html);
-    } catch (emailError) {
-      console.error("Failed to send cancellation email:", emailError);
-    }
+    await this.notifyUser(booking, "cancelled", id);
 
     return updatedBooking;
   }
@@ -180,16 +242,7 @@ export class AdminBookingService {
       status: "confirmed",
     });
 
-    try {
-      const { subject, html } = bookingStatusEmail(
-        booking.fullName,
-        "confirmed",
-        booking,
-      );
-      await sendEmail(booking.email, subject, html);
-    } catch (emailError) {
-      console.error("Failed to send confirmation email:", emailError);
-    }
+    await this.notifyUser(booking, "confirmed", id);
 
     return updatedBooking;
   }
@@ -219,16 +272,7 @@ export class AdminBookingService {
       status: "checked_in",
     });
 
-    try {
-      const { subject, html } = bookingStatusEmail(
-        booking.fullName,
-        "checked_in",
-        booking,
-      );
-      await sendEmail(booking.email, subject, html);
-    } catch (emailError) {
-      console.error("Failed to send check-in email:", emailError);
-    }
+    await this.notifyUser(booking, "checked_in", id);
 
     return updatedBooking;
   }
@@ -251,16 +295,7 @@ export class AdminBookingService {
       status: "checked_out",
     });
 
-    try {
-      const { subject, html } = bookingStatusEmail(
-        booking.fullName,
-        "checked_out",
-        booking,
-      );
-      await sendEmail(booking.email, subject, html);
-    } catch (emailError) {
-      console.error("Failed to send check-out email:", emailError);
-    }
+    await this.notifyUser(booking, "checked_out", id);
 
     return updatedBooking;
   }
