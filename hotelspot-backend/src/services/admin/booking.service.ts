@@ -1,3 +1,5 @@
+import { bookingStatusEmail } from "../../config/bookingStatusEmail";
+import { sendEmail } from "../../config/email";
 import { CreateBookingDTO, UpdateBookingDTO } from "../../dtos/booking.dto";
 import { HttpError } from "../../errors/http-error";
 import { BookingRepository } from "../../repositories/booking.repositories";
@@ -38,13 +40,13 @@ export class AdminBookingService {
 
     return booking;
   }
+
   async getBookingsByUserId(userId: string) {
     const bookings = await bookingRepository.getByUserId(userId);
     return bookings;
   }
 
   async createBooking(data: CreateBookingDTO & { userId: string }) {
-    // Validate check-in and check-out dates
     const checkIn = new Date(data.checkInDate);
     const checkOut = new Date(data.checkOutDate);
 
@@ -52,7 +54,6 @@ export class AdminBookingService {
       throw new HttpError(400, "Check-out date must be after check-in date");
     }
 
-    // Ensure check-in date is not in the past
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -79,10 +80,21 @@ export class AdminBookingService {
       throw new HttpError(404, "Booking not found");
     }
 
-    // Validate status transitions
     this.validateStatusTransition(booking.status, status);
 
     const updatedBooking = await bookingRepository.update(id, { status });
+
+    try {
+      const { subject, html } = bookingStatusEmail(
+        booking.fullName,
+        status,
+        booking,
+      );
+      await sendEmail(booking.email, subject, html);
+    } catch (emailError) {
+      console.error("Failed to send booking status email:", emailError);
+    }
+
     return updatedBooking;
   }
 
@@ -109,7 +121,6 @@ export class AdminBookingService {
       throw new HttpError(404, "Booking not found");
     }
 
-    // Prevent updating cancelled bookings
     if (booking.status === "cancelled") {
       throw new HttpError(400, "Cannot update a cancelled booking");
     }
@@ -125,7 +136,6 @@ export class AdminBookingService {
       throw new HttpError(404, "Booking not found");
     }
 
-    // Check if booking can be cancelled
     if (booking.status === "cancelled") {
       throw new HttpError(400, "Booking is already cancelled");
     }
@@ -137,6 +147,17 @@ export class AdminBookingService {
     const updatedBooking = await bookingRepository.update(id, {
       status: "cancelled",
     });
+
+    try {
+      const { subject, html } = bookingStatusEmail(
+        booking.fullName,
+        "cancelled",
+        booking,
+      );
+      await sendEmail(booking.email, subject, html);
+    } catch (emailError) {
+      console.error("Failed to send cancellation email:", emailError);
+    }
 
     return updatedBooking;
   }
@@ -159,6 +180,17 @@ export class AdminBookingService {
       status: "confirmed",
     });
 
+    try {
+      const { subject, html } = bookingStatusEmail(
+        booking.fullName,
+        "confirmed",
+        booking,
+      );
+      await sendEmail(booking.email, subject, html);
+    } catch (emailError) {
+      console.error("Failed to send confirmation email:", emailError);
+    }
+
     return updatedBooking;
   }
 
@@ -176,7 +208,6 @@ export class AdminBookingService {
       );
     }
 
-    // Verify check-in date
     const today = new Date();
     const checkInDate = new Date(booking.checkInDate);
 
@@ -187,6 +218,17 @@ export class AdminBookingService {
     const updatedBooking = await bookingRepository.update(id, {
       status: "checked_in",
     });
+
+    try {
+      const { subject, html } = bookingStatusEmail(
+        booking.fullName,
+        "checked_in",
+        booking,
+      );
+      await sendEmail(booking.email, subject, html);
+    } catch (emailError) {
+      console.error("Failed to send check-in email:", emailError);
+    }
 
     return updatedBooking;
   }
@@ -209,6 +251,17 @@ export class AdminBookingService {
       status: "checked_out",
     });
 
+    try {
+      const { subject, html } = bookingStatusEmail(
+        booking.fullName,
+        "checked_out",
+        booking,
+      );
+      await sendEmail(booking.email, subject, html);
+    } catch (emailError) {
+      console.error("Failed to send check-out email:", emailError);
+    }
+
     return updatedBooking;
   }
 
@@ -219,7 +272,6 @@ export class AdminBookingService {
       throw new HttpError(404, "Booking not found");
     }
 
-    // Only allow deletion of cancelled or old completed bookings
     if (booking.status !== "cancelled" && booking.status !== "checked_out") {
       throw new HttpError(
         400,
@@ -245,8 +297,6 @@ export class AdminBookingService {
         .length,
       cancelledBookings: allBookings.filter((b) => b.status === "cancelled")
         .length,
-
-      // Payment stats
       paymentPendingBookings: allBookings.filter(
         (b) => b.paymentStatus === "pending",
       ).length,
@@ -255,13 +305,9 @@ export class AdminBookingService {
       paymentFailedBookings: allBookings.filter(
         (b) => b.paymentStatus === "failed",
       ).length,
-
-      // Revenue (only paid bookings)
       totalRevenue: allBookings
         .filter((b) => b.paymentStatus === "paid")
         .reduce((sum, b) => sum + b.totalPrice, 0),
-
-      // Today's check-ins
       todayCheckIns: allBookings.filter((b) => {
         const checkInDate = new Date(b.checkInDate);
         const today = new Date();
@@ -270,8 +316,6 @@ export class AdminBookingService {
           b.status === "confirmed"
         );
       }).length,
-
-      // Today's check-outs
       todayCheckOuts: allBookings.filter((b) => {
         const checkOutDate = new Date(b.checkOutDate);
         const today = new Date();
@@ -328,8 +372,8 @@ export class AdminBookingService {
       pending: ["confirmed", "cancelled"],
       confirmed: ["checked_in", "cancelled"],
       checked_in: ["checked_out"],
-      checked_out: [], // Final state
-      cancelled: [], // Final state
+      checked_out: [],
+      cancelled: [],
     };
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
@@ -356,9 +400,6 @@ export class AdminBookingService {
     });
   }
 
-  /**
-   * Get upcoming check-outs (next 7 days)
-   */
   async getUpcomingCheckOuts(days: number = 7) {
     const allBookings = await bookingRepository.getAll();
     const today = new Date();
