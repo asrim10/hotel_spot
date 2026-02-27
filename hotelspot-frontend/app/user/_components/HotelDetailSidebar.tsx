@@ -18,11 +18,7 @@ interface HotelDetailSidebarProps {
   };
 }
 
-const TABS = [
-  { id: "overview", label: "Overview" },
-  { id: "details", label: "Details" },
-  { id: "reviews", label: "Reviews" },
-] as const;
+const TABS = [{ id: "overview", label: "Overview" }] as const;
 
 type Tab = (typeof TABS)[number]["id"];
 
