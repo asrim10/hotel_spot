@@ -44,8 +44,13 @@ export class ReviewService {
     const review = await reviewRepository.getById(id);
     if (!review) throw new HttpError(404, "Review not found");
 
+    // getById populates hotelId, so extract the raw _id safely
+    const hotelId = (review.hotelId as any)?._id
+      ? (review.hotelId as any)._id.toString()
+      : review.hotelId.toString();
+
     const updatedReview = await reviewRepository.update(id, updateData);
-    await this.updateHotelRating(review.hotelId.toString());
+    await this.updateHotelRating(hotelId);
     return updatedReview;
   }
 
@@ -53,8 +58,12 @@ export class ReviewService {
     const review = await reviewRepository.getById(id);
     if (!review) throw new HttpError(404, "Review not found");
 
+    const hotelId = (review.hotelId as any)?._id
+      ? (review.hotelId as any)._id.toString()
+      : review.hotelId.toString();
+
     const deleted = await reviewRepository.delete(id);
-    await this.updateHotelRating(review.hotelId.toString());
+    await this.updateHotelRating(hotelId);
     return deleted;
   }
 }
