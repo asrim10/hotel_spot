@@ -207,6 +207,42 @@ export default function HotelBookingPage() {
       className="min-h-screen bg-[#0a0a0a] text-white"
       style={{ fontFamily: "'Georgia', serif" }}
     >
+      <style>{`
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: invert(1);
+          cursor: pointer;
+          opacity: 0.7;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+          opacity: 1;
+        }
+        input[type="date"]::-webkit-datetime-edit {
+          color: white;
+        }
+        input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+          color: white;
+        }
+        input[type="date"]::-webkit-datetime-edit-text {
+          color: #3a3a3a;
+        }
+        input[type="date"]::-webkit-datetime-edit-month-field,
+        input[type="date"]::-webkit-datetime-edit-day-field,
+        input[type="date"]::-webkit-datetime-edit-year-field {
+          color: white;
+        }
+        input[type="date"]::-webkit-datetime-edit-month-field:focus,
+        input[type="date"]::-webkit-datetime-edit-day-field:focus,
+        input[type="date"]::-webkit-datetime-edit-year-field:focus {
+          background-color: #c9a96e;
+          color: #0a0a0a;
+          border-radius: 2px;
+        }
+        select option {
+          background-color: #0d0d0d;
+          color: white;
+        }
+      `}</style>
+
       {/* TOP NAV */}
       <div className="border-b border-[#1a1a1a] px-12 py-4 flex items-center justify-between">
         <button
