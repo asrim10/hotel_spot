@@ -14,34 +14,67 @@ const MONTHS = [
   "Nov",
   "Dec",
 ];
-const DATA = [42, 68, 55, 81, 73, 95, 88, 102, 91, 118, 107, 134];
-const MAX = Math.max(...DATA);
+
 const W = 600,
   H = 140,
   PAD = 10;
 
 function buildPath(data: number[]) {
+  const max = Math.max(...data, 1);
   const pts = data.map((v, i) => ({
     x: PAD + (i / (data.length - 1)) * (W - PAD * 2),
-    y: H - PAD - (v / MAX) * (H - PAD * 2),
+    y: H - PAD - (v / max) * (H - PAD * 2),
   }));
   let d = `M ${pts[0].x} ${pts[0].y}`;
   for (let i = 1; i < pts.length; i++) {
     const cx = (pts[i - 1].x + pts[i].x) / 2;
     d += ` C ${cx} ${pts[i - 1].y}, ${cx} ${pts[i].y}, ${pts[i].x} ${pts[i].y}`;
   }
-  return { d, pts };
+  return { d, pts, max };
 }
 
-export function RevenueChart({ totalRevenue }: { totalRevenue: number }) {
-  const { d, pts } = buildPath(DATA);
+interface RevenueChartProps {
+  totalRevenue: number;
+  bookings?: {
+    checkInDate?: string;
+    createdAt?: string;
+    totalPrice?: number;
+    paymentStatus?: string;
+  }[];
+}
+
+export function RevenueChart({
+  totalRevenue,
+  bookings = [],
+}: RevenueChartProps) {
+  // Build monthly revenue from real bookings
+  const currentYear = new Date().getFullYear();
+
+  const monthlyData = Array(12).fill(0);
+
+  bookings.forEach((b) => {
+    if (b.paymentStatus !== "paid") return;
+    const date = new Date(b.createdAt ?? b.checkInDate ?? "");
+    if (isNaN(date.getTime())) return;
+    if (date.getFullYear() !== currentYear) return;
+    const month = date.getMonth(); // 0-indexed
+    monthlyData[month] += b.totalPrice ?? 0;
+  });
+
+  const hasData = monthlyData.some((v) => v > 0);
+  const chartData = hasData ? monthlyData : Array(12).fill(0);
+
+  const { d, pts, max } = buildPath(chartData);
   const areaD = `${d} L ${pts[pts.length - 1].x} ${H} L ${pts[0].x} ${H} Z`;
-  const peak = DATA.indexOf(MAX);
+
+  // Highlight the month with highest revenue
+  const peakIdx = chartData.indexOf(Math.max(...chartData));
+
   const fmt =
-    totalRevenue >= 1000000
-      ? `Rs.${(totalRevenue / 1000000).toFixed(1)}M`
-      : totalRevenue >= 1000
-        ? `Rs.${(totalRevenue / 1000).toFixed(1)}k`
+    totalRevenue >= 1_000_000
+      ? `Rs.${(totalRevenue / 1_000_000).toFixed(1)}M`
+      : totalRevenue >= 1_000
+        ? `Rs.${(totalRevenue / 1_000).toFixed(1)}k`
         : `Rs.${totalRevenue}`;
 
   return (
@@ -58,13 +91,14 @@ export function RevenueChart({ totalRevenue }: { totalRevenue: number }) {
             {fmt}
           </p>
           <p className="text-xs text-[#6b6b8a] mt-0.5">
-            Across all properties · all time
+            Across all properties · {currentYear}
           </p>
         </div>
         <div className="flex items-center gap-1.5 text-[11px] text-[#6b6b8a]">
           <div className="w-2 h-2 rounded-full bg-[#C9A84C]" /> Revenue trend
         </div>
       </div>
+
       <div
         className="relative w-full"
         style={{ aspectRatio: `${W}/${H + 30}` }}
@@ -86,6 +120,8 @@ export function RevenueChart({ totalRevenue }: { totalRevenue: number }) {
               </feMerge>
             </filter>
           </defs>
+
+          {/* Grid lines */}
           {[0.25, 0.5, 0.75, 1].map((v) => (
             <line
               key={v}
@@ -97,7 +133,25 @@ export function RevenueChart({ totalRevenue }: { totalRevenue: number }) {
               strokeWidth="1"
             />
           ))}
+
+          {/* Y-axis value hints */}
+          {[0.5, 1].map((v) => (
+            <text
+              key={v}
+              x={PAD}
+              y={H - PAD - v * (H - PAD * 2) - 4}
+              fontSize="8"
+              fill="#6b6b8a"
+              fontFamily="DM Sans"
+            >
+              {max > 0 ? `Rs.${((v * max) / 1000).toFixed(0)}k` : ""}
+            </text>
+          ))}
+
+          {/* Area fill */}
           <path d={areaD} fill="url(#goldGrad)" />
+
+          {/* Line */}
           <path
             d={d}
             fill="none"
@@ -105,24 +159,37 @@ export function RevenueChart({ totalRevenue }: { totalRevenue: number }) {
             strokeWidth="2"
             filter="url(#glow)"
           />
-          <circle cx={pts[peak].x} cy={pts[peak].y} r="5" fill="#C9A84C" />
-          <circle
-            cx={pts[peak].x}
-            cy={pts[peak].y}
-            r="9"
-            fill="none"
-            stroke="#C9A84C"
-            strokeOpacity="0.3"
-            strokeWidth="1"
-          />
+
+          {/* Peak dot */}
+          {hasData && (
+            <>
+              <circle
+                cx={pts[peakIdx].x}
+                cy={pts[peakIdx].y}
+                r="5"
+                fill="#C9A84C"
+              />
+              <circle
+                cx={pts[peakIdx].x}
+                cy={pts[peakIdx].y}
+                r="9"
+                fill="none"
+                stroke="#C9A84C"
+                strokeOpacity="0.3"
+                strokeWidth="1"
+              />
+            </>
+          )}
+
+          {/* Month labels */}
           {MONTHS.map((m, i) => (
             <text
               key={m}
-              x={PAD + (i / (DATA.length - 1)) * (W - PAD * 2)}
+              x={PAD + (i / (chartData.length - 1)) * (W - PAD * 2)}
               y={H + 22}
               textAnchor="middle"
               fontSize="9"
-              fill="#6b6b8a"
+              fill={i === peakIdx && hasData ? "#C9A84C" : "#6b6b8a"}
               fontFamily="DM Sans"
               letterSpacing="1"
             >
@@ -131,6 +198,13 @@ export function RevenueChart({ totalRevenue }: { totalRevenue: number }) {
           ))}
         </svg>
       </div>
+
+      {/* No data state */}
+      {!hasData && (
+        <p className="text-center text-[11px] text-[#6b6b8a] mt-2">
+          No paid bookings recorded for {currentYear} yet
+        </p>
+      )}
     </div>
   );
 }

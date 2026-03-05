@@ -62,12 +62,12 @@ export default async function AdminDashboardPage() {
   const reviewAnalytics = ok<any>(reviewAnalyticsRes, "data") ?? {};
 
   //  Derived metrics
+  const confirmedCount = bookingStats?.confirmedBookings ?? 0;
+  const pendingCount = bookingStats?.pendingBookings ?? 0;
+  const cancelledCount = bookingStats?.cancelledBookings ?? 0;
+  const checkedInCount = bookingStats?.checkedInBookings ?? 0;
+  const totalBookings = bookingStats?.totalBookings ?? bookings.length;
   const totalRevenue = bookingStats?.totalRevenue ?? 0;
-  const totalBookings = bookingStats?.total ?? bookings.length;
-  const confirmedCount = bookingStats?.confirmed ?? 0;
-  const pendingCount = bookingStats?.pending ?? 0;
-  const cancelledCount = bookingStats?.cancelled ?? 0;
-  const checkedInCount = bookingStats?.checkedIn ?? 0;
   const totalUsers = users.length;
   const totalHotels = hotels.length;
   const avgRating = reviewAnalytics?.averageRating
@@ -230,7 +230,7 @@ export default async function AdminDashboardPage() {
             style={{ animationDelay: "0.15s" }}
           >
             <div className="col-span-2">
-              <RevenueChart totalRevenue={totalRevenue} />
+              <RevenueChart totalRevenue={totalRevenue} bookings={bookings} />
             </div>
             <UpcomingWidget checkIns={checkIns} checkOuts={checkOuts} />
           </div>
