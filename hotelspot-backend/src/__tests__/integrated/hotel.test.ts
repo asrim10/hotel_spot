@@ -28,14 +28,15 @@ describe("Hotel Routes", () => {
   };
 
   beforeAll(async () => {
-    // Clean up test data
-    await UserModel.deleteMany({ email: testAdmin.email });
-    await HotelModel.deleteMany({ hotelName: testHotel.hotelName });
+    await UserModel.deleteMany({
+      $or: [{ email: testAdmin.email }, { username: testAdmin.username }],
+    });
+    await HotelModel.deleteMany({
+      hotelName: { $in: [testHotel.hotelName, "Updated Test Hotel"] },
+    });
 
-    // Hash password before saving in DB
     const hashedPassword = await bcrypt.hash(testAdmin.password, 10);
 
-    // Create admin user
     await UserModel.create({
       username: testAdmin.username,
       email: testAdmin.email,
@@ -44,22 +45,31 @@ describe("Hotel Routes", () => {
       role: "admin",
     });
 
-    // Login to get token
     const loginResponse = await request(app).post("/api/auth/login").send({
       email: testAdmin.email,
       password: testAdmin.password,
     });
 
-    expect(loginResponse.status).toBe(200);
-    expect(loginResponse.body).toHaveProperty("token");
+    if (loginResponse.status !== 200) {
+      throw new Error(
+        `beforeAll login failed with status ${loginResponse.status}: ${JSON.stringify(loginResponse.body)}`,
+      );
+    }
 
     authToken = loginResponse.body.token;
+
+    if (!authToken) {
+      throw new Error(
+        "Login succeeded but token was missing from response body",
+      );
+    }
   });
 
   afterAll(async () => {
-    // Clean up test data
     await UserModel.deleteMany({ email: testAdmin.email });
-    await HotelModel.deleteMany({ hotelName: testHotel.hotelName });
+    await HotelModel.deleteMany({
+      hotelName: { $in: [testHotel.hotelName, "Updated Test Hotel"] },
+    });
   });
 
   describe("POST /api/admin/hotels", () => {
@@ -82,14 +92,12 @@ describe("Hotel Routes", () => {
       expect(response.body).toHaveProperty("success", true);
       expect(response.body).toHaveProperty("message", "Hotel Created");
       expect(response.body).toHaveProperty("data");
-
       expect(response.body.data).toHaveProperty("_id");
       expect(response.body.data).toHaveProperty(
         "hotelName",
         testHotel.hotelName,
       );
 
-      // Save hotel ID for later tests
       testHotelId = response.body.data._id;
       expect(testHotelId).toBeDefined();
     });
@@ -157,7 +165,11 @@ describe("Hotel Routes", () => {
 
   describe("GET /api/admin/hotels/:id", () => {
     test("should get a single hotel by ID", async () => {
-      expect(testHotelId).toBeDefined();
+      if (!testHotelId) {
+        throw new Error(
+          "testHotelId is not set — 'should create a new hotel' must pass first",
+        );
+      }
 
       const response = await request(app)
         .get(`/api/admin/hotels/${testHotelId}`)
@@ -198,7 +210,11 @@ describe("Hotel Routes", () => {
 
   describe("PUT /api/admin/hotels/:id", () => {
     test("should update a hotel", async () => {
-      expect(testHotelId).toBeDefined();
+      if (!testHotelId) {
+        throw new Error(
+          "testHotelId is not set — 'should create a new hotel' must pass first",
+        );
+      }
 
       const updatedData = {
         hotelName: "Updated Test Hotel",
@@ -241,7 +257,7 @@ describe("Hotel Routes", () => {
       const response = await request(app)
         .put(`/api/admin/hotels/${testHotelId}`)
         .set("Authorization", `Bearer ${authToken}`)
-        .field("price", "-50"); // invalid negative price
+        .field("price", "-50");
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("success", false);
@@ -250,7 +266,11 @@ describe("Hotel Routes", () => {
 
   describe("DELETE /api/admin/hotels/:id", () => {
     test("should delete a hotel", async () => {
-      expect(testHotelId).toBeDefined();
+      if (!testHotelId) {
+        throw new Error(
+          "testHotelId is not set — 'should create a new hotel' must pass first",
+        );
+      }
 
       const response = await request(app)
         .delete(`/api/admin/hotels/${testHotelId}`)
@@ -261,7 +281,6 @@ describe("Hotel Routes", () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty("success", true);
 
-      // Verify hotel is deleted
       const getResponse = await request(app)
         .get(`/api/admin/hotels/${testHotelId}`)
         .set("Authorization", `Bearer ${authToken}`);
