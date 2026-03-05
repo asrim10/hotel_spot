@@ -1,34 +1,31 @@
-import request from "supertest"; // mock HTTP requests
-import app from "../../app"; // import the Express app
+import request from "supertest";
+import app from "../../app";
 import { UserModel } from "../../models/user.model";
+
 describe("Authentication Routes", () => {
-  // test group/suite name
-  // function containing related tests
   const testUser = {
-    // make this object as per your User schema
     username: "testuser",
     email: "test@example.com",
     password: "password123",
     confirmPassword: "password123",
     fullName: "Test Man",
   };
+
   beforeAll(async () => {
-    // Clean up the test user if it already exists
-    await UserModel.deleteMany({ email: testUser.email });
-  });
-  afterAll(async () => {
-    // Clean up the test user after tests
-    await UserModel.deleteMany({ email: testUser.email });
+    await UserModel.deleteMany({
+      $or: [{ email: testUser.email }, { username: testUser.username }],
+    });
   });
 
-  //Register
+  afterAll(async () => {
+    await UserModel.deleteMany({
+      $or: [{ email: testUser.email }, { username: testUser.username }],
+    });
+    await UserModel.deleteMany({ email: "newemail@example.com" });
+  });
+
   describe("POST /api/auth/register", () => {
-    // test group/suite name (nested)
-    // function containing related tests
-    test(// individual test case
-    "should register a new user", async () => {
-      // test case name
-      // test case function
+    test("should register a new user", async () => {
       const response = await request(app)
         .post("/api/auth/register")
         .send(testUser);
@@ -37,10 +34,7 @@ describe("Authentication Routes", () => {
       expect(response.body).toHaveProperty("success", true);
     });
 
-    test(// individual test case
-    "should not register a new user", async () => {
-      // test case name
-      // test case function
+    test("should not register a duplicate email", async () => {
       const response = await request(app)
         .post("/api/auth/register")
         .send(testUser);
@@ -49,12 +43,9 @@ describe("Authentication Routes", () => {
       expect(response.body).toHaveProperty("success", false);
     });
 
-    test(// individual test case
-    "should not register a new user", async () => {
-      // test case name
-      // test case function
+    test("should not register a duplicate username with different email", async () => {
       const response = await request(app).post("/api/auth/register").send({
-        username: "testuser",
+        username: testUser.username,
         email: "newemail@example.com",
         password: "password123",
         confirmPassword: "password123",
@@ -103,7 +94,6 @@ describe("Authentication Routes", () => {
     });
   });
 
-  // Login
   describe("POST /api/auth/login", () => {
     test("should login successfully with correct credentials", async () => {
       const response = await request(app).post("/api/auth/login").send({

@@ -27,11 +27,11 @@ describe("Booking Routes", () => {
   };
 
   beforeAll(async () => {
-    // clean up
-    await UserModel.deleteMany({ email: testUser.email });
+    await UserModel.deleteMany({
+      $or: [{ email: testUser.email }, { username: testUser.username }],
+    });
     await BookingModel.deleteMany({ email: validPayload.email });
 
-    // create user
     const hashedPassword = await bcrypt.hash(testUser.password, 10);
     await UserModel.create({
       username: testUser.username,
@@ -41,15 +41,24 @@ describe("Booking Routes", () => {
       role: "user",
     });
 
-    // login to get token
     const loginRes = await request(app).post("/api/auth/login").send({
       email: testUser.email,
       password: testUser.password,
     });
 
-    expect(loginRes.status).toBe(200);
-    expect(loginRes.body).toHaveProperty("token");
+    if (loginRes.status !== 200) {
+      throw new Error(
+        `beforeAll login failed with status ${loginRes.status}: ${JSON.stringify(loginRes.body)}`,
+      );
+    }
+
     authToken = loginRes.body.token;
+
+    if (!authToken) {
+      throw new Error(
+        "Login succeeded but token was missing from response body",
+      );
+    }
   });
 
   afterAll(async () => {
@@ -71,7 +80,6 @@ describe("Booking Routes", () => {
       expect(res.body.data).toHaveProperty("_id");
       expect(res.body.data).toHaveProperty("status", "pending");
 
-      // save id for later tests
       testBookingId = res.body.data._id;
     });
 
@@ -112,7 +120,6 @@ describe("Booking Routes", () => {
     });
   });
 
-  // GET /api/bookings/me
   describe("GET /api/bookings/me", () => {
     test("returns bookings for logged in user", async () => {
       const res = await request(app)
@@ -132,10 +139,13 @@ describe("Booking Routes", () => {
     });
   });
 
-  // GET /api/bookings/:id
   describe("GET /api/bookings/:id", () => {
     test("returns a booking by id", async () => {
-      expect(testBookingId).toBeDefined();
+      if (!testBookingId) {
+        throw new Error(
+          "testBookingId is not set — the POST 'creates a booking' test must pass first",
+        );
+      }
 
       const res = await request(app)
         .get(`/api/bookings/${testBookingId}`)
@@ -167,10 +177,13 @@ describe("Booking Routes", () => {
     });
   });
 
-  // PUT /api/bookings/:id
   describe("PUT /api/bookings/:id", () => {
     test("updates booking status", async () => {
-      expect(testBookingId).toBeDefined();
+      if (!testBookingId) {
+        throw new Error(
+          "testBookingId is not set — the POST 'creates a booking' test must pass first",
+        );
+      }
 
       const res = await request(app)
         .put(`/api/bookings/${testBookingId}`)
@@ -225,10 +238,13 @@ describe("Booking Routes", () => {
     });
   });
 
-  // DELETE /api/bookings/:id
   describe("DELETE /api/bookings/:id", () => {
     test("deletes a booking", async () => {
-      expect(testBookingId).toBeDefined();
+      if (!testBookingId) {
+        throw new Error(
+          "testBookingId is not set — the POST 'creates a booking' test must pass first",
+        );
+      }
 
       const res = await request(app)
         .delete(`/api/bookings/${testBookingId}`)
@@ -237,7 +253,6 @@ describe("Booking Routes", () => {
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("success", true);
 
-      // confirm it's gone
       const getRes = await request(app)
         .get(`/api/bookings/${testBookingId}`)
         .set("Authorization", `Bearer ${authToken}`);
