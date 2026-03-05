@@ -263,6 +263,7 @@ export class AdminBookingService {
 
     const today = new Date();
     const checkInDate = new Date(booking.checkInDate);
+    checkInDate.setHours(0, 0, 0, 0);
 
     if (checkInDate > today) {
       throw new HttpError(400, "Cannot check-in before check-in date");
