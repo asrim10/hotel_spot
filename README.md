@@ -80,8 +80,8 @@ hotelspot/
 
 ## 1️⃣ Clone the Repository
 
-git clone https://github.com/your-username/hotelspot.git
-cd hotelspot
+git clone https://github.com/asrim10/hotel_spot.git
+cd hotel_spot
 
 
 ## 2️⃣ Install Backend Dependencies
