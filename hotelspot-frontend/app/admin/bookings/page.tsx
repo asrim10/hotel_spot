@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 import { toast } from "react-toastify";
-import { BookingStats } from "@/app/admin/_components/bookings/BookingStats";
-import { BookingTable } from "@/app/admin/_components/bookings/BookingTable";
+import { BookingStats } from "@/app/admin/bookings/_components/BookingStats";
+import { BookingTable } from "@/app/admin/bookings/_components/BookingTable";
 import {
   handleGetAllBookingsAdmin,
   handleGetBookingStatsAdmin,
