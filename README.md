@@ -1,7 +1,7 @@
 # 🏨 HotelSpot
 ### Full Stack Hotel Booking Web Application
 
-![React](https://img.shields.io/badge/Frontend-React-blue)
+![Nextjs](https://img.shields.io/badge/Frontend-Nextjs-blue)
 ![Node.js](https://img.shields.io/badge/Backend-Node.js-green)
 ![Express](https://img.shields.io/badge/Framework-Express-lightgrey)
 ![MongoDB](https://img.shields.io/badge/Database-MongoDB-darkgreen)
