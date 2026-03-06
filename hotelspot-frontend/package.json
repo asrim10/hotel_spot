@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest",
+    "test": "jest --runInBand --verbose --detectOpenHandles",
+    "test:coverage": "jest --runInBand --coverage",
     "test:watch": "jest --watch"
 
   },
