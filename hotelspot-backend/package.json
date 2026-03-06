@@ -8,7 +8,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "test": "jest --verbose --detectOpenHandles"
+    "test": "jest --runInBand --verbose --detectOpenHandles",
+    "test:coverage": "jest --runInBand --coverage"
+
   },
   "dependencies": {
     "@types/nodemailer": "^7.0.9",
